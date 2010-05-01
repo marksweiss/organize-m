@@ -55,7 +55,7 @@ Entry Format
   - project: My Project
   - tags: [Tag 1, Tag 2, ...]
   - actions: [Action 1, Action 2, ...]
-  - due: My Eearlies Action Due Date
+  - due: My Eearliest Action Due Date
   - notes: |
     My Notes on multiple lines and lines
     and lines and lines
