@@ -1,25 +1,22 @@
 --------
 Overview
 --------
-Everyone organizes their thoughts and work differently.  Many try different organizing/TODO/GTD etc. systems, starting with lists on paper and working upward to nifty handheld gadgets, web-based organizers and so on.  If you are like me, you have tried several, and none are quite right.  
+Everyone organizes their thoughts and work differently.  Many try different organizing/TODO/GTD etc. systems, starting with lists on paper and working up to nifty handheld gadgets, web-based organizers and so on.  If you are like me, you have tried several, and none are quite right.  
 
-It seems many people have this experience, because there many commercial and free organizer tools.  And it seems many programmers have this experience, because there are many commercial, free and personal organizer projects.  The combination of highly personalized requirements, and high motivation (you want to organize things, and in a way that seems organized to you) seems to spawn many solutions to (nearly) the same problem.
+It seems many people have this experience, because there are many commercial and free organizer tools.  And it seems many programmers have this experience, because there are many commercial, free and personal organizer projects.  The combination of highly personalized requirements and high motivation (you want to organize things, in a way that seems organized to you) seems to spawn many solutions to (nearly) the same problem.
 
 So here's mine.  If you try it and like it, great, please let me know.  If you want to suggest features, contribute, fork it and make it your own, please do.  And if nobody cares, that's OK too, because after all I'm building the perfect organizer for me.
 
 -----
 Goals
 -----
-* Support entry of new items from the command line. 
-** New items are appended to the end of the text file storing all items.
-
+* Support entry of new items from the command line
 * Support entry of new items and editing of existing items in a text file
+* Storage of items in YAML format, so they are human readable and editable but also structured so they can be manipulated by organize-m
 
-* Storage of items in YAML format, to be human readable, editable and understandable but also structured to be easily manipulated from the command line, searched and reported on
-
-* Simple, intuitive, consistent command line actions that you will learn once and not forget, and they you'll be able to figure out for the first time just based on what you've done before.
-** e.g. - orgm search -project fix up the house  # leads to ...
-** e.g. - orgm search -title cut the grass
+* Simple, intuitive, consistent command line actions that you will learn once and not forget, and that you'll be able to figure out for the first time just based on what you've done before.
+** orgm search -project fix up the house
+** orgm search -title cut the grass
 
 * Association of each entry with any of the following metadata (all metadata is optional)
 ** title
@@ -41,15 +38,22 @@ Goals
 ** project (exact match of single term provided)
 ** tags (exact match of terms provided)
 
+* Support for reporting on metadata
+** all titles (alpha order, due date order)
+** all projects (alpha order)
+** all areas (alpha order)
+** all tags (alpha order)
+** all actions (grouped by item, item next due date order)
+
 * Support for rebuilding the text file from the command line, to regroup it by
 ** project
 ** area of responsibility
 ** tags
 
-------------
-Entry Format
-------------
-- entry:
+-----------
+Item Format
+-----------
+- item:
   - title: My Title
   - area: My Area
   - project: My Project
@@ -60,7 +64,7 @@ Entry Format
     My Notes on multiple lines and lines
     and lines and lines
     
-- entry: 
+- item: 
 ...
 ...
 ...
