@@ -43,7 +43,7 @@ class RootElement(object):
     def __str__(self):
         # Leading line break to always init a new Element block
         #  validly at the start of a new line
-        return "\n- " + str(self.key) + ":"
+        return "\n- %s:" % self.key
 
 # TODO - Validate val can validly convert to str if it's not None
 class ChildTextElement(object):
@@ -55,7 +55,7 @@ class ChildTextElement(object):
         self.val = val
     
     def __str__(self):
-        return "  - " + str(self.key) + ": " + str(self.val)
+        return "  - %s: %s" % (self.key, self.val)
 
 # TODO - Validate val is a List if it's not None
 class ChildListElement(object):
@@ -68,7 +68,7 @@ class ChildListElement(object):
         self.val = val
     
     def __str__(self):
-        return "  - " + str(self.key) + ": " + str(self.val)
+        return "  - %s: %s" % (self.key, self.val)
 
 # TODO - Validate val can validly convert to str if it's not None
 class ChildMultilineTextElement(object):
@@ -78,7 +78,7 @@ class ChildMultilineTextElement(object):
       self.val = val
   
   def __str__(self):
-      return "  - " + str(self.key) + ": | \n    " + str(self.val)
+      return "  - %s: | \n    %s" % (self.key, self.val)
 
 
 # A single Item in the TODO file, with a root 'item:' element and child
