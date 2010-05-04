@@ -47,9 +47,6 @@ class ChildMultilineTextElement(object):
       self.key = key
       self.val = val
   
-  # Note that values over multi-lines must be enclosed in double quotes to
-  #  most robustly be valid YAML over multiple lines.  There are other ways to do
-  #  multi-line literals, but this is the simplest.
   def __str__(self):
       ret = []
       ret.append('  - %s: |' % self.key)
