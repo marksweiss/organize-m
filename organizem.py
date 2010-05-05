@@ -24,7 +24,7 @@ class Organizem:
     # NOTE: element must be one of the "enums" in class Element (other than ROOT)
     # NOTE: Returns the entire item as a Python object (dict/list combo)
     def find_items(self, element, val):
-        self._load()
+        self.data = self._load()
         ret = []
         for item in self.data:
             item_data = item[Item.Element.ROOT]
@@ -50,9 +50,22 @@ class Organizem:
                         ret.append(item_data)
         # If no matches this returns empty list, which evaluates to "False"
         return ret
+
+    def get_elements(self, element):
+        self.data = self._load()
+        ret = []        
+        for item in self.data:
+            item_data = item[Item.Element.ROOT]
+            ret.append(item_data[Item.Element.item_index(element)][element])
+        return ret
     
+    # Groups all items by the distinct values in the element passed in, e.g.
+    #  groups by all the tags in the file, or projects or areas.
+    # Returns Py data structure, list of dicts, keys are the group terms and
+    #  values are a list of items (which are dict with values a list of dicts,
+    #  which are the name/val elements of the item)
     def get_grouped_items(self, element):
-        self._load()
+        self.data = self._load()
         ret = {}        
         for item in self.data:
             item_data = item[Item.Element.ROOT]
@@ -62,21 +75,34 @@ class Organizem:
             for group_key in group_keys:
                 if group_key not in ret:
                     ret[group_key] = []
-                ret[group_key].append(item_data)
+                ret[group_key].append(item)
         return ret
     
-    def get_elements(self, element):
-        self._load()
+    # Groups items as get_grouped_items() does, then backs up the current
+    #  data file to [file_name]_bak, writes the grouped items to the file
+    #  and also returns them for convenience and testing purposes
+    def regroup_data_file(self, element):
+        grouped_items = self.get_grouped_items(element)
+        items = []
+        for group_key in grouped_items.keys():          
+            for item in grouped_items[group_key]:
+                items.append(item)
+        self._rewrite(items)
         ret = []        
-        for item in self.data:
-            item_data = item[Item.Element.ROOT]
-            ret.append(item_data[Item.Element.item_index(element)][element])
-        return ret
-    
+        for item in items:
+            ret.append(str(item))
+        return "\n".join(ret)
+        
+    def backup(self, bak_data_file=None):
+        if not bak_data_file:
+            bak_data_file = self.data_file + '_bak'
+        self._backup(bak_data_file)
+
     # Helpers
     def _load(self):
         with open(self.data_file) as f:
             self.data = yaml.load(f)
+        return self.data
 
     # Useful for debugging, though doesn't support any current feature
     def _dump(self):
@@ -84,3 +110,17 @@ class Organizem:
             lines = f.readlines()
             for line in lines:
                 print line        
+
+    # Utility and used by regroup_data_file
+    def _backup(self, bak_data_file):
+        with open(self.data_file, 'r') as fr:
+            lines = fr.readlines()
+            with open(bak_data_file, 'w') as fw:
+                for line in lines:
+                    fw.write(line)
+            
+    def _rewrite(self, items):
+        self._backup(self.data_file + '_bak')
+        with open(self.data_file, 'w') as f:         
+            for item in items:
+                f.write(str(item))
