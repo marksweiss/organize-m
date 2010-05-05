@@ -34,9 +34,14 @@ Goals
 ** note (fuzzy full text search)
 
 * Support for reporting items from the command line, grouped by 
-** area of responsibility (exact match of single term provided)
-** project (exact match of single term provided)
-** tags (exact match of terms provided)
+** project
+** area of responsibility
+** tags
+
+* Support for rebuilding the text file from the command line, to regroup it by
+** project
+** area of responsibility
+** tags
 
 * Support for reporting on metadata
 ** all titles (alpha order, due date order)
@@ -45,10 +50,7 @@ Goals
 ** all tags (alpha order)
 ** all actions (grouped by item, item next due date order)
 
-* Support for rebuilding the text file from the command line, to regroup it by
-** project
-** area of responsibility
-** tags
+* Backup data file
 
 -----------
 Item Format
