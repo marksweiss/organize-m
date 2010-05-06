@@ -7,18 +7,31 @@ It seems many people have this experience, because there are many commercial and
 
 So here's mine.  If you try it and like it, great, please let me know.  If you want to suggest features, contribute, fork it and make it your own, please do.  And if nobody cares, that's OK too, because after all I'm building the perfect organizer for me.
 
------
-Goals
------
-* Support entry of new items from the command line
-* Support entry of new items and editing of existing items in a text file
-* Storage of items in YAML format, so they are human readable and editable but also structured so they can be manipulated by organize-m
+--------
+Features
+--------
+* Enter new items from the command line
+* Enter new items and edit existing items in a text file
+* Stores items in YAML format, so they are human readable and editable but also structured so they can be manipulated by organize-m
+* Append a dummy entry to the data file from the command line
 
-* Simple, intuitive, consistent command line actions that you will learn once and not forget, and that you'll be able to figure out for the first time just based on what you've done before.
-** orgm search -project fix up the house
-** orgm search -title cut the grass
+* Delete items from the command line, by
+** title (regex match of terms provided)
+** area of responsibility (regex match of terms provided)
+** project (regex match of terms provided)
+** tags (regex match of terms provided)
 
-* Association of each entry with any of the following metadata (all metadata besides title is optional)
+* Simple, intuitive, consistent command line actions.
+** python orgm --add --title 'cut the grass' --project 'fix up the house' --due_date 5-10-2010 --notes 'This has been a long time coming'
+** python orgm --search --project 'fix up the house'
+** python orgm --search --title 'cut the grass'
+** python orgm --remove --title 'cut the grass'
+** python orgm --show_grouped --title
+** python orgm --show_elements --area
+** python orgm --rebuild_grouped --project
+** python orgm --backup 'my_backup_data.dat'
+
+* Associate each entry with any of the following metadata (all metadata besides title is optional)
 ** title
 ** area of responsibility
 ** project
@@ -27,41 +40,41 @@ Goals
 ** earliest action due date
 ** note (free text of any any length)
 
-* Support for searching for items from the command line by
-** title (exact match of terms provided)
-** actions (exact match of terms provided)
-** tags (exact match of terms provided)
-** note (fuzzy full text search)
+* Search for items from the command line by
+** title (regex match of terms provided)
+** actions (regex match of terms provided)
+** tags (regex match of terms provided)
+** note (regex match of terms provided)
 
-* Support for reporting items from the command line, grouped by 
+* Report items from the command line, grouped by 
 ** project
 ** area of responsibility
 ** tags
 
-* Support for rebuilding the text file from the command line, to regroup it by
+* Rebuild the text file from the command line, to regroup it by
 ** project
 ** area of responsibility
 ** tags
 
-* Support for reporting on metadata
+* Report on item element values
 ** all titles (alpha order, due date order)
 ** all projects (alpha order)
 ** all areas (alpha order)
 ** all tags (alpha order)
 ** all actions (grouped by item, item next due date order)
 
-* Backup data file
+* Support for backup of data file to provided backup file name
 
 -----------
 Item Format
 -----------
 - item:
-  - title: My Title
-  - area: My Area
-  - project: My Project
+  - title: 'My Title'
+  - area: 'My Area'
+  - project: 'My Project'
   - tags: [Tag 1, Tag 2, ...]
   - actions: [Action 1, Action 2, ...]
-  - due: My Eearliest Action Due Date
+  - due: 5-5-2010
   - note: |
     My Note on multiple lines and lines
     and lines and lines
@@ -71,5 +84,70 @@ Item Format
 ...
 ...
 
-  
-  
+----------------------
+Command Line Interface
+----------------------
+Precede all commands by: python orgm
+
+
+--add - adds an item, can have flags for any element type, followed by string value
+
+--add 
+      --title 'my item title' 
+      --project 'my project' 
+      --area 'my area' 
+      --tags "['tag1', 'tag2']" 
+      --actions "['do this now', 'do this later']" 
+      --due_date '5-5-2010' 
+      --note 'This is a short note. Long ones should be edited in the file'
+
+
+--add_empty  - appends an empty new item to the bottom of the data file
+
+
+--remove - finds an item
+
+--remove --title 'my item title'
+--remove --title 'my item t*'    # regex match supported for all --find calls    
+--remove --actions "['do this now', 'do this later']"
+--remove --actions 'do this now'
+--remove --tags "['tag1', 'tag2']"
+--remove --tags 'tag1'
+--remove --note 'This is a short note. Long ones should be edited in the file'
+
+ 
+--find - finds an item
+
+--find --title 'my item title'
+--find --title 'my item t*'    # regex match supported for all --find calls    
+--find --actions "['do this now', 'do this later']"
+--find --actions 'do this now'
+--find --tags "['tag1', 'tag2']"
+--find --tags 'tag1'
+--find --note 'This is a short note. Long ones should be edited in the file'
+
+
+--show_grouped - show items grouped by an element type 
+
+--show_grouped --project
+--show_grouped --area
+--show_grouped --tags
+
+
+--show_elements - show all elements of a given type
+
+--show_elements --title
+--show_elements --project
+--show_elements --area
+--show_elements --tags
+--show_elements --actions
+
+
+--rebuild_grouped - rebuild the data file grouped by an element type 
+
+--rebuild_grouped --project
+--rebuild_grouped --area
+--rebuild_grouped --tags
+
+
+--backup --file_name '/MyPath/MyFile.dat'
