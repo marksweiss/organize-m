@@ -1,4 +1,7 @@
 import yaml
+import item
+# import odict
+from odict import OrderedDict
 
 from item import Item
 
@@ -66,7 +69,10 @@ class Organizem:
     #  which are the name/val elements of the item)
     def get_grouped_items(self, element):
         self.data = self._load()
-        ret = {}        
+        # Use dictionary that keeps keys in sorted order to return items sorted
+        #  by the values for the element key that is being used to group the items
+        # NOTE: This is 3p module, odict.py
+        ret = OrderedDict()        
         for item in self.data:
             item_data = item[Item.Element.ROOT]
             group_keys = item_data[Item.Element.item_index(element)][element]
@@ -75,7 +81,7 @@ class Organizem:
             for group_key in group_keys:
                 if group_key not in ret:
                     ret[group_key] = []
-                ret[group_key].append(item)
+                ret[group_key].append(item)        
         return ret
     
     # Groups items as get_grouped_items() does, then backs up the current
@@ -97,6 +103,12 @@ class Organizem:
         if not bak_data_file:
             bak_data_file = self.data_file + '_bak'
         self._backup(bak_data_file)
+    
+    def add_empty(self):
+        self.add_item(Item(''))
+            
+    def run_shell_cmd(self, argv):
+        pass
 
     # Helpers
     def _load(self):
@@ -122,5 +134,5 @@ class Organizem:
     def _rewrite(self, items):
         self._backup(self.data_file + '_bak')
         with open(self.data_file, 'w') as f:         
-            for item in items:
-                f.write(str(item))
+            for item in items:              
+                f.write(yaml.dump(item))

@@ -294,7 +294,7 @@ class OrganizemTestCase(unittest.TestCase):
         for group_key in grouped_items.keys():          
             for item in grouped_items[group_key]:
                 grouped_items_str.append(str(item))
-        grouped_items_str = "\n".join(grouped_items_str)
+        grouped_items_str = "\n".join(grouped_items_str)        
         self.assertTrue(grouped_items_str == new_data_file_str)
 
     def test_regroup_data_file_area(self):
@@ -381,7 +381,22 @@ class OrganizemTestCase(unittest.TestCase):
         orgm.backup(bak_data_file)
         import filecmp
         filecmp.cmp(TEST_DATA_FILE, bak_data_file)
-        
+ 
+    # NOTE: This is a maual test, no assert().  User must look at TEST_DATA_FILE
+    #  and confirm there is a new empty item
+    def test_add_empty(self):
+        self._init_test_data_file()
+        orgm = Organizem(TEST_DATA_FILE)
+        orgm.add_empty()
+ 
+    #def test_add_item__find_item_by_title__cli(self):
+    #    self._init_test_data_file()
+    #    orgm = Organizem(TEST_DATA_FILE)
+    #    title = 'my item title'
+    #    cmd = ['-- add', '--title', title]
+    #    orgm.run_shell_cmd(cmd)                
+    #    self.assertTrue(orgm.find_items(Item.Element.TITLE, title))
 
-if __name__ == '__main__':
+
+if __name__ == '__main__':  
     unittest.main()
