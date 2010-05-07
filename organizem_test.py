@@ -48,6 +48,18 @@ class OrganizemTestCase(unittest.TestCase):
         orgm.add_item(item)                
         self.assertTrue(orgm.find_items(Item.Element.TITLE, rgx_match, is_regex_match=True))
 
+    def test_remove_items_rgx(self):
+        self._init_test_data_file()
+        title = "title"
+        rgx_match = "titl*"
+        item = Item(title)
+        orgm = Organizem(TEST_DATA_FILE)
+        orgm.add_item(item)
+        self.assertTrue(orgm.find_items(Item.Element.TITLE, rgx_match, is_regex_match=True))
+        # NOTE: Now remove the item and check that it's not there any more
+        orgm.remove_items(Item.Element.TITLE, rgx_match, is_regex_match=True)
+        self.assertFalse(orgm.find_items(Item.Element.TITLE, rgx_match, is_regex_match=True))
+
     def test_add_item__find_items_by_area(self):
         self._init_test_data_file()
         title = "title"

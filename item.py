@@ -107,7 +107,7 @@ class Item(object):
         # TODO real date type and validation - create a new Element type
         self._due_date = ChildTextElement(Item.Element.DUE_DATE, due_date)
         self._note = ChildMultilineTextElement(Item.Element.NOTE, note)
-    
+        
     # Props so string values for each Element in the Item are directly available
     @property
     def title(self):
@@ -148,6 +148,7 @@ class Item(object):
         ret.append(str(self._due_date))
         ret.append(str(self._note))
         return "\n".join(ret)
+
 
     # TODO Make this serialize to dict/list structure as a string 
     #  that will yaml.load() as is and can eval into a python object
