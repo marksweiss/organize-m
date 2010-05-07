@@ -41,10 +41,10 @@ Features
 ** note (free text of any any length)
 
 * Search for items from the command line by
-** title (regex match of terms provided)
-** actions (regex match of terms provided)
-** tags (regex match of terms provided)
-** note (regex match of terms provided)
+** title (exact or regex match of terms provided)
+** actions (exact or regex match of terms provided)
+** tags (exact or regex match of terms provided)
+** note (exact or regex match of terms provided)
 
 * Report items from the command line, grouped by 
 ** project
@@ -119,12 +119,13 @@ Precede all commands by: python orgm
 --find - finds an item
 
 --find --title 'my item title'
---find --title 'my item t*'    # regex match supported for all --find calls    
 --find --actions "['do this now', 'do this later']"
 --find --actions 'do this now'
 --find --tags "['tag1', 'tag2']"
 --find --tags 'tag1'
 --find --note 'This is a short note. Long ones should be edited in the file'
+# regex match supported for all elements except --note
+--find --regex --title 'my item t*'
 
 
 --show_grouped - show items grouped by an element type 

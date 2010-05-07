@@ -39,6 +39,15 @@ class OrganizemTestCase(unittest.TestCase):
         orgm.add_item(item)                
         self.assertTrue(orgm.find_items(Item.Element.TITLE, title))
 
+    def test_add_item__find_rgx_item_by_title(self):
+        self._init_test_data_file()
+        title = "title"
+        rgx_match = "titl*"
+        item = Item(title)
+        orgm = Organizem(TEST_DATA_FILE)
+        orgm.add_item(item)                
+        self.assertTrue(orgm.find_items(Item.Element.TITLE, rgx_match, is_regex_match=True))
+
     def test_add_item__find_items_by_area(self):
         self._init_test_data_file()
         title = "title"
@@ -48,6 +57,16 @@ class OrganizemTestCase(unittest.TestCase):
         orgm.add_item(item)                
         self.assertTrue(orgm.find_items(Item.Element.AREA, area))
 
+    def test_add_item__find_rgx_item_by_area(self):
+        self._init_test_data_file()
+        title = "title"
+        area = "area"
+        rgx_match = "are*"
+        item = Item(title, area=area)
+        orgm = Organizem(TEST_DATA_FILE)
+        orgm.add_item(item)                
+        self.assertTrue(orgm.find_items(Item.Element.AREA, rgx_match, is_regex_match=True))
+
     def test_add_item__find_items_by_project(self):
         self._init_test_data_file()
         title = "title"
@@ -56,6 +75,16 @@ class OrganizemTestCase(unittest.TestCase):
         orgm = Organizem(TEST_DATA_FILE)
         orgm.add_item(item)                
         self.assertTrue(orgm.find_items(Item.Element.PROJECT, project))
+
+    def test_add_item__find_rgx_items_by_project(self):
+        self._init_test_data_file()
+        title = "title"
+        project = "my project"
+        rgx_match = "my proj*"
+        item = Item(title, project=project)
+        orgm = Organizem(TEST_DATA_FILE)
+        orgm.add_item(item)                
+        self.assertTrue(orgm.find_items(Item.Element.PROJECT, rgx_match, is_regex_match=True))
 
     def test_add_item__find_items_by_tags(self):
         self._init_test_data_file()
@@ -77,21 +106,64 @@ class OrganizemTestCase(unittest.TestCase):
         self.assertTrue(orgm.find_items(Item.Element.TAGS, tag2))
         self.assertTrue(orgm.find_items(Item.Element.TAGS, tags2))
 
+    def test_add_item__find_rgx_items_by_tags(self):
+        self._init_test_data_file()
+        title = "title"
+        # Test case of single-value passed to find_items() for a 
+        #  element that is stored in item as a list (tags)
+        tag1 = 'tag 1001'
+        tag1_rgx = 'tag 100*'
+        tags1 = [tag1]
+        item1 = Item(title, tags=tags1)
+        orgm = Organizem(TEST_DATA_FILE)
+        orgm.add_item(item1)
+        self.assertTrue(orgm.find_items(Item.Element.TAGS, tag1_rgx, is_regex_match=True))
+        # Test case of multi-value list passed to find_items() for a 
+        #  element that is stored in item as a list (tags)
+        tag2 = 'tag 1012'
+        tag2_rgx = 'tag 101*'        
+        tags2 = [tag1, tag2]
+        item2 = Item(title, tags=tags2)
+        orgm.add_item(item2)
+        self.assertTrue(orgm.find_items(Item.Element.TAGS, tag2_rgx, is_regex_match=True))
+
     def test_add_item__find_items_by_actions(self):
         self._init_test_data_file()
         title = "title"
-        action1 = 'action 1'
+        action1 = 'action 100'
+        action1_rgx = 'action 10*'
         actions1 = [action1]
         item1 = Item(title, actions=actions1)
         orgm = Organizem(TEST_DATA_FILE)
         orgm.add_item(item1)
-        self.assertTrue(orgm.find_items(Item.Element.ACTIONS, action1))
-        action2 = 'action 2'
+        self.assertTrue(orgm.find_items(Item.Element.ACTIONS, action1_rgx, is_regex_match=True))
+        action2 = 'action 200'
         actions2 = [action1, action2]
         item2 = Item(title, actions=actions2)
         orgm.add_item(item2)
         self.assertTrue(orgm.find_items(Item.Element.ACTIONS, action2))
         self.assertTrue(orgm.find_items(Item.Element.ACTIONS, actions2))
+
+    def test_add_item__find_rgx_items_by_actions(self):
+        self._init_test_data_file()
+        title = "title"
+        # Test case of single-value passed to find_items() for a 
+        #  element that is stored in item as a list (tags)
+        action1 = 'action 1010'
+        action1_rgx = 'action 101*'
+        actions1 = [action1]
+        item1 = Item(title, actions=actions1)
+        orgm = Organizem(TEST_DATA_FILE)
+        orgm.add_item(item1)
+        self.assertTrue(orgm.find_items(Item.Element.ACTIONS, action1_rgx, is_regex_match=True))
+        # Test case of multi-value list passed to find_items() for a 
+        #  element that is stored in item as a list (tags)
+        action2 = 'action 1020'
+        action2_rgx = 'action 102*'        
+        actions2 = [action1, action2]
+        item2 = Item(title, actions=actions2)
+        orgm.add_item(item2)
+        self.assertTrue(orgm.find_items(Item.Element.ACTIONS, action2_rgx, is_regex_match=True))
 
     def test_add_item__find_items_by_note(self):
         self._init_test_data_file()
@@ -110,6 +182,25 @@ class OrganizemTestCase(unittest.TestCase):
         orgm = Organizem(TEST_DATA_FILE)
         orgm.add_item(item)                
         self.assertTrue(orgm.find_items(Item.Element.NOTE, note))
+
+    def test_add_item__find_rgx_items_by_note(self):
+        self._init_test_data_file()
+        title = "title"
+        note = """* Support for reporting on metadata
+** all titles (alpha order, due date order)
+  ** all projects (alpha order)
+    ** all areas (alpha order)
+      ** all tags (alpha order)
+        ** all actions (grouped by item, item next due date order)
+    http://www.snippy.com
+
+    ljalj;
+  a             dafs            asdfdsa           wkwjl;qq;q;"""
+        note_rgx = "\* Support for reporting *"
+        item = Item(title, note=note)
+        orgm = Organizem(TEST_DATA_FILE)
+        orgm.add_item(item)                
+        self.assertTrue(orgm.find_items(Item.Element.NOTE, note_rgx, is_regex_match=True))
 
     def test_get_all_titles(self):
         self._init_test_data_file()

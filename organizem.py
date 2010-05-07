@@ -1,6 +1,6 @@
+import re
+
 import yaml
-import item
-# import odict
 from odict import OrderedDict
 
 from item import Item
@@ -8,6 +8,7 @@ from item import Item
 
 # TODO Move into real config? Make user-configurable?
 DATA_FILE = "orgm.dat"
+
 
 # Manages an Organizem TODO data file, binding to a data file by name
 #  and supporting add_item() to add new items and find_item() to find existing items        
@@ -22,11 +23,14 @@ class Organizem:
         with open(self.data_file, 'a') as f:         
             f.write(str(item))
     
+    def add_empty(self):
+        self.add_item(Item(''))
+    
     # NOTE: Finds all matching items, trying to match the element, value passed
     #  in, e.g. TITLE and a title value, PROJECT and a project value, etc.
     # NOTE: element must be one of the "enums" in class Element (other than ROOT)
     # NOTE: Returns the entire item as a Python object (dict/list combo)
-    def find_items(self, element, val):
+    def find_items(self, element, pattern, is_regex_match=False):
         self.data = self._load()
         ret = []
         for item in self.data:
@@ -37,20 +41,21 @@ class Organizem:
             #  for the index position of the dict that has the key (Element.X) 
             #  passed as the element arg to this function
             # Get value for the element of interest, handle cases of string and list            
-            comp_val = item_data[Item.Element.item_index(element)][element]
+            match_val = item_data[Item.Element.item_index(element)][element]
             # Support case that some elements are str, and some are list
-            if isinstance(comp_val, str) and comp_val == val:
+            if isinstance(match_val, str) and self._match(pattern, match_val, element, is_regex_match):
                 ret.append(item_data)
-            elif isinstance(comp_val, list):
-                # Support letting the caller pass a single value (e.g. one tag)
-                #  or a list of values for elements that are list type
-                if isinstance(val, list):
-                    for v in val:
-                        if v in comp_val:
+            elif isinstance(match_val, list):
+                for val in match_val:
+                    # Support letting the caller pass a single value (e.g. one tag)
+                    #  or a list of values for elements that are list type
+                    if isinstance(pattern, list):
+                        for p in pattern:
+                            if self._match(p, val, element, is_regex_match):
+                                ret.append(item_data)
+                    elif isinstance(pattern, str):
+                        if self._match(pattern, val, element, is_regex_match):
                             ret.append(item_data)
-                elif isinstance(val, str):
-                    if val in comp_val:
-                        ret.append(item_data)
         # If no matches this returns empty list, which evaluates to "False"
         return ret
 
@@ -103,14 +108,22 @@ class Organizem:
         if not bak_data_file:
             bak_data_file = self.data_file + '_bak'
         self._backup(bak_data_file)
-    
-    def add_empty(self):
-        self.add_item(Item(''))
             
     def run_shell_cmd(self, argv):
         pass
 
     # Helpers
+    def _match(self, pattern, string, element, is_regex_match):
+        if not is_regex_match:
+            return pattern == string
+        else:
+            # Note types can have line breaks and lots of crap.
+            # Increase our chances of avoiding trouble by removing line breaks
+            if element == Item.Element.NOTE:
+               string = string.replace('\n', ' ')    
+            rgx = re.compile(pattern, re.IGNORECASE)
+            return rgx.search(string) != None
+    
     def _load(self):
         with open(self.data_file) as f:
             self.data = yaml.load(f)
