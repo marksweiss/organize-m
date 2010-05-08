@@ -16,10 +16,10 @@ Features
 * Append a dummy entry to the data file from the command line
 
 * Delete items from the command line, by
-** title (regex match of terms provided)
-** area of responsibility (regex match of terms provided)
-** project (regex match of terms provided)
-** tags (regex match of terms provided)
+** title (exact or regex match of terms provided)
+** area of responsibility (exact or regex match of terms provided)
+** project (exact or regex match of terms provided)
+** tags (exact or regex match of terms provided)
 
 * Simple, intuitive, consistent command line actions.
 ** python orgm --add --title 'cut the grass' --project 'fix up the house' --due_date 5-10-2010 --notes 'This has been a long time coming'
@@ -35,8 +35,8 @@ Features
 ** title
 ** area of responsibility
 ** project
-** tags (0 or more)
-** actions (0 or more)
+** tags
+** actions
 ** earliest action due date
 ** note (free text of any any length)
 
@@ -61,7 +61,7 @@ Features
 ** all projects (alpha order)
 ** all areas (alpha order)
 ** all tags (alpha order)
-** all actions (grouped by item, item next due date order)
+** all actions (alpha order)
 
 * Support for backup of data file to provided backup file name
 
