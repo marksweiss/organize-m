@@ -14,7 +14,7 @@ DATA_FILE = "orgm.dat"
 #  and supporting add_item() to add new items and find_item() to find existing items        
 class Organizem:
 
-    def __init__(self, data_file):
+    def __init__(self, data_file=DATA_FILE):
         self.data_file = data_file
         self.data = None
         
@@ -113,7 +113,7 @@ class Organizem:
             bak_data_file = self.data_file + '_bak'
         self._backup(bak_data_file)
             
-    def run_shell_cmd(self, argv):
+    def run_shell_cmd(self, title, **kwargs):
         pass
 
     # Helpers
