@@ -47,19 +47,7 @@ class OrganizemTestCase(unittest.TestCase):
         orgm = Organizem(TEST_DATA_FILE)
         orgm.add_item(item)                
         self.assertTrue(orgm.find_items(Item.Element.TITLE, rgx_match, is_regex_match=True))
-
-    def test_remove_items_rgx(self):
-        self._init_test_data_file()
-        title = "title"
-        rgx_match = "titl*"
-        item = Item(title)
-        orgm = Organizem(TEST_DATA_FILE)
-        orgm.add_item(item)
-        self.assertTrue(orgm.find_items(Item.Element.TITLE, rgx_match, is_regex_match=True))
-        # NOTE: Now remove the item and check that it's not there any more
-        orgm.remove_items(Item.Element.TITLE, rgx_match, is_regex_match=True)
-        self.assertFalse(orgm.find_items(Item.Element.TITLE, rgx_match, is_regex_match=True))
-
+        
     def test_add_item__find_items_by_area(self):
         self._init_test_data_file()
         title = "title"
@@ -214,6 +202,124 @@ class OrganizemTestCase(unittest.TestCase):
         orgm.add_item(item)                
         self.assertTrue(orgm.find_items(Item.Element.NOTE, note_rgx, is_regex_match=True))
 
+    def test_remove_items_rgx_by_title(self):
+        self._init_test_data_file()
+        title = "title"
+        rgx_match = "titl*"
+        item = Item(title)
+        orgm = Organizem(TEST_DATA_FILE)
+        orgm.add_item(item)
+        self.assertTrue(orgm.find_items(Item.Element.TITLE, rgx_match, is_regex_match=True))
+        # NOTE: Now remove the item and check that it's not there any more
+        orgm.remove_items(Item.Element.TITLE, rgx_match, is_regex_match=True)
+        self.assertFalse(orgm.find_items(Item.Element.TITLE, rgx_match, is_regex_match=True))
+        
+    def test_remove_items_rgx_by_area(self):
+        self._init_test_data_file()
+        title = "title"
+        area = "area"
+        rgx_match = "are*"
+        item = Item(title, area=area)
+        orgm = Organizem(TEST_DATA_FILE)
+        orgm.add_item(item)
+        self.assertTrue(orgm.find_items(Item.Element.AREA, rgx_match, is_regex_match=True))
+        orgm.remove_items(Item.Element.AREA, rgx_match, is_regex_match=True)
+        self.assertFalse(orgm.find_items(Item.Element.AREA, rgx_match, is_regex_match=True))
+
+    def test_remove_items_by_project(self):
+        self._init_test_data_file()
+        title = "title"
+        project = "project"
+        item = Item(title, project=project)
+        orgm = Organizem(TEST_DATA_FILE)
+        orgm.add_item(item)
+        self.assertTrue(orgm.find_items(Item.Element.PROJECT, project))
+        orgm.remove_items(Item.Element.PROJECT, project)
+        self.assertFalse(orgm.find_items(Item.Element.PROJECT, project))
+
+    def test_remove_items_by_tags(self):
+        self._init_test_data_file()
+        title = "title"
+        tag1 = 'tag 1'
+        tags1 = [tag1]
+        item1 = Item(title, tags=tags1)
+        orgm = Organizem(TEST_DATA_FILE)
+        orgm.add_item(item1)
+        self.assertTrue(orgm.find_items(Item.Element.TAGS, tag1))
+        orgm.remove_items(Item.Element.TAGS, tag1)
+        self.assertFalse(orgm.find_items(Item.Element.TAGS, tag1))
+        tag2 = 'tag 2'
+        tags2 = [tag1, tag2]
+        item2 = Item(title, tags=tags2)
+        orgm.add_item(item2)
+        self.assertTrue(orgm.find_items(Item.Element.TAGS, tag2))
+        self.assertTrue(orgm.find_items(Item.Element.TAGS, tags2))
+        orgm.remove_items(Item.Element.TAGS, tags2)        
+        self.assertFalse(orgm.find_items(Item.Element.TAGS, tags2))
+
+    def test_remove_items_rgx_by_actions(self):
+        self._init_test_data_file()
+        title = "title"
+        action1 = 'action 110'
+        rgx_match = "action 11*"
+        actions1 = [action1]
+        item1 = Item(title, actions=actions1)
+        orgm = Organizem(TEST_DATA_FILE)
+        orgm.add_item(item1)
+        self.assertTrue(orgm.find_items(Item.Element.ACTIONS, action1))
+        orgm.remove_items(Item.Element.ACTIONS, rgx_match, is_regex_match=True)
+        self.assertFalse(orgm.find_items(Item.Element.ACTIONS, action1))
+        action2 = 'action 101'
+        rgx_match = "action 10*"
+        actions2 = [action1, action2]
+        item2 = Item(title, actions=actions2)
+        orgm.add_item(item2)
+        self.assertTrue(orgm.find_items(Item.Element.ACTIONS, action2))
+        self.assertTrue(orgm.find_items(Item.Element.ACTIONS, actions2))
+        orgm.remove_items(Item.Element.ACTIONS, rgx_match, is_regex_match=True)        
+        self.assertFalse(orgm.find_items(Item.Element.ACTIONS, actions2))
+
+    def test_remove_items_by_note(self):
+        self._init_test_data_file()
+        title = "title"
+        note = """* Support for reporting on metadata
+** all titles (alpha order, due date order)
+  ** all projects (alpha order)
+    ** all areas (alpha order)
+      ** all tags (alpha order)
+        ** all actions (grouped by item, item next due date order)
+    http://www.snippy.com
+
+    ljalj;
+  a             dafs            asdfdsa           wkwjl;qq;q;"""
+        item = Item(title, note=note)
+        orgm = Organizem(TEST_DATA_FILE)
+        orgm.add_item(item)                
+        self.assertTrue(orgm.find_items(Item.Element.NOTE, note))
+        orgm.remove_items(Item.Element.NOTE, note)        
+        self.assertFalse(orgm.find_items(Item.Element.NOTE, note)) 
+        
+    def test_remove_items_rgx_by_note(self):
+        self._init_test_data_file()
+        title = "title"
+        note = """* Support for reporting on metadata
+** all titles (alpha order, due date order)
+  ** all projects (alpha order)
+    ** all areas (alpha order)
+      ** all tags (alpha order)
+        ** all actions (grouped by item, item next due date order)
+    http://www.snippy.com
+
+    ljalj;
+  a             dafs            asdfdsa           wkwjl;qq;q;"""
+        note_rgx = "\* Support for reporting *"
+        item = Item(title, note=note)
+        orgm = Organizem(TEST_DATA_FILE)
+        orgm.add_item(item)                
+        self.assertTrue(orgm.find_items(Item.Element.NOTE, note_rgx, is_regex_match=True))
+        orgm.remove_items(Item.Element.NOTE, note_rgx, is_regex_match=True)        
+        self.assertFalse(orgm.find_items(Item.Element.NOTE, note_rgx))  
+  
     def test_get_all_titles(self):
         self._init_test_data_file()
         title1 = 'title 1'
