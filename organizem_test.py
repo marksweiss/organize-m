@@ -1,13 +1,12 @@
 import unittest
 
-from item import Item
+from item import Item, Elem
 from organizem import Organizem
 
 
 TEST_DATA_FILE = "orgm_test.dat"
 
 
-# TDD all the way ... :-)  
 class OrganizemTestCase(unittest.TestCase):
     
     # Helpers
@@ -37,7 +36,7 @@ class OrganizemTestCase(unittest.TestCase):
         item = Item(title)
         orgm = Organizem(TEST_DATA_FILE)
         orgm.add_item(item)                
-        self.assertTrue(orgm.find_items(Item.Element.TITLE, title))
+        self.assertTrue(orgm.find_items(Elem.TITLE, title))
 
     def test_add_item__find_rgx_item_by_title(self):
         self._init_test_data_file()
@@ -46,7 +45,7 @@ class OrganizemTestCase(unittest.TestCase):
         item = Item(title)
         orgm = Organizem(TEST_DATA_FILE)
         orgm.add_item(item)                
-        self.assertTrue(orgm.find_items(Item.Element.TITLE, rgx_match, is_regex_match=True))
+        self.assertTrue(orgm.find_items(Elem.TITLE, rgx_match, is_regex_match=True))
         
     def test_add_item__find_items_by_area(self):
         self._init_test_data_file()
@@ -55,7 +54,7 @@ class OrganizemTestCase(unittest.TestCase):
         item = Item(title, area=area)
         orgm = Organizem(TEST_DATA_FILE)
         orgm.add_item(item)                
-        self.assertTrue(orgm.find_items(Item.Element.AREA, area))
+        self.assertTrue(orgm.find_items(Elem.AREA, area))
 
     def test_add_item__find_rgx_item_by_area(self):
         self._init_test_data_file()
@@ -65,7 +64,7 @@ class OrganizemTestCase(unittest.TestCase):
         item = Item(title, area=area)
         orgm = Organizem(TEST_DATA_FILE)
         orgm.add_item(item)                
-        self.assertTrue(orgm.find_items(Item.Element.AREA, rgx_match, is_regex_match=True))
+        self.assertTrue(orgm.find_items(Elem.AREA, rgx_match, is_regex_match=True))
 
     def test_add_item__find_items_by_project(self):
         self._init_test_data_file()
@@ -74,7 +73,7 @@ class OrganizemTestCase(unittest.TestCase):
         item = Item(title, project=project)
         orgm = Organizem(TEST_DATA_FILE)
         orgm.add_item(item)                
-        self.assertTrue(orgm.find_items(Item.Element.PROJECT, project))
+        self.assertTrue(orgm.find_items(Elem.PROJECT, project))
 
     def test_add_item__find_rgx_items_by_project(self):
         self._init_test_data_file()
@@ -84,7 +83,7 @@ class OrganizemTestCase(unittest.TestCase):
         item = Item(title, project=project)
         orgm = Organizem(TEST_DATA_FILE)
         orgm.add_item(item)                
-        self.assertTrue(orgm.find_items(Item.Element.PROJECT, rgx_match, is_regex_match=True))
+        self.assertTrue(orgm.find_items(Elem.PROJECT, rgx_match, is_regex_match=True))
 
     def test_add_item__find_items_by_tags(self):
         self._init_test_data_file()
@@ -96,15 +95,15 @@ class OrganizemTestCase(unittest.TestCase):
         item1 = Item(title, tags=tags1)
         orgm = Organizem(TEST_DATA_FILE)
         orgm.add_item(item1)
-        self.assertTrue(orgm.find_items(Item.Element.TAGS, tag1))
+        self.assertTrue(orgm.find_items(Elem.TAGS, tag1))
         # Test case of multi-value list passed to find_items() for a 
         #  element that is stored in item as a list (tags)
         tag2 = 'tag 2'
         tags2 = [tag1, tag2]
         item2 = Item(title, tags=tags2)
         orgm.add_item(item2)
-        self.assertTrue(orgm.find_items(Item.Element.TAGS, tag2))
-        self.assertTrue(orgm.find_items(Item.Element.TAGS, tags2))
+        self.assertTrue(orgm.find_items(Elem.TAGS, tag2))
+        self.assertTrue(orgm.find_items(Elem.TAGS, tags2))
 
     def test_add_item__find_rgx_items_by_tags(self):
         self._init_test_data_file()
@@ -117,7 +116,7 @@ class OrganizemTestCase(unittest.TestCase):
         item1 = Item(title, tags=tags1)
         orgm = Organizem(TEST_DATA_FILE)
         orgm.add_item(item1)
-        self.assertTrue(orgm.find_items(Item.Element.TAGS, tag1_rgx, is_regex_match=True))
+        self.assertTrue(orgm.find_items(Elem.TAGS, tag1_rgx, is_regex_match=True))
         # Test case of multi-value list passed to find_items() for a 
         #  element that is stored in item as a list (tags)
         tag2 = 'tag 1012'
@@ -125,7 +124,7 @@ class OrganizemTestCase(unittest.TestCase):
         tags2 = [tag1, tag2]
         item2 = Item(title, tags=tags2)
         orgm.add_item(item2)
-        self.assertTrue(orgm.find_items(Item.Element.TAGS, tag2_rgx, is_regex_match=True))
+        self.assertTrue(orgm.find_items(Elem.TAGS, tag2_rgx, is_regex_match=True))
 
     def test_add_item__find_items_by_actions(self):
         self._init_test_data_file()
@@ -136,13 +135,13 @@ class OrganizemTestCase(unittest.TestCase):
         item1 = Item(title, actions=actions1)
         orgm = Organizem(TEST_DATA_FILE)
         orgm.add_item(item1)
-        self.assertTrue(orgm.find_items(Item.Element.ACTIONS, action1_rgx, is_regex_match=True))
+        self.assertTrue(orgm.find_items(Elem.ACTIONS, action1_rgx, is_regex_match=True))
         action2 = 'action 200'
         actions2 = [action1, action2]
         item2 = Item(title, actions=actions2)
         orgm.add_item(item2)
-        self.assertTrue(orgm.find_items(Item.Element.ACTIONS, action2))
-        self.assertTrue(orgm.find_items(Item.Element.ACTIONS, actions2))
+        self.assertTrue(orgm.find_items(Elem.ACTIONS, action2))
+        self.assertTrue(orgm.find_items(Elem.ACTIONS, actions2))
 
     def test_add_item__find_rgx_items_by_actions(self):
         self._init_test_data_file()
@@ -155,7 +154,7 @@ class OrganizemTestCase(unittest.TestCase):
         item1 = Item(title, actions=actions1)
         orgm = Organizem(TEST_DATA_FILE)
         orgm.add_item(item1)
-        self.assertTrue(orgm.find_items(Item.Element.ACTIONS, action1_rgx, is_regex_match=True))
+        self.assertTrue(orgm.find_items(Elem.ACTIONS, action1_rgx, is_regex_match=True))
         # Test case of multi-value list passed to find_items() for a 
         #  element that is stored in item as a list (tags)
         action2 = 'action 1020'
@@ -163,7 +162,7 @@ class OrganizemTestCase(unittest.TestCase):
         actions2 = [action1, action2]
         item2 = Item(title, actions=actions2)
         orgm.add_item(item2)
-        self.assertTrue(orgm.find_items(Item.Element.ACTIONS, action2_rgx, is_regex_match=True))
+        self.assertTrue(orgm.find_items(Elem.ACTIONS, action2_rgx, is_regex_match=True))
 
     def test_add_item__find_items_by_note(self):
         self._init_test_data_file()
@@ -181,7 +180,7 @@ class OrganizemTestCase(unittest.TestCase):
         item = Item(title, note=note)
         orgm = Organizem(TEST_DATA_FILE)
         orgm.add_item(item)                
-        self.assertTrue(orgm.find_items(Item.Element.NOTE, note))
+        self.assertTrue(orgm.find_items(Elem.NOTE, note))
 
     def test_add_item__find_rgx_items_by_note(self):
         self._init_test_data_file()
@@ -200,7 +199,7 @@ class OrganizemTestCase(unittest.TestCase):
         item = Item(title, note=note)
         orgm = Organizem(TEST_DATA_FILE)
         orgm.add_item(item)                
-        self.assertTrue(orgm.find_items(Item.Element.NOTE, note_rgx, is_regex_match=True))
+        self.assertTrue(orgm.find_items(Elem.NOTE, note_rgx, is_regex_match=True))
 
     def test_remove_items_rgx_by_title(self):
         self._init_test_data_file()
@@ -209,10 +208,10 @@ class OrganizemTestCase(unittest.TestCase):
         item = Item(title)
         orgm = Organizem(TEST_DATA_FILE)
         orgm.add_item(item)
-        self.assertTrue(orgm.find_items(Item.Element.TITLE, rgx_match, is_regex_match=True))
+        self.assertTrue(orgm.find_items(Elem.TITLE, rgx_match, is_regex_match=True))
         # NOTE: Now remove the item and check that it's not there any more
-        orgm.remove_items(Item.Element.TITLE, rgx_match, is_regex_match=True)
-        self.assertFalse(orgm.find_items(Item.Element.TITLE, rgx_match, is_regex_match=True))
+        orgm.remove_items(Elem.TITLE, rgx_match, is_regex_match=True)
+        self.assertFalse(orgm.find_items(Elem.TITLE, rgx_match, is_regex_match=True))
         
     def test_remove_items_rgx_by_area(self):
         self._init_test_data_file()
@@ -222,9 +221,9 @@ class OrganizemTestCase(unittest.TestCase):
         item = Item(title, area=area)
         orgm = Organizem(TEST_DATA_FILE)
         orgm.add_item(item)
-        self.assertTrue(orgm.find_items(Item.Element.AREA, rgx_match, is_regex_match=True))
-        orgm.remove_items(Item.Element.AREA, rgx_match, is_regex_match=True)
-        self.assertFalse(orgm.find_items(Item.Element.AREA, rgx_match, is_regex_match=True))
+        self.assertTrue(orgm.find_items(Elem.AREA, rgx_match, is_regex_match=True))
+        orgm.remove_items(Elem.AREA, rgx_match, is_regex_match=True)
+        self.assertFalse(orgm.find_items(Elem.AREA, rgx_match, is_regex_match=True))
 
     def test_remove_items_by_project(self):
         self._init_test_data_file()
@@ -233,9 +232,9 @@ class OrganizemTestCase(unittest.TestCase):
         item = Item(title, project=project)
         orgm = Organizem(TEST_DATA_FILE)
         orgm.add_item(item)
-        self.assertTrue(orgm.find_items(Item.Element.PROJECT, project))
-        orgm.remove_items(Item.Element.PROJECT, project)
-        self.assertFalse(orgm.find_items(Item.Element.PROJECT, project))
+        self.assertTrue(orgm.find_items(Elem.PROJECT, project))
+        orgm.remove_items(Elem.PROJECT, project)
+        self.assertFalse(orgm.find_items(Elem.PROJECT, project))
 
     def test_remove_items_by_tags(self):
         self._init_test_data_file()
@@ -245,17 +244,17 @@ class OrganizemTestCase(unittest.TestCase):
         item1 = Item(title, tags=tags1)
         orgm = Organizem(TEST_DATA_FILE)
         orgm.add_item(item1)
-        self.assertTrue(orgm.find_items(Item.Element.TAGS, tag1))
-        orgm.remove_items(Item.Element.TAGS, tag1)
-        self.assertFalse(orgm.find_items(Item.Element.TAGS, tag1))
+        self.assertTrue(orgm.find_items(Elem.TAGS, tag1))
+        orgm.remove_items(Elem.TAGS, tag1)
+        self.assertFalse(orgm.find_items(Elem.TAGS, tag1))
         tag2 = 'tag 2'
         tags2 = [tag1, tag2]
         item2 = Item(title, tags=tags2)
         orgm.add_item(item2)
-        self.assertTrue(orgm.find_items(Item.Element.TAGS, tag2))
-        self.assertTrue(orgm.find_items(Item.Element.TAGS, tags2))
-        orgm.remove_items(Item.Element.TAGS, tags2)        
-        self.assertFalse(orgm.find_items(Item.Element.TAGS, tags2))
+        self.assertTrue(orgm.find_items(Elem.TAGS, tag2))
+        self.assertTrue(orgm.find_items(Elem.TAGS, tags2))
+        orgm.remove_items(Elem.TAGS, tags2)        
+        self.assertFalse(orgm.find_items(Elem.TAGS, tags2))
 
     def test_remove_items_rgx_by_actions(self):
         self._init_test_data_file()
@@ -266,18 +265,18 @@ class OrganizemTestCase(unittest.TestCase):
         item1 = Item(title, actions=actions1)
         orgm = Organizem(TEST_DATA_FILE)
         orgm.add_item(item1)
-        self.assertTrue(orgm.find_items(Item.Element.ACTIONS, action1))
-        orgm.remove_items(Item.Element.ACTIONS, rgx_match, is_regex_match=True)
-        self.assertFalse(orgm.find_items(Item.Element.ACTIONS, action1))
+        self.assertTrue(orgm.find_items(Elem.ACTIONS, action1))
+        orgm.remove_items(Elem.ACTIONS, rgx_match, is_regex_match=True)
+        self.assertFalse(orgm.find_items(Elem.ACTIONS, action1))
         action2 = 'action 101'
         rgx_match = "action 10*"
         actions2 = [action1, action2]
         item2 = Item(title, actions=actions2)
         orgm.add_item(item2)
-        self.assertTrue(orgm.find_items(Item.Element.ACTIONS, action2))
-        self.assertTrue(orgm.find_items(Item.Element.ACTIONS, actions2))
-        orgm.remove_items(Item.Element.ACTIONS, rgx_match, is_regex_match=True)        
-        self.assertFalse(orgm.find_items(Item.Element.ACTIONS, actions2))
+        self.assertTrue(orgm.find_items(Elem.ACTIONS, action2))
+        self.assertTrue(orgm.find_items(Elem.ACTIONS, actions2))
+        orgm.remove_items(Elem.ACTIONS, rgx_match, is_regex_match=True)        
+        self.assertFalse(orgm.find_items(Elem.ACTIONS, actions2))
 
     def test_remove_items_by_note(self):
         self._init_test_data_file()
@@ -295,9 +294,9 @@ class OrganizemTestCase(unittest.TestCase):
         item = Item(title, note=note)
         orgm = Organizem(TEST_DATA_FILE)
         orgm.add_item(item)                
-        self.assertTrue(orgm.find_items(Item.Element.NOTE, note))
-        orgm.remove_items(Item.Element.NOTE, note)        
-        self.assertFalse(orgm.find_items(Item.Element.NOTE, note)) 
+        self.assertTrue(orgm.find_items(Elem.NOTE, note))
+        orgm.remove_items(Elem.NOTE, note)        
+        self.assertFalse(orgm.find_items(Elem.NOTE, note)) 
         
     def test_remove_items_rgx_by_note(self):
         self._init_test_data_file()
@@ -316,9 +315,9 @@ class OrganizemTestCase(unittest.TestCase):
         item = Item(title, note=note)
         orgm = Organizem(TEST_DATA_FILE)
         orgm.add_item(item)                
-        self.assertTrue(orgm.find_items(Item.Element.NOTE, note_rgx, is_regex_match=True))
-        orgm.remove_items(Item.Element.NOTE, note_rgx, is_regex_match=True)        
-        self.assertFalse(orgm.find_items(Item.Element.NOTE, note_rgx))  
+        self.assertTrue(orgm.find_items(Elem.NOTE, note_rgx, is_regex_match=True))
+        orgm.remove_items(Elem.NOTE, note_rgx, is_regex_match=True)        
+        self.assertFalse(orgm.find_items(Elem.NOTE, note_rgx))  
   
     def test_get_all_titles(self):
         self._init_test_data_file()
@@ -330,7 +329,7 @@ class OrganizemTestCase(unittest.TestCase):
         orgm.add_item(item1)
         orgm.add_item(item2) 
         # Have to handle the fact that init of test dat file includes dummy item with "TEST_ITEM" title       
-        self.assertTrue(orgm.get_elements(Item.Element.TITLE) == ['TEST_ITEM', 'title 1', 'title 2'])
+        self.assertTrue(orgm.get_elements(Elem.TITLE) == ['TEST_ITEM', 'title 1', 'title 2'])
 
     def test_get_all_projects(self):
         self._init_test_data_file()
@@ -344,7 +343,7 @@ class OrganizemTestCase(unittest.TestCase):
         orgm.add_item(item1)
         orgm.add_item(item2)        
         # Have to handle the fact that init of test dat file includes dummy item with empty name        
-        self.assertTrue(orgm.get_elements(Item.Element.PROJECT) == ['', 'project 1', 'project 2'])
+        self.assertTrue(orgm.get_elements(Elem.PROJECT) == ['', 'project 1', 'project 2'])
 
     def test_get_all_areas(self):
         self._init_test_data_file()
@@ -358,7 +357,7 @@ class OrganizemTestCase(unittest.TestCase):
         orgm.add_item(item1)
         orgm.add_item(item2)        
         # Have to handle the fact that init of test dat file includes dummy item with empty name        
-        self.assertTrue(orgm.get_elements(Item.Element.AREA) == ['', 'area 1', 'area 2'])
+        self.assertTrue(orgm.get_elements(Elem.AREA) == ['', 'area 1', 'area 2'])
 
     def test_get_all_tags(self):
         self._init_test_data_file()
@@ -372,7 +371,7 @@ class OrganizemTestCase(unittest.TestCase):
         orgm.add_item(item1)
         orgm.add_item(item2)        
         # Have to handle the fact that init of test dat file includes dummy item with empty name
-        self.assertTrue(orgm.get_elements(Item.Element.TAGS) == [[], ['tag 1', 'tag 2'], ['tag 3', 'tag 4']])
+        self.assertTrue(orgm.get_elements(Elem.TAGS) == [[], ['tag 1', 'tag 2'], ['tag 3', 'tag 4']])
 
     def test_get_all_actions(self):
         self._init_test_data_file()
@@ -386,7 +385,7 @@ class OrganizemTestCase(unittest.TestCase):
         orgm.add_item(item1)
         orgm.add_item(item2)        
         # Have to handle the fact that init of test dat file includes dummy item with empty name
-        self.assertTrue(orgm.get_elements(Item.Element.ACTIONS) == [[], ['action 1', 'action 2'], ['action 3', 'action 4']])
+        self.assertTrue(orgm.get_elements(Elem.ACTIONS) == [[], ['action 1', 'action 2'], ['action 3', 'action 4']])
 
     def test_get_grouped_items_project(self):
         self._init_test_data_file()
@@ -407,7 +406,7 @@ class OrganizemTestCase(unittest.TestCase):
         orgm.add_item(item4)        
         expected1 = [{'item' : [{'title': 'title 1'}, {'area': ''}, {'project': 'project 1'}, {'tags': []}, {'actions': []}, {'due_date': ''}, {'note': ''}]}, {'item' : [{'title': 'title 3'}, {'area': ''}, {'project': 'project 1'}, {'tags': []}, {'actions': []}, {'due_date': ''}, {'note': ''}]}]
         expected2 = [{'item' : [{'title': 'title 2'}, {'area': ''}, {'project': 'project 2'}, {'tags': []}, {'actions': []}, {'due_date': ''}, {'note': ''}]}, {'item' : [{'title': 'title 4'}, {'area': ''}, {'project': 'project 2'}, {'tags': []}, {'actions': []}, {'due_date': ''}, {'note': ''}]}]
-        actual = orgm.get_grouped_items(Item.Element.PROJECT)
+        actual = orgm.get_grouped_items(Elem.PROJECT)
         actual1 = actual[project1]
         actual2 = actual[project2]
         self.assertTrue(expected1 == actual1)
@@ -432,7 +431,7 @@ class OrganizemTestCase(unittest.TestCase):
         orgm.add_item(item4)        
         expected1 = [{'item' : [{'title': 'title 1'}, {'area': 'area 1'}, {'project': ''}, {'tags': []}, {'actions': []}, {'due_date': ''}, {'note': ''}]}, {'item' : [{'title': 'title 3'}, {'area': 'area 1'}, {'project': ''}, {'tags': []}, {'actions': []}, {'due_date': ''}, {'note': ''}]}]
         expected2 = [{'item' : [{'title': 'title 2'}, {'area': 'area 2'}, {'project': ''}, {'tags': []}, {'actions': []}, {'due_date': ''}, {'note': ''}]}, {'item' : [{'title': 'title 4'}, {'area': 'area 2'}, {'project': ''}, {'tags': []}, {'actions': []}, {'due_date': ''}, {'note': ''}]}]
-        actual = orgm.get_grouped_items(Item.Element.AREA)      
+        actual = orgm.get_grouped_items(Elem.AREA)      
         actual1 = actual[area1]
         actual2 = actual[area2]
         self.assertTrue(expected1 == actual1)
@@ -468,7 +467,7 @@ class OrganizemTestCase(unittest.TestCase):
         expected4 = [{'item' : [{'title': 'title 2'}, {'area': ''}, {'project': ''}, {'tags': [tag3, tag4]}, {'actions': []}, {'due_date': ''}, {'note': ''}]}, \
                      {'item' : [{'title': 'title 4'}, {'area': ''}, {'project': ''}, {'tags': [tag3, tag4]}, {'actions': []}, {'due_date': ''}, {'note': ''}]}]
 
-        actual = orgm.get_grouped_items(Item.Element.TAGS)
+        actual = orgm.get_grouped_items(Elem.TAGS)
         actual1 = actual[tag1]
         actual2 = actual[tag2]
         actual3 = actual[tag3]
@@ -497,8 +496,8 @@ class OrganizemTestCase(unittest.TestCase):
         orgm.add_item(item3)
         orgm.add_item(item4)
 
-        grouped_items = orgm.get_grouped_items(Item.Element.PROJECT)
-        new_data_file_str = orgm.regroup_data_file(Item.Element.PROJECT)
+        grouped_items = orgm.get_grouped_items(Elem.PROJECT)
+        new_data_file_str = orgm.regroup_data_file(Elem.PROJECT)
         grouped_items_str = []
         for group_key in grouped_items.keys():          
             for item in grouped_items[group_key]:
@@ -524,8 +523,8 @@ class OrganizemTestCase(unittest.TestCase):
         orgm.add_item(item3)
         orgm.add_item(item4)
 
-        grouped_items = orgm.get_grouped_items(Item.Element.AREA)
-        new_data_file_str = orgm.regroup_data_file(Item.Element.AREA)
+        grouped_items = orgm.get_grouped_items(Elem.AREA)
+        new_data_file_str = orgm.regroup_data_file(Elem.AREA)
         grouped_items_str = []
         for group_key in grouped_items.keys():          
             for item in grouped_items[group_key]:
@@ -555,8 +554,8 @@ class OrganizemTestCase(unittest.TestCase):
         orgm.add_item(item3)
         orgm.add_item(item4)
 
-        grouped_items = orgm.get_grouped_items(Item.Element.TAGS)
-        new_data_file_str = orgm.regroup_data_file(Item.Element.TAGS)
+        grouped_items = orgm.get_grouped_items(Elem.TAGS)
+        new_data_file_str = orgm.regroup_data_file(Elem.TAGS)
         grouped_items_str = []
         for group_key in grouped_items.keys():          
             for item in grouped_items[group_key]:
@@ -604,7 +603,7 @@ class OrganizemTestCase(unittest.TestCase):
     #    title = 'my item title'
     #    cmd = ['-- add', '--title', title]
     #    orgm.run_shell_cmd(cmd)                
-    #    self.assertTrue(orgm.find_items(Item.Element.TITLE, title))
+    #    self.assertTrue(orgm.find_items(Elem.TITLE, title))
 
 
 if __name__ == '__main__':  

@@ -3,17 +3,44 @@ import re
 import yaml
 from odict import OrderedDict
 
-from item import Item
+from item import Item, Elem
 
 
 # TODO Move into real config? Make user-configurable?
 DATA_FILE = "orgm.dat"
 
 
+class OrganizemIllegalUsageException(Exception): pass
+
+
+class Action(object):
+    ADD = 'add'
+    ADD_EMPTY = 'add_empty'
+    REMOVE = 'remove'
+    FIND = 'find'
+    SHOW_GROUPED = 'show_grouped'
+    SHOW_ELEMENTS = 'show_elements'
+    REBUILD_GROUPED = 'rebuild_grouped'
+    BACKUP = 'backup'
+
+class ActionArg(object):
+    REGEX = 'regex'
+    FILENAME = 'filename'
+    BY_TITLE = 'by_title'
+    BY_AREA = 'by_area'
+    BY_PROJECT = 'by_project'
+    BY_TAGS = 'by_tags'
+    BY_ACTIONS = 'by_actions'
+
+
 # Manages an Organizem TODO data file, binding to a data file by name
 #  and supporting add_item() to add new items and find_item() to find existing items        
-class Organizem:
+class Organizem(object):
 
+    # Public API
+    # Testers, extenders or anyone who wants to use Organizem programatically
+    #  can call these public methods directly. Regular usage is from commmand line
+    #  which only uses #run_cli()
     def __init__(self, data_file=DATA_FILE):
         self.data_file = data_file
         self.data = None
@@ -43,16 +70,16 @@ class Organizem:
         # Result is we get back (all rows) - (those that match)
         filtered_items = self._find_or_filter_items(element, pattern, is_regex_match, is_filter=True)              
         for item in filtered_items:
-            item_data = item[Item.Element.ROOT]            
+            item_data = item[Elem.ROOT]            
             # Build append items call dynammically from the current data, then eval()                    
             item_call = "items.append(Item('%s', %s='%s', %s='%s', %s=%s, %s=%s, %s='%s', %s='%s'))" % \
-              (item_data[Item.Element.item_index(Item.Element.TITLE)][Item.Element.TITLE], 
-              Item.Element.AREA, item_data[Item.Element.item_index(Item.Element.AREA)][Item.Element.AREA],
-              Item.Element.PROJECT, item_data[Item.Element.item_index(Item.Element.PROJECT)][Item.Element.PROJECT],
-              Item.Element.TAGS, item_data[Item.Element.item_index(Item.Element.TAGS)][Item.Element.TAGS],
-              Item.Element.ACTIONS, item_data[Item.Element.item_index(Item.Element.ACTIONS)][Item.Element.ACTIONS],
-              Item.Element.DUE_DATE, item_data[Item.Element.item_index(Item.Element.DUE_DATE)][Item.Element.DUE_DATE],
-              Item.Element.NOTE, item_data[Item.Element.item_index(Item.Element.NOTE)][Item.Element.NOTE])            
+              (item_data[Elem.index(Elem.TITLE)][Elem.TITLE], 
+              Elem.AREA, item_data[Elem.index(Elem.AREA)][Elem.AREA],
+              Elem.PROJECT, item_data[Elem.index(Elem.PROJECT)][Elem.PROJECT],
+              Elem.TAGS, item_data[Elem.index(Elem.TAGS)][Elem.TAGS],
+              Elem.ACTIONS, item_data[Elem.index(Elem.ACTIONS)][Elem.ACTIONS],
+              Elem.DUE_DATE, item_data[Elem.index(Elem.DUE_DATE)][Elem.DUE_DATE],
+              Elem.NOTE, item_data[Elem.index(Elem.NOTE)][Elem.NOTE])            
             eval(item_call)
         # Send all the rewrites to the helper to create new data file        
         self._rewrite(items)
@@ -63,8 +90,8 @@ class Organizem:
         if self.data is None:
             return ret
         for item in self.data:
-            item_data = item[Item.Element.ROOT]
-            ret.append(item_data[Item.Element.item_index(element)][element])
+            item_data = item[Elem.ROOT]
+            ret.append(item_data[Elem.index(element)][element])
         return ret
     
     # Groups all items by the distinct values in the element passed in, e.g.
@@ -81,8 +108,8 @@ class Organizem:
         if self.data is None:
             return ret
         for item in self.data:
-            item_data = item[Item.Element.ROOT]
-            group_keys = item_data[Item.Element.item_index(element)][element]
+            item_data = item[Elem.ROOT]
+            group_keys = item_data[Elem.index(element)][element]
             if isinstance(group_keys, str):
                 group_keys = [group_keys]
             for group_key in group_keys:
@@ -112,9 +139,108 @@ class Organizem:
         if not bak_data_file:
             bak_data_file = self.data_file + '_bak'
         self._backup(bak_data_file)
+    
+    # CLI API
+    # Command line users use only this call, indirectly, by passing command lines
+    #  to orgm.py#__main__()     
+    def run_cli(self, title, args):  
+        # Get the action to be taken
+        action = args.action
+        # Get the mandatory title Element
+        title = args.title
+        # Get any optional Element values
+        area = args.area
+        project = args.project
+        # Must split() the two list element types, so the string becomes Py list
+        tags = args.tags.split(',')
+        actions = args.actions.split(',')
+        due_date = args.due_date
+        note = args.note
+        # Get optional Modifiers, regex, filename
+        is_regex_match = args.regex
+        filename = args.filename
+        # group_by_* Modifiers
+        # Required for --show_grouped, --rebuild_grouped, --show_elements
+        # TODO add validation
+        by_title = args.by_title 
+        by_area = args.by_area 
+        by_project = args.by_project 
+        by_tags = args.by_tags 
+        by_actions = args.by_actions 
+        
+        # For actions matching on an element value, figure out which one
+        # NOTE: Just uses first one that by usine if/elif.  DOES NOT
+        #  validate only one was passed in and raise Exception
+        match_elem = None
+        match_val = None        
+        if action == Action.FIND or action == Action.REMOVE:
+            if len(title):
+                match_elem = Elem.TITLE
+                match_val = title
+            elif len(tags):
+                match_elem = Elem.TAGS
+                match_val = tags                
+            elif len(actions):
+                match_elem = Elem.ACTIONS
+                match_val = actions            
+            elif len(note):
+                match_elem = Elem.NOTE
+                match_val = note
+                
+        # For actions modified by a group_by arg, figure out which one
+        group_elem = None
+        if action == Action.SHOW_GROUPED or \
+            action == Action.REBUILD_GROUPED or \
+            action == Action.SHOW_ELEMENTS:
+            if by_title:
+                group_elem = Elem.TITLE
+            elif by_area:
+                group_elem = Elem.AREA
+            elif by_project:
+                group_elem = Elem.PROJECT
+            elif by_tags:
+                group_elem = Elem.TAGS
+            elif by_actions:
+                group_elem = Elem.ACTIONS
+
+        # Now turn cmd line action and arguments into Organizem API call
+        if action == Action.ADD:
+            if not len(title):
+                raise OrganizemIllegalUsageException("'--add' action must include '--title' element and a value for title.")
+            item = Item(title, \
+                area=area, project=project, tags=tags, \
+                actions=actions, due_date=due_date, \
+                note=note)
+            self.add_item(item)
             
-    def run_shell_cmd(self, title, **kwargs):
-        pass
+        elif action == Action.ADD_EMPTY:
+            self.add_empty()
+        
+        elif action == Action.REMOVE:
+            self.remove_items(match_elem, match_val, is_regex_match)            
+        
+        elif action == Action.FIND:
+            items = self.find_items(match_elem, match_val, is_regex_match)            
+            if items:
+                for item in items:              
+                    print str(Item.py_item_to_item(item)) + '\n'
+        
+        # TODO
+        elif action == Action.SHOW_GROUPED:
+            return self.get_grouped_items(group_elem)
+        
+        # TODO
+        elif action == Action.SHOW_ELEMENTS:
+            return self.get_elements(group_elem)
+        
+        # TODO    
+        elif action == Action.REBUILD_GROUPED:
+            self.regroup_data_file(group_elem)
+            
+        # TODO
+        elif action == Action.BACKUP:
+            self.backup(filename)
+
 
     # Helpers
     
@@ -128,13 +254,13 @@ class Organizem:
         if self.data is None:
             return ret        
         for item in self.data: 
-            item_elems = item[Item.Element.ROOT]
+            item_elems = item[Elem.ROOT]
             # Child lists of parent list come back as individual ordered dicts 
             #  in a list, one dict for each child name/value pair (child list).  
             #  So to get the one we care about "generically" we need an enum here 
             #  for the index position of the dict that has the key (Element.X) 
             # Get value for the element of interest, handle cases of string and list            
-            elem_val = item_elems[Item.Element.item_index(element)][element]
+            elem_val = item_elems[Elem.index(element)][element]
             
             # Support case that some elements are str, and some are list
             # These are the match cases:
@@ -217,7 +343,7 @@ class Organizem:
         else:
             # Note types can have line breaks and lots of crap.
             # Increase our chances of avoiding trouble by removing line breaks
-            if element == Item.Element.NOTE:
+            if element == Elem.NOTE:
                match_val = match_val.replace('\n', ' ')    
             rgx = re.compile(pattern, re.IGNORECASE)
             return rgx.search(match_val) != None
