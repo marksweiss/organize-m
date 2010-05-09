@@ -86,12 +86,12 @@ class Organizem(object):
     
     def get_elements(self, element):
         self.data = self._load()
-        ret = []
+        ret = set()
         if self.data is None:
             return ret
         for item in self.data:
             item_data = item[Elem.ROOT]
-            ret.append(item_data[Elem.index(element)][element])
+            ret.add(item_data[Elem.index(element)][element])
         return ret
     
     # Groups all items by the distinct values in the element passed in, e.g.
@@ -223,16 +223,22 @@ class Organizem(object):
             items = self.find_items(match_elem, match_val, is_regex_match)            
             if items:
                 for item in items:              
-                    print str(Item.py_item_to_item(item)) + '\n'
+                    print str(Item.py_item_to_item(item))
         
-        # TODO
         elif action == Action.SHOW_GROUPED:
-            return self.get_grouped_items(group_elem)
+            grouped_items = self.get_grouped_items(group_elem)
+            if grouped_items:
+                for key in grouped_items.keys():
+                    print '\n\n*** ' + key + ' ***'
+                    for item in grouped_items[key]:
+                        print str(Item.py_item_to_item(item))
         
-        # TODO
         elif action == Action.SHOW_ELEMENTS:
-            return self.get_elements(group_elem)
-        
+            elems = self.get_elements(group_elem)          
+            if elems:
+                for elem in elems:              
+                    print elem
+                    
         # TODO    
         elif action == Action.REBUILD_GROUPED:
             self.regroup_data_file(group_elem)
