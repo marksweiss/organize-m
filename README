@@ -1,15 +1,18 @@
 --------
 Overview
 --------
+
 Everyone organizes their thoughts and work differently.  Many try different organizing/TODO/GTD etc. systems, starting with lists on paper and working up to nifty handheld gadgets, web-based organizers and so on.  If you are like me, you have tried several, and none are quite right.  
 
 It seems many people have this experience, because there are many commercial and free organizer tools.  And it seems many programmers have this experience, because there are many commercial, free and personal organizer projects.  The combination of highly personalized requirements and high motivation (you want to organize things, in a way that seems organized to you) seems to spawn many solutions to (nearly) the same problem.
 
 So here's mine.  If you try it and like it, great, please let me know.  If you want to suggest features, contribute, fork it and make it your own, please do.  And if nobody cares, that's OK too, because after all I'm building the perfect organizer for me.
 
+
 --------
 Features
 --------
+
 * Enter new items from the command line
 * Enter new items and edit existing items in a text file
 * Stores items in YAML format, so they are human readable and editable but also structured so they can be manipulated by organize-m
@@ -65,16 +68,18 @@ Features
 
 * Support for backup of data file to provided backup file name
 
+
 -----------
 Item Format
 -----------
+
 - item:
   - title: 'My Title'
   - area: 'My Area'
   - project: 'My Project'
-  - tags: [Tag 1, Tag 2, ...]
-  - actions: [Action 1, Action 2, ...]
-  - due: 5-5-2010
+  - tags: 'Tag 1, Tag 2'
+  - actions: 'Action 1, Action 2'
+  - due: '5-5-2010'
   - note: |
     My Note on multiple lines and lines
     and lines and lines
@@ -84,15 +89,83 @@ Item Format
 ...
 ...
 
-----------------------
-Command Line Interface
-----------------------
+
+-------------------------------
+Command Line Interface Cookbook
+-------------------------------
+
+* Add item with all elements taking values
+python orgm.py --add --title 'my item title' --area 'my area' --project 'my project' --tags 'tag 1, tag 2'  --actions "['do this now', 'do this later']" --due_date '5-5-2010' --note 'This is a short note. Long ones should be edited in the file'
+
+* Append an empty item to the end of the data file because you want to then go into the file and edit it
+python orgm.py --add_empty
+
+* Add quick reminder with just an item title
+python orgm.py --add --title 'my item title'
+
+* Add a quick near-term item with a title and some TODO actions
+python orgm.py --add --title 'my item title' --actions 'do this right away, do this later'
+
+* Add a floating non-project item with a title, actions and a due_date
+python orgm.py --add --title 'my item title' --actions 'do this right away, do this later' --due_date '5-10-2010'
+
+* Add a project item
+python orgm.py --add --title 'my item title' --project 'my project' --actions 'do this right away, do this later' --due_date '5-10-2010'
+
+* Use areas of responsibility to group items and projects
+* Grouping items
+python orgm.py --add --title 'music to listen to' --area 'Cultural Erudition' --note "Snippy's Greatest Hits, Exile on Main Street"
+python orgm.py --add --title 'movies to wach' --area 'Cultural Erudition' --note "Metropolis, The Deer Hunter"
+* Grouping projects
+python orgm.py --add --title 'my item title 1' --area 'departmental delivery of all projects' --project 'the project I manage directly' --actions 'do this right away, do this later' --due_date '5-10-2010'
+python orgm.py --add --title 'my item title 2' --area 'departmental delivery of all projects' --project 'the project managed by my underling' --actions 'do this right away, do this later' --due_date '5-10-2010'
+
+* Use tags to apply the same searchable label across items, whatever project or area they are in
+* Tags are a flexible piece of metadata you can use to flexibly associate items any way you please
+python orgm.py --add --title 'an issue with project 1' --project 'project 1' --tags 'project issues, project 1 release'
+python orgm.py --add --title 'an issue with project 2' --project 'project 2' --tags 'project issues, project 2 release'
+
+* Find and display to stdout all items matching a literal or regular expression. For example, you may wnat to find all items in a project or with a partial title
+* Match partial titles by passing --regex flag and --title match predicate
+python orgm.py --find --regex --title '*issue with proj*'
+* Find and display to stdout all items in a project or area
+python orgm.py --find --project 'my project 1'
+python orgm.py --find --area 'my area of extreme responsibility'
+* Find and display to stdout all items with a given tag or having any of a list of tags
+python orgm.py --find --tags 'tag 1, tag 2'
+python orgm.py --find --regex --tags 'tag*'
+
+* Quickly display to stdout all values for title, area of responsibility, project, tags and actions, ordered alpha descending
+* This is handy to, for example, see what tags you have used already to keep them consistent
+python orgm.py --show_elements --by_title
+python orgm.py --show_elements --by_area
+python orgm.py --show_elements --by_project
+python orgm.py --show_elements --by_tags
+python orgm.py --show_elements --by_actions
+
+* Quickly display to stdout all items, grouped by distinct values for areas of responsibility, projects or tags
+* This is a handy report to create a "checklist" of grouped items
+python orgm.py --show_grouped --by_area
+python orgm.py --show_grouped --by_project
+python orgm.py --show_grouped --by_tags
+
+* As above, but rewrite the item data file because you want to go in and work with it, and you want the items grouped a certain way
+python orgm.py --rebuild_grouped --by_area
+python orgm.py --rebuild_grouped --by_project
+python orgm.py --rebuild_grouped --by_tags
+
+* Backup the data file, perhaps after a --reguild_grouped to get a copy of your items in a certain view, or perhaps to a remote network directory or Dropbox or a USB key or whatever to back it up
+python orgm.py --backup 'my_backup_data_file.txt'
+
+
+--------------------------------
+Command Line Interface Reference
+--------------------------------
+
 Precede all commands shown below by: python orgm.py
 e.g.-
  python orgm.py --add --title 'my item title' --area 'my area' --project 'my project' --tags 'tag 1, tag 2'  --actions "['do this now', 'do this later']" --due_date '5-5-2010' --note 'This is a short note. Long ones should be edited in the file'
 
-Notes on Usage of Element arguments to --add, --find and --remove
------------------------------------------------------------------
 * Title is required.  All other elements are optional
 * Title is a string of oneor more tokens enclosed in quotes.
 * Project is a string of one or more tokens enclosed in quotes
@@ -101,6 +174,9 @@ Notes on Usage of Element arguments to --add, --find and --remove
 * Actions are a list of elements of one or more tokens, separated by commas, enclosed in quotes
 * Due Date is a string enclosed in quotes. TODO for future is support a real date type
 * Note is a string of one ore more tokens enclosed in quotes
+
+Command Reference
+-----------------
 
 --add - adds an item to the data file
 * Must include --title, and can optionally include any of the additional Element arguments below
@@ -111,7 +187,7 @@ Notes on Usage of Element arguments to --add, --find and --remove
       --area 'my area' 
       --project 'my project' 
       --tags 'tag 1, tag 2'  
-      --actions "['do this now', 'do this later']" 
+      --actions 'do this now, do this later' 
       --due_date '5-5-2010' 
       --note 'This is a short note. Long ones should be edited in the file'
 
@@ -124,9 +200,9 @@ Notes on Usage of Element arguments to --add, --find and --remove
 
 --remove --title 'my item title'
 --remove --title 'my item t*'    
---remove --tags "['tag1', 'tag2']"
+--remove --tags 'tag1, tag2'
 --remove --tags 'tag1'
---remove --actions "['do this now', 'do this later']"
+--remove --actions 'do this now, do this later'
 --remove --actions 'do this now'
 --remove --note 'This is a short note. Long ones should be edited in the file'
 
@@ -136,9 +212,9 @@ Notes on Usage of Element arguments to --add, --find and --remove
 * Can supply optional --regex arg to match Items on a regex rather than literal match
 
 --find --title 'my item title'
---find --tags "['tag1', 'tag2']"
+--find --tags 'tag1, tag2'
 --find --tags 'tag1'
---find --actions "['do this now', 'do this later']"
+--find --actions 'do this now, do this later'
 --find --actions 'do this now'
 --find --note 'This is a short note. Long ones should be edited in the file'
 --find --regex --title 'my item t*'
@@ -170,5 +246,5 @@ Notes on Usage of Element arguments to --add, --find and --remove
 --rebuild_grouped --by_tags
 
 
---backup --file_name '/MyPath/MyFile.dat'
+--backup --file_name '/MyPath/MyBackupOrgmFile.dat'
 * Can optionally supply name of file to backup to. If none supplied default is used.
