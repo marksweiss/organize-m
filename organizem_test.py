@@ -341,9 +341,11 @@ class OrganizemTestCase(unittest.TestCase):
         item2 = Item(title2, project=project2)
         orgm = Organizem(TEST_DATA_FILE)
         orgm.add_item(item1)
-        orgm.add_item(item2)        
+        orgm.add_item(item2)
+        expected = ["''", 'project 1', 'project 2']
+        actual = orgm.get_elements(Elem.PROJECT)
         # Have to handle the fact that init of test dat file includes dummy item with empty name        
-        self.assertTrue(orgm.get_elements(Elem.PROJECT) == ['', 'project 1', 'project 2'])
+        self.assertTrue(expected == actual)
 
     def test_get_all_areas(self):
         self._init_test_data_file()
@@ -355,9 +357,11 @@ class OrganizemTestCase(unittest.TestCase):
         item2 = Item(title2, area=area2)
         orgm = Organizem(TEST_DATA_FILE)
         orgm.add_item(item1)
-        orgm.add_item(item2)        
+        orgm.add_item(item2)
+        expected = ["''", 'area 1', 'area 2']
+        actual = orgm.get_elements(Elem.AREA)        
         # Have to handle the fact that init of test dat file includes dummy item with empty name        
-        self.assertTrue(orgm.get_elements(Elem.AREA) == ['', 'area 1', 'area 2'])
+        self.assertTrue(expected == actual)
 
     def test_get_all_tags(self):
         self._init_test_data_file()
@@ -369,9 +373,11 @@ class OrganizemTestCase(unittest.TestCase):
         item2 = Item(title2, tags=tags2)
         orgm = Organizem(TEST_DATA_FILE)
         orgm.add_item(item1)
-        orgm.add_item(item2)        
+        orgm.add_item(item2)
+        expected = ['tag 1', 'tag 2', 'tag 3', 'tag 4']
+        actual = orgm.get_elements(Elem.TAGS)
         # Have to handle the fact that init of test dat file includes dummy item with empty name
-        self.assertTrue(orgm.get_elements(Elem.TAGS) == [[], ['tag 1', 'tag 2'], ['tag 3', 'tag 4']])
+        self.assertTrue(expected == actual)
 
     def test_get_all_actions(self):
         self._init_test_data_file()
@@ -383,9 +389,11 @@ class OrganizemTestCase(unittest.TestCase):
         item2 = Item(title2, actions=actions2)
         orgm = Organizem(TEST_DATA_FILE)
         orgm.add_item(item1)
-        orgm.add_item(item2)        
+        orgm.add_item(item2)
+        expected = ['action 1', 'action 2', 'action 3', 'action 4']
+        actual = orgm.get_elements(Elem.ACTIONS)        
         # Have to handle the fact that init of test dat file includes dummy item with empty name
-        self.assertTrue(orgm.get_elements(Elem.ACTIONS) == [[], ['action 1', 'action 2'], ['action 3', 'action 4']])
+        self.assertTrue(expected == actual)
 
     def test_get_grouped_items_project(self):
         self._init_test_data_file()
@@ -403,12 +411,12 @@ class OrganizemTestCase(unittest.TestCase):
         orgm.add_item(item1)
         orgm.add_item(item2)
         orgm.add_item(item3)
-        orgm.add_item(item4)        
-        expected1 = [{'item' : [{'title': 'title 1'}, {'area': ''}, {'project': 'project 1'}, {'tags': []}, {'actions': []}, {'due_date': ''}, {'note': ''}]}, {'item' : [{'title': 'title 3'}, {'area': ''}, {'project': 'project 1'}, {'tags': []}, {'actions': []}, {'due_date': ''}, {'note': ''}]}]
-        expected2 = [{'item' : [{'title': 'title 2'}, {'area': ''}, {'project': 'project 2'}, {'tags': []}, {'actions': []}, {'due_date': ''}, {'note': ''}]}, {'item' : [{'title': 'title 4'}, {'area': ''}, {'project': 'project 2'}, {'tags': []}, {'actions': []}, {'due_date': ''}, {'note': ''}]}]
+        orgm.add_item(item4)
+        expected1 = repr([{'item' : [{'title': 'title 1'}, {'area': "''"}, {'project': 'project 1'}, {'tags': []}, {'actions': []}, {'due_date': "''"}, {'note': ''}]}, {'item' : [{'title': 'title 3'}, {'area': "''"}, {'project': 'project 1'}, {'tags': []}, {'actions': []}, {'due_date': "''"}, {'note': ''}]}])
+        expected2 = repr([{'item' : [{'title': 'title 2'}, {'area': "''"}, {'project': 'project 2'}, {'tags': []}, {'actions': []}, {'due_date': "''"}, {'note': ''}]}, {'item' : [{'title': 'title 4'}, {'area': "''"}, {'project': 'project 2'}, {'tags': []}, {'actions': []}, {'due_date': "''"}, {'note': ''}]}])
         actual = orgm.get_grouped_items(Elem.PROJECT)
-        actual1 = actual[project1]
-        actual2 = actual[project2]
+        actual1 = repr(actual[project1])
+        actual2 = repr(actual[project2])        
         self.assertTrue(expected1 == actual1)
         self.assertTrue(expected2 == actual2)
 
@@ -429,11 +437,11 @@ class OrganizemTestCase(unittest.TestCase):
         orgm.add_item(item2)
         orgm.add_item(item3)
         orgm.add_item(item4)        
-        expected1 = [{'item' : [{'title': 'title 1'}, {'area': 'area 1'}, {'project': ''}, {'tags': []}, {'actions': []}, {'due_date': ''}, {'note': ''}]}, {'item' : [{'title': 'title 3'}, {'area': 'area 1'}, {'project': ''}, {'tags': []}, {'actions': []}, {'due_date': ''}, {'note': ''}]}]
-        expected2 = [{'item' : [{'title': 'title 2'}, {'area': 'area 2'}, {'project': ''}, {'tags': []}, {'actions': []}, {'due_date': ''}, {'note': ''}]}, {'item' : [{'title': 'title 4'}, {'area': 'area 2'}, {'project': ''}, {'tags': []}, {'actions': []}, {'due_date': ''}, {'note': ''}]}]
+        expected1 = repr([{'item' : [{'title': 'title 1'}, {'area': 'area 1'}, {'project': "''"}, {'tags': []}, {'actions': []}, {'due_date': "''"}, {'note': ''}]}, {'item' : [{'title': 'title 3'}, {'area': 'area 1'}, {'project': "''"}, {'tags': []}, {'actions': []}, {'due_date': "''"}, {'note': ''}]}])
+        expected2 = repr([{'item' : [{'title': 'title 2'}, {'area': 'area 2'}, {'project': "''"}, {'tags': []}, {'actions': []}, {'due_date': "''"}, {'note': ''}]}, {'item' : [{'title': 'title 4'}, {'area': 'area 2'}, {'project': "''"}, {'tags': []}, {'actions': []}, {'due_date': "''"}, {'note': ''}]}])
         actual = orgm.get_grouped_items(Elem.AREA)      
-        actual1 = actual[area1]
-        actual2 = actual[area2]
+        actual1 = repr(actual[area1])
+        actual2 = repr(actual[area2])        
         self.assertTrue(expected1 == actual1)
         self.assertTrue(expected2 == actual2)
 
@@ -459,19 +467,19 @@ class OrganizemTestCase(unittest.TestCase):
         orgm.add_item(item3)
         orgm.add_item(item4)
         
-        expected1 = [{'item' : [{'title': 'title 1'}, {'area': ''}, {'project': ''}, {'tags': [tag1, tag2]}, {'actions': []}, {'due_date': ''}, {'note': ''}]}, {'item' : [{'title': 'title 3'}, {'area': ''}, {'project': ''}, {'tags': [tag1, tag2]}, {'actions': []}, {'due_date': ''}, {'note': ''}]}]
-        expected2 = [{'item' : [{'title': 'title 1'}, {'area': ''}, {'project': ''}, {'tags': [tag1, tag2]}, {'actions': []}, {'due_date': ''}, {'note': ''}]}, \
-                     {'item' : [{'title': 'title 3'}, {'area': ''}, {'project': ''}, {'tags': [tag1, tag2]}, {'actions': []}, {'due_date': ''}, {'note': ''}]}]
-        expected3 = [{'item' : [{'title': 'title 2'}, {'area': ''}, {'project': ''}, {'tags': [tag3, tag4]}, {'actions': []}, {'due_date': ''}, {'note': ''}]}, \
-                     {'item' : [{'title': 'title 4'}, {'area': ''}, {'project': ''}, {'tags': [tag3, tag4]}, {'actions': []}, {'due_date': ''}, {'note': ''}]}]
-        expected4 = [{'item' : [{'title': 'title 2'}, {'area': ''}, {'project': ''}, {'tags': [tag3, tag4]}, {'actions': []}, {'due_date': ''}, {'note': ''}]}, \
-                     {'item' : [{'title': 'title 4'}, {'area': ''}, {'project': ''}, {'tags': [tag3, tag4]}, {'actions': []}, {'due_date': ''}, {'note': ''}]}]
+        expected1 = repr([{'item' : [{'title': 'title 1'}, {'area': "''"}, {'project': "''"}, {'tags': [tag1, tag2]}, {'actions': []}, {'due_date': "''"}, {'note': ''}]}, {'item' : [{'title': 'title 3'}, {'area': "''"}, {'project': "''"}, {'tags': [tag1, tag2]}, {'actions': []}, {'due_date': "''"}, {'note': ''}]}])
+        expected2 = repr([{'item' : [{'title': 'title 1'}, {'area': "''"}, {'project': "''"}, {'tags': [tag1, tag2]}, {'actions': []}, {'due_date': "''"}, {'note': ''}]}, \
+                     {'item' : [{'title': 'title 3'}, {'area': "''"}, {'project': "''"}, {'tags': [tag1, tag2]}, {'actions': []}, {'due_date': "''"}, {'note': ''}]}])
+        expected3 = repr([{'item' : [{'title': 'title 2'}, {'area': "''"}, {'project': "''"}, {'tags': [tag3, tag4]}, {'actions': []}, {'due_date': "''"}, {'note': ''}]}, \
+                     {'item' : [{'title': 'title 4'}, {'area': "''"}, {'project': "''"}, {'tags': [tag3, tag4]}, {'actions': []}, {'due_date': "''"}, {'note': ''}]}])
+        expected4 = repr([{'item' : [{'title': 'title 2'}, {'area': "''"}, {'project': "''"}, {'tags': [tag3, tag4]}, {'actions': []}, {'due_date': "''"}, {'note': ''}]}, \
+                     {'item' : [{'title': 'title 4'}, {'area': "''"}, {'project': "''"}, {'tags': [tag3, tag4]}, {'actions': []}, {'due_date': "''"}, {'note': ''}]}])
 
         actual = orgm.get_grouped_items(Elem.TAGS)
-        actual1 = actual[tag1]
-        actual2 = actual[tag2]
-        actual3 = actual[tag3]
-        actual4 = actual[tag4]
+        actual1 = repr(actual[tag1])
+        actual2 = repr(actual[tag2])
+        actual3 = repr(actual[tag3])
+        actual4 = repr(actual[tag4])
                 
         self.assertTrue(expected1 == actual1)
         self.assertTrue(expected2 == actual2)
