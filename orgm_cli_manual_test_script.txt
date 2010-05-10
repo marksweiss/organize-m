@@ -1,6 +1,6 @@
 # Test --add and populate items used in --show_grouped, --show_elements and --rebuild_groups
 # Run this and check the file orgm.dat
-python orgm.py --add --title 'my title' --area 'my area' --project 'my project' --tags "tag_1, tag_2" --actions "my action 1, my action 2" --due_date 5-8-2010 --note 'my note http://www.note.com'
+python orgm.py --add --title 'my title' --area 'my area' --project 'my project' --tags 'tag_1, tag_2' --actions 'my action 1, my action 2' --due_date 5-8-2010 --note 'my note http://www.note.com'
 python orgm.py --add --title 'my title 2' --area 'my area' --project 'my project' --tags "tag_1, tag_2" --actions "my action 1, my action 2" --due_date 5-8-2010 --note 'my note http://www.note.com'
 python orgm.py --add --title 'my title 3' --area 'my area' --project 'my project' --tags "tag_1, tag_2" --actions "my action 1, my action 2" --due_date 5-8-2010 --note 'my note http://www.note.com'
 python orgm.py --add --title 'my title' --area 'my area 2' --project 'my project' --tags "tag_1, tag_2" --actions "my action 1, my action 2" --due_date 5-8-2010 --note 'my note http://www.note.com'
