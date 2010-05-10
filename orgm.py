@@ -70,7 +70,6 @@ def main(argv):
                       action="store_true", dest=ActionArg.BY_ACTIONS, default=False,  
                       help="Modifies --show_elements to show values for --actions. Modifies --show_grouped and --rebuild_grouped to group by --actions Element values")
     
-    
     # Elements
     # The data to be --add(ed), or the data to match on for --find and --remove
     parser.add_option("-t", "--title", 

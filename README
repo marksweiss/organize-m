@@ -87,7 +87,9 @@ Item Format
 ----------------------
 Command Line Interface
 ----------------------
-Precede all commands shown below by: python orgm
+Precede all commands shown below by: python orgm.py
+e.g.-
+ python orgm.py --add --title 'my item title' --area 'my area' --project 'my project' --tags 'tag 1, tag 2'  --actions "['do this now', 'do this later']" --due_date '5-5-2010' --note 'This is a short note. Long ones should be edited in the file'
 
 Notes on Usage of Element arguments to --add, --find and --remove
 -----------------------------------------------------------------
@@ -103,7 +105,8 @@ Notes on Usage of Element arguments to --add, --find and --remove
 --add - adds an item to the data file
 * Must include --title, and can optionally include any of the additional Element arguments below
 
---add 
+--add --title 'my item title' --area 'my area' --project 'my project' --tags 'tag 1, tag 2'  --actions "['do this now', 'do this later']" --due_date '5-5-2010' --note 'This is a short note. Long ones should be edited in the file'
+--add  # reorganized for readability only
       --title 'my item title' 
       --area 'my area' 
       --project 'my project' 
@@ -111,7 +114,6 @@ Notes on Usage of Element arguments to --add, --find and --remove
       --actions "['do this now', 'do this later']" 
       --due_date '5-5-2010' 
       --note 'This is a short note. Long ones should be edited in the file'
-
 
 --add_empty  - appends an empty new Item to the bottom of the data file
 

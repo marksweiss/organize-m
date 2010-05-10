@@ -3,7 +3,7 @@ import re
 import yaml
 from odict import OrderedDict
 
-from item import Item, Elem
+from item import Elem, Item
 
 
 # TODO Move into real config? Make user-configurable?
@@ -33,9 +33,12 @@ class ActionArg(object):
     BY_ACTIONS = 'by_actions'
 
 
-# Manages an Organizem TODO data file, binding to a data file by name
-#  and supporting add_item() to add new items and find_item() to find existing items        
 class Organizem(object):
+    """
+    Manages an Organizem TODO data file, binding to a data file by name
+    and exposing methods that implement the Actions enum-ed above 
+    in class Actions.
+    """
 
     # Public API
     # Testers, extenders or anyone who wants to use Organizem programatically
@@ -43,7 +46,7 @@ class Organizem(object):
     #  which only uses #run_cli()
     def __init__(self, data_file=DATA_FILE):
         self.data_file = data_file
-        self.data = None
+        self.data = []
         
     # Just appends item to end of file using Item.__str__()
     # Maybe there is a way to leverage the library to yaml-ize transparently?
@@ -57,48 +60,42 @@ class Organizem(object):
     # NOTE: Finds all matching items, trying to match the element, value passed
     #  in, e.g. TITLE and a title value, PROJECT and a project value, etc.
     # NOTE: element must be one of the "enums" in class Element (other than ROOT)
-    # NOTE: Returns the entire item as a Python object (dict/list combo) or None if no matches found
+    # NOTE: Returns list of 0 or more Items
     def find_items(self, element, pattern, is_regex_match=False):
-        ret = self._find_or_filter_items(element, pattern, is_regex_match, is_filter=False)
-        if ret == [] or ret == '':
-            return None        
-        return ret
+        return self._find_or_filter_items(element, pattern, is_regex_match, is_filter=False)
         
     def remove_items(self, element, pattern, is_regex_match=False):
-        items = []
         # Call helper with filtering on and filter predicate the pattern passed in
         # Result is we get back (all rows) - (those that match)
         filtered_items = self._find_or_filter_items(element, pattern, is_regex_match, is_filter=True)              
-        for item in filtered_items:
-            item_data = item[Elem.ROOT]            
-            # Build append items call dynammically from the current data, then eval()                    
-            item_call = "items.append(Item('%s', %s='%s', %s='%s', %s=%s, %s=%s, %s='%s', %s='%s'))" % \
-              (item_data[Elem.index(Elem.TITLE)][Elem.TITLE], 
-              Elem.AREA, item_data[Elem.index(Elem.AREA)][Elem.AREA],
-              Elem.PROJECT, item_data[Elem.index(Elem.PROJECT)][Elem.PROJECT],
-              Elem.TAGS, item_data[Elem.index(Elem.TAGS)][Elem.TAGS],
-              Elem.ACTIONS, item_data[Elem.index(Elem.ACTIONS)][Elem.ACTIONS],
-              Elem.DUE_DATE, item_data[Elem.index(Elem.DUE_DATE)][Elem.DUE_DATE],
-              Elem.NOTE, item_data[Elem.index(Elem.NOTE)][Elem.NOTE])            
-            eval(item_call)
         # Send all the rewrites to the helper to create new data file        
-        self._rewrite(items)
+        self._rewrite(filtered_items)
     
     def get_elements(self, element):
         self.data = self._load()
-        ret = []
+        # Use set to get unique values only
+        ret = set()
         if self.data is None:
             return ret
+        
         for item in self.data:
-            item_data = item[Elem.ROOT]
-            ret.append(item_data[Elem.index(element)][element])
+            # Skip empty string and empty list, not interesting to return anyway
+            # Handle case of list elements, loop over those to get their values
+            val = item.get_elem_val(element)
+            if val and len(val):
+                if isinstance(val, str):
+                    ret.add(val)
+                elif isinstance(val, list):
+                    for v in val:
+                        ret.add(v)
+        # Now convert the set of uniqe values to list to sort it for return. Return contract is
+        #  is sorted in descending order.
+        ret = list(ret)
+        ret.sort()
         return ret
     
     # Groups all items by the distinct values in the element passed in, e.g.
     #  groups by all the tags in the file, or projects or areas.
-    # Returns Py data structure, list of dicts, keys are the group terms and
-    #  values are a list of items (which are dict with values a list of dicts,
-    #  which are the name/val elements of the item)
     def get_grouped_items(self, element):
         self.data = self._load()
         # Use dictionary that keeps keys in sorted order to return items sorted
@@ -107,9 +104,9 @@ class Organizem(object):
         ret = OrderedDict()
         if self.data is None:
             return ret
+
         for item in self.data:
-            item_data = item[Elem.ROOT]
-            group_keys = item_data[Elem.index(element)][element]
+            group_keys = item.get_elem_val(element)            
             if isinstance(group_keys, str):
                 group_keys = [group_keys]
             for group_key in group_keys:
@@ -125,11 +122,15 @@ class Organizem(object):
         grouped_items = self.get_grouped_items(element)
         items = []
         if grouped_items is None:
-            return items
-        for group_key in grouped_items.keys():          
+            return ""
+        for group_key in grouped_items.keys():        
             for item in grouped_items[group_key]:
+                # Call item util method to convert PyItem returned by get_grouped_items()
+                #  to Item that can be converted to YAML by self._rewrite()
                 items.append(item)
+        # Pass the Items, regrouped, to be written to data file
         self._rewrite(items)
+        # Now as conveniennce and for debugging, pass the same output back to stdout
         ret = []        
         for item in items:
             ret.append(str(item))
@@ -158,7 +159,17 @@ class Organizem(object):
         note = args.note
         # Get optional Modifiers, regex, filename
         is_regex_match = args.regex
+        # Trim single- or double-quotes from filename -- annoying to have this in name
+        #  but CLI everywhere else has quotes around args, so this means user
+        #  doesn't need to remember to do that
         filename = args.filename
+        if filename and len(filename):
+            first_char = filename[0]
+            # TODO This is obviously flimsy (can have different style quote at each end)
+            last_char = filename[len(filename) - 1]
+            if ((first_char == "'" or first_char == '"') and \
+                (last_char == "'" or last_char == '"')):
+                filename = filename[1:-1]
         # group_by_* Modifiers
         # Required for --show_grouped, --rebuild_grouped, --show_elements
         # TODO add validation
@@ -205,7 +216,7 @@ class Organizem(object):
 
         # Now turn cmd line action and arguments into Organizem API call
         if action == Action.ADD:
-            if not len(title):
+            if len(title) == 0:
                 raise OrganizemIllegalUsageException("'--add' action must include '--title' element and a value for title.")
             item = Item(title, \
                 area=area, project=project, tags=tags, \
@@ -221,23 +232,26 @@ class Organizem(object):
 
         elif action == Action.FIND:
             items = self.find_items(match_elem, match_val, is_regex_match)            
-            if items:
-                for item in items:              
-                    print str(Item.py_item_to_item(item)) + '\n'
+            for item in items:              
+                print str(item)
         
-        # TODO
         elif action == Action.SHOW_GROUPED:
-            return self.get_grouped_items(group_elem)
+            grouped_items = self.get_grouped_items(group_elem)
+            for group_key in grouped_items.keys().sort():
+                print '\n\n*** ' + group_key + ' ***'
+                for item in grouped_items[group_key]:
+                    print str(item)
         
-        # TODO
         elif action == Action.SHOW_ELEMENTS:
-            return self.get_elements(group_elem)
-        
+            elems = self.get_elements(group_elem)
+            elems.sort()
+            for elem in elems:              
+                print elem
+                    
         # TODO    
         elif action == Action.REBUILD_GROUPED:
             self.regroup_data_file(group_elem)
             
-        # TODO
         elif action == Action.BACKUP:
             self.backup(filename)
 
@@ -249,34 +263,26 @@ class Organizem(object):
     #  includes matches (if is_filter=False) or excludes matches (if is_filter=True).  Used by
     #  both find_items() and remove_items(), with remove_items() having is_filter=True
     def _find_or_filter_items(self, element, pattern, is_regex_match, is_filter):
+        ret = []
         self.data = self._load()
-        ret = [] 
-        if self.data is None:
-            return ret        
         for item in self.data: 
-            item_elems = item[Elem.ROOT]
-            # Child lists of parent list come back as individual ordered dicts 
-            #  in a list, one dict for each child name/value pair (child list).  
-            #  So to get the one we care about "generically" we need an enum here 
-            #  for the index position of the dict that has the key (Element.X) 
-            # Get value for the element of interest, handle cases of string and list            
-            elem_val = item_elems[Elem.index(element)][element]
-            
+            match_val = item.get_elem_val(element)
+
             # Support case that some elements are str, and some are list
             # These are the match cases:
-            # 1) pattern is str, elem_val is str, not is_filter
-            # 2) pattern is str, elem_val is str, is_filter
-            # 3) pattern is str, elem_val is list, not is_filter
-            # 4) pattern is str, elem_val is list, is_filter
-            # 5) pattern is list, elem_val is str, not is_filter
-            # 6) pattern is list, elem_val is str, is_filter
-            # 7) pattern is list, elem_val is list, not is_filter
-            # 8) pattern is list, elem_val is list, is_filter
+            # 1) pattern is str, match_val is str, not is_filter
+            # 2) pattern is str, match_val is str, is_filter
+            # 3) pattern is str, match_val is list, not is_filter
+            # 4) pattern is str, match_val is list, is_filter
+            # 5) pattern is list, match_val is str, not is_filter
+            # 6) pattern is list, match_val is str, is_filter
+            # 7) pattern is list, match_val is list, not is_filter
+            # 8) pattern is list, match_val is list, is_filter
             
             # 1) and 2)
             # Straight match scalar value to scalar value
-            if isinstance(pattern, str) and isinstance(elem_val, str):
-                is_match = self._is_match(pattern, elem_val, element, is_regex_match)
+            if isinstance(pattern, str) and isinstance(match_val, str):
+                is_match = self._is_match(pattern, match_val, element, is_regex_match)
                 # 1)
                 if (is_match and not is_filter):
                     ret.append(item)
@@ -285,11 +291,11 @@ class Organizem(object):
                     ret.append(item)
             # 3) and 4)
             # Match scalar pattern to any element of elem_val list
-            elif isinstance(pattern, str) and isinstance(elem_val, list):
+            elif isinstance(pattern, str) and isinstance(match_val, list):
                 # Scope outside loop because we only include this item in is_filter case
                 #  if we've checked every item and *none* match
                 is_match = False
-                for v in elem_val:
+                for v in match_val:
                     is_match = self._is_match(pattern, v, element, is_regex_match)
                      # 3)
                      # Matched and we aren't filtering, so first match means we can short-circuit
@@ -302,10 +308,10 @@ class Organizem(object):
                     ret.append(item)
             # 5) and 6)
             # Match any element in list pattern to scalar elem_val
-            elif isinstance(pattern, list) and isinstance(elem_val, str):
+            elif isinstance(pattern, list) and isinstance(match_val, str):
                 is_match = False
                 for p in pattern:
-                    is_match = self._is_match(p, elem_val, element, is_regex_match)
+                    is_match = self._is_match(p, match_val, element, is_regex_match)
                      # 5)
                      # Matched and we aren't filtering, so first match means we can short-circuit
                     if (is_match and not is_filter):
@@ -317,10 +323,10 @@ class Organizem(object):
                     ret.append(item)                        
             # 7) and 8)
             # Match any element in list pattern to any elmentn in list elem_val
-            elif isinstance(pattern, list) and isinstance(elem_val, list):
+            elif isinstance(pattern, list) and isinstance(match_val, list):
                 is_match = False
                 for p in pattern:
-                    for v in elem_val:
+                    for v in match_val:
                         is_match = self._is_match(p, v, element, is_regex_match)
                         # 7)
                         # Matched and we aren't filtering, so first match means we can short-circuit
@@ -350,7 +356,16 @@ class Organizem(object):
     
     def _load(self):
         with open(self.data_file) as f:
-            self.data = yaml.load(f)
+            # NOTE: PyYaml returns list/dict hybrid deserialization from YAML, not class Item
+            #  objects we want to manipulate throughout our code (to have one standard, clean, OO
+            #  representation of an Item).  So we convert her on _load() and then use Items everywhere
+            py_items = yaml.load(f)
+            if py_items and len(py_items):
+                # We got back to data to load, clear any previous state in self.data
+                del self.data[:]
+                for py_item in py_items:
+                    # Convert each item retrieved from the file to a class Item object
+                    self.data.append(Item.init_from_py_item(py_item))             
         return self.data
 
     # Useful for debugging, though doesn't support any current feature
@@ -370,6 +385,7 @@ class Organizem(object):
             
     def _rewrite(self, items):
         self._backup(self.data_file + '_bak')
-        with open(self.data_file, 'w') as f:         
+        with open(self.data_file, 'w') as f:     
             for item in items:
                 f.write(str(item))
+                

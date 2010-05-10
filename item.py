@@ -1,6 +1,3 @@
-import yaml
-
-
 # Possibly overdesign, but we model each type of YAML element we can have in an
 #  Item entry with a class, which handles str(), validation and repr() TODO
 # So Item can add new Elements just by choosing on of these Element types
@@ -56,6 +53,13 @@ class ChildMultilineTextElement(object):
 
 
 class Elem(object):
+    """
+        Defines the types of Elements an Item can have.  Also defines their position
+        in Items, and provides metod to map an element to its index. This is used by
+        Item to map Python objects deserialized from YAML to YAML representation
+        and to Items
+    """
+    
     # Don't use this with #Item.find_item()
     ROOT = 'item'   
     # Use these with #Item.find_item()
@@ -68,18 +72,15 @@ class Elem(object):
     NOTE = 'note'
 
     # Child lists of parent list come back as individual ordered dicts 
-    #  in a list, one dict for each child name/value pair (child list).  
-    #  So to get the one we care about "generically" we need an enum here 
-    #  for the index position of the dict that has the key (Element.X) 
-    #  passed as the element arg to this function            
+    #  in a list, one dict for each child name/value pair (child list).             
     ITEM_INDEXES = {TITLE : 0, AREA : 1, PROJECT : 2, TAGS : 3, 
                     ACTIONS : 4, DUE_DATE : 5, NOTE : 6}
 
     @staticmethod
-    def index(element):
-        return Elem.ITEM_INDEXES[element]
+    def index(element):  # TODO RENAME elem_index() or get rid of it
+        return Elem.ITEM_INDEXES[element]       
 
-
+        
 # A single Item in the TODO file, with a root 'item:' element and child
 #  elements for each of the TODO fields, title, project, area, tags, actions
 #  due_date and notes
@@ -109,10 +110,10 @@ class Item(object):
         self._note = ChildMultilineTextElement(Elem.NOTE, note)
     
     @staticmethod
-    def py_item_to_item(py_obj_item):
+    def init_from_py_item(py_item):
         """Converts Item serialized to Python object form, dicts and lists, to YAML"""
-        root = RootElement(Elem.ROOT)
-        elems = py_obj_item[Elem.ROOT]
+        
+        elems = py_item[Elem.ROOT]
         title = elems[Elem.index(Elem.TITLE)][Elem.TITLE]
         area = elems[Elem.index(Elem.AREA)][Elem.AREA]
         project = elems[Elem.index(Elem.PROJECT)][Elem.PROJECT]
@@ -121,7 +122,23 @@ class Item(object):
         due_date = elems[Elem.index(Elem.DUE_DATE)][Elem.DUE_DATE]
         note = elems[Elem.index(Elem.NOTE)][Elem.NOTE]
         return Item(title, area=area, project=project, tags=tags, actions=actions, due_date=due_date, note=note)
-
+    
+    def get_elem_val(self, element):
+        if element == Elem.TITLE:
+            return self.title
+        elif element == Elem.AREA:
+            return self.area
+        elif element == Elem.PROJECT:
+            return self.project
+        elif element == Elem.TAGS:
+            return self.tags
+        elif element == Elem.ACTIONS:
+            return self.actions
+        elif element == Elem.DUE_DATE:
+            return self.due_date
+        elif element == Elem.NOTE:
+            return self.note
+    
     # Props so string values for each Element in the Item are directly available
     @property
     def title(self):
@@ -151,7 +168,31 @@ class Item(object):
     def note(self):
         return self._note.val
 
+    # For now str() representation is YAML.  Make separate method to make client
+    #  code more explicit and allow future change to str() without client code change
     def __str__(self):
+        return self._to_yaml()
+    
+    def __repr__(self):
+        """
+        Returns form of object matching form produced by PyYaml.#load() when it loads
+        the YAML item from the data file. So then PyYaml.#dump(Item.#repr()) produces
+        valid YAML string
+        """
+        item_repr = {}
+        elems = []
+        elems.append({Elem.TITLE : self.title})
+        elems.append({Elem.AREA : self.area})
+        elems.append({Elem.PROJECT : self.project})
+        elems.append({Elem.TAGS : self.tags})
+        elems.append({Elem.ACTIONS : self.actions})
+        elems.append({Elem.DUE_DATE : self.due_date})
+        elems.append({Elem.NOTE : self.note})
+        item_repr[Elem.ROOT] = elems
+        return repr(item_repr)
+    
+    
+    def _to_yaml(self):
         ret = []
         ret.append(str(self._root))
         ret.append(str(self._title))
@@ -163,12 +204,8 @@ class Item(object):
         ret.append(str(self._note))
         return "\n".join(ret)
 
-
-    # TODO Make this serialize to dict/list structure as a string 
-    #  that will yaml.load() as is and can eval into a python object
-    #def __repr__(self):
-    #    return self.__str__()
-
+        
+        
     def __load_elems(self, kwelements):
       area = None
       project = None
