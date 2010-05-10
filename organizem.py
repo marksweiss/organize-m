@@ -236,10 +236,12 @@ class Organizem(object):
                 print str(item)
         
         elif action == Action.SHOW_GROUPED:
-            grouped_items = self.get_grouped_items(group_elem)
-            for group_key in grouped_items.keys().sort():
+            grouped_items = self.get_grouped_items(group_elem)            
+            group_keys = grouped_items.keys()
+            group_keys.sort()
+            for group_key in group_keys:
                 print '\n\n*** ' + group_key + ' ***'
-                for item in grouped_items[group_key]:
+                for item in grouped_items[group_key]:                    
                     print str(item)
         
         elif action == Action.SHOW_ELEMENTS:
