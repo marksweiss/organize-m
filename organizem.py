@@ -218,7 +218,7 @@ class Organizem(object):
         
         elif action == Action.REMOVE:
             self.remove_items(match_elem, match_val, is_regex_match)            
-        
+
         elif action == Action.FIND:
             items = self.find_items(match_elem, match_val, is_regex_match)            
             if items:
