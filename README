@@ -25,12 +25,18 @@ Features
 ** tags (exact or regex match of terms provided)
 
 * Simple, intuitive, consistent command line actions.
-** python orgm --add --title 'cut the grass' --project 'fix up the house' --due_date 5-10-2010 --notes 'This has been a long time coming'
-** python orgm --search --project 'fix up the house'
-** python orgm --search --title 'cut the grass'
+** python orgm --add --title 'cut the grass' --project 'fix up the house' --due_date 5-10-2010 --note 'This has been a long time coming'
+** python orgm -a -t 'cut the grass' -p 'fix up the house' -d 5-10-2010 -n 'This has been a long time coming'
+** python orgm --find --project 'fix up the house'
+** python orgm -f -p 'fix up the house'
+** python orgm --find --title 'cut the grass'
+** python orgm --find --regex --title 'cut the grass'
+** python orgm -f -x -t 'cut the grass'
 ** python orgm --remove --title 'cut the grass'
 ** python orgm --show_grouped --by_title
 ** python orgm --show_elements --by_area
+** python orgm -s --by_title
+** python orgm -S --by_area
 ** python orgm --rebuild_grouped --by_project
 ** python orgm --backup 'my_backup_data.dat'
 
@@ -95,45 +101,62 @@ Command Line Interface Cookbook
 -------------------------------
 
 * Add item with all elements taking values
-python orgm.py --add --title 'my item title' --area 'my area' --project 'my project' --tags 'tag 1, tag 2'  --actions "['do this now', 'do this later']" --due_date '5-5-2010' --note 'This is a short note. Long ones should be edited in the file'
+python orgm.py --add --title 'my item title' --area 'my area' --project 'my project' --tags 'tag 1, tag 2'  --actions 'do this now, do this later' --due_date '5-5-2010' --note 'This is a short note. Long ones should be edited in the file'
+python orgm.py -a -t 'my item title' -A 'my area' -p 'my project' -T 'tag 1, tag 2'  -c 'do this now, do this later' -d '5-5-2010' -n 'This is a short note. Long ones should be edited in the file'
 
 * Append an empty item to the end of the data file because you want to then go into the file and edit it
 python orgm.py --add_empty
+python orgm.py -e
 
 * Add quick reminder with just an item title
 python orgm.py --add --title 'my item title'
+python orgm.py -a -t 'my item title'
 
 * Add a quick near-term item with a title and some TODO actions
 python orgm.py --add --title 'my item title' --actions 'do this right away, do this later'
+python orgm.py -a -t 'my item title' -c 'do this right away, do this later'
 
 * Add a floating non-project item with a title, actions and a due_date
 python orgm.py --add --title 'my item title' --actions 'do this right away, do this later' --due_date '5-10-2010'
+python orgm.py -a -t 'my item title' -c 'do this right away, do this later' -d '5-10-2010'
 
 * Add a project item
 python orgm.py --add --title 'my item title' --project 'my project' --actions 'do this right away, do this later' --due_date '5-10-2010'
+python orgm.py -a -t 'my item title' -p 'my project' -c 'do this right away, do this later' -d '5-10-2010'
 
 * Use areas of responsibility to group items and projects
 * Grouping items
-python orgm.py --add --title 'music to listen to' --area 'Cultural Erudition' --note "Snippy's Greatest Hits, Exile on Main Street"
-python orgm.py --add --title 'movies to wach' --area 'Cultural Erudition' --note "Metropolis, The Deer Hunter"
+python orgm.py --add --title 'music to listen to' --area 'Cultural Erudition' --actions "Snippy's Greatest Hits, Exile on Main Street"
+python orgm.py -a -t 'music to listen to' -A 'Cultural Erudition' -c "Snippy's Greatest Hits, Exile on Main Street"
+python orgm.py --add --title 'movies to watch' --area 'Cultural Erudition' --actions "Metropolis, The Deer Hunter"
+python orgm.py -a -t 'movies to watch' -A 'Cultural Erudition' -c "Metropolis, The Deer Hunter"
 * Grouping projects
 python orgm.py --add --title 'my item title 1' --area 'departmental delivery of all projects' --project 'the project I manage directly' --actions 'do this right away, do this later' --due_date '5-10-2010'
+python orgm.py -a -t 'my item title 1' -A 'departmental delivery of all projects' -p 'the project I manage directly' -c 'do this right away, do this later' -d '5-10-2010'
 python orgm.py --add --title 'my item title 2' --area 'departmental delivery of all projects' --project 'the project managed by my underling' --actions 'do this right away, do this later' --due_date '5-10-2010'
+python orgm.py -a -t 'my item title 2' -A'departmental delivery of all projects' -p 'the project managed by my underling' -c 'do this right away, do this later' -d '5-10-2010'
 
 * Use tags to apply the same searchable label across items, whatever project or area they are in
 * Tags are a flexible piece of metadata you can use to flexibly associate items any way you please
 python orgm.py --add --title 'an issue with project 1' --project 'project 1' --tags 'project issues, project 1 release'
+python orgm.py -a -t 'an issue with project 1' -p 'project 1' -T 'project issues, project 1 release'
 python orgm.py --add --title 'an issue with project 2' --project 'project 2' --tags 'project issues, project 2 release'
+python orgm.py -a -t 'an issue with project 2' -p 'project 2' -T 'project issues, project 2 release'
 
 * Find and display to stdout all items matching a literal or regular expression. For example, you may wnat to find all items in a project or with a partial title
 * Match partial titles by passing --regex flag and --title match predicate
 python orgm.py --find --regex --title '*issue with proj*'
+python orgm.py -f -x -t '*issue with proj*'
 * Find and display to stdout all items in a project or area
 python orgm.py --find --project 'my project 1'
+python orgm.py -f -p 'my project 1'
 python orgm.py --find --area 'my area of extreme responsibility'
+python orgm.py -f -A 'my area of extreme responsibility'
 * Find and display to stdout all items with a given tag or having any of a list of tags
 python orgm.py --find --tags 'tag 1, tag 2'
+python orgm.py -f -T 'tag 1, tag 2'
 python orgm.py --find --regex --tags 'tag*'
+python orgm.py -f -x -T 'tag*'
 
 * Quickly display to stdout all values for title, area of responsibility, project, tags and actions, ordered alpha descending
 * This is handy to, for example, see what tags you have used already to keep them consistent
@@ -142,21 +165,32 @@ python orgm.py --show_elements --by_area
 python orgm.py --show_elements --by_project
 python orgm.py --show_elements --by_tags
 python orgm.py --show_elements --by_actions
+python orgm.py -S -1
+python orgm.py -S -2
+python orgm.py -S -3
+python orgm.py -S -4
+python orgm.py -S -5
 
 * Quickly display to stdout all items, grouped by distinct values for areas of responsibility, projects or tags
 * This is a handy report to create a "checklist" of grouped items
 python orgm.py --show_grouped --by_area
 python orgm.py --show_grouped --by_project
 python orgm.py --show_grouped --by_tags
+python orgm.py -s -2
+python orgm.py -s -3
+python orgm.py -s -4
 
 * As above, but rewrite the item data file because you want to go in and work with it, and you want the items grouped a certain way
 python orgm.py --rebuild_grouped --by_area
 python orgm.py --rebuild_grouped --by_project
 python orgm.py --rebuild_grouped --by_tags
+python orgm.py -R -2
+python orgm.py -R -3
+python orgm.py -R -4
 
 * Backup the data file, perhaps after a --reguild_grouped to get a copy of your items in a certain view, or perhaps to a remote network directory or Dropbox or a USB key or whatever to back it up
 python orgm.py --backup 'my_backup_data_file.txt'
-
+python orgm.py -b 'my_backup_data_file.txt'
 
 --------------------------------
 Command Line Interface Reference
@@ -170,7 +204,7 @@ e.g.-
 * Title is a string of oneor more tokens enclosed in quotes.
 * Project is a string of one or more tokens enclosed in quotes
 * Area is a string of one or more tokens enclosed in quotes
-* Tags are a list of elements of one or more tokens, separated by commas, encloseed in quotes
+* Tags are a list of elements of one or more tokens, separated by commas, enclosed in quotes
 * Actions are a list of elements of one or more tokens, separated by commas, enclosed in quotes
 * Due Date is a string enclosed in quotes. TODO for future is support a real date type
 * Note is a string of one ore more tokens enclosed in quotes
@@ -178,8 +212,16 @@ e.g.-
 Command Reference
 -----------------
 
---add - adds an item to the data file
+[-a | --add] - adds an item to the data file
+
 * Must include --title, and can optionally include any of the additional Element arguments below
+[-t | --title]  - item title 
+[-A | --area]  - area of responsibility that includes the item
+[-p | --project]  - project the item is part of
+[-T | --tags]  - tags associated with the item
+[-c | --actions]  - item actions that need to be taken
+[-d | --due_date] - date first action associated with item is due 
+[-n | --note] - additional freeform text associated with item
 
 --add --title 'my item title' --area 'my area' --project 'my project' --tags 'tag 1, tag 2'  --actions "['do this now', 'do this later']" --due_date '5-5-2010' --note 'This is a short note. Long ones should be edited in the file'
 --add  # reorganized for readability only
@@ -191,12 +233,14 @@ Command Reference
       --due_date '5-5-2010' 
       --note 'This is a short note. Long ones should be edited in the file'
 
---add_empty  - appends an empty new Item to the bottom of the data file
+      
+[-e | --add_empty]  - appends an empty new Item to the bottom of the data file
 
 
---remove - removes an Item from the data file
+[-r | --remove] - removes an Item from the data file
 * Must supply *one* Element type and value. Items matching will be removed.
-* Can supply optional --regex arg to match Items on a regex rather than literal match
+* Can supply optional arg to match Items on a regex rather than literal match
+[-x | --regex ]
 
 --remove --title 'my item title'
 --remove --title 'my item t*'    
@@ -207,9 +251,10 @@ Command Reference
 --remove --note 'This is a short note. Long ones should be edited in the file'
 
  
---find - finds an Item and returns it to stdout
+[-f | --find] - finds an Item and returns it to stdout
 * Must supply *one* Element type and value. Items matching will be returned.
 * Can supply optional --regex arg to match Items on a regex rather than literal match
+[-x | --regex ]
 
 --find --title 'my item title'
 --find --tags 'tag1, tag2'
@@ -220,15 +265,20 @@ Command Reference
 --find --regex --title 'my item t*'
 
 
---show_grouped - show Items grouped by an Element type, sent to stdout 
+[-s | --show_grouped] - show Items grouped by an Element type, sent to stdout 
 * Must supply one Element type
+[-1 | --by_title]
+[-2 | --by_area]
+[-3 | --by_project]
+[-4 | --by_tags]
+[-5 | --by_actions]
 
 --show_grouped --by_area
 --show_grouped --by_project
 --show_grouped --by_tags
 
 
---show_elements - show all values for Elements of a given type, sent to stdout
+[-S | --show_elements] - show all values for Elements of a given type, sent to stdout
 * Must supply one Element type
 
 --show_elements --by_title
@@ -238,7 +288,7 @@ Command Reference
 --show_elements --by_actions
 
 
---rebuild_grouped - rebuild the data file grouped by an Element type 
+[-R | --rebuild_grouped] - rebuild the data file grouped by an Element type 
 * Must supply one Element type
 
 --rebuild_grouped --by_area
@@ -246,5 +296,8 @@ Command Reference
 --rebuild_grouped --by_tags
 
 
---backup --file_name '/MyPath/MyBackupOrgmFile.dat'
+[-b | --backup] - backup all item data
 * Can optionally supply name of file to backup to. If none supplied default is used.
+[-F | --filename]
+
+--backup --file_name '/MyPath/MyBackupOrgmFile.dat'

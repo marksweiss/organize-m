@@ -23,19 +23,19 @@ def main(argv):
     parser.add_option("-e", "--add_empty", 
                       action="store_const", const=Action.ADD_EMPTY, dest="action",                        
                       help="Add an empty Item to the end of the data file")
-    parser.add_option("-v", "--remove", 
+    parser.add_option("-r", "--remove", 
                       action="store_const", const=Action.REMOVE, dest="action",  
                       help="Remove an Item. Can include --regex flag arg to match by regex. Must include one Element arg to match on.")
     parser.add_option("-f", "--find", 
                       action="store_const", const=Action.FIND, dest="action",  
                       help="Find an Item. Can include --regex flag arg to match by regex. Must include one Element arg to match on.")
-    parser.add_option("-g", "--show_grouped", 
+    parser.add_option("-s", "--show_grouped", 
                       action="store_const", const=Action.SHOW_GROUPED, dest="action",  
                       help="Display all items grouped by distinct values for the Element type provided. e.g. - grouped by Title.")
-    parser.add_option("-l", "--show_elements", 
+    parser.add_option("-S", "--show_elements", 
                       action="store_const", const=Action.SHOW_ELEMENTS, dest="action",  
                       help="Display all element values for the Element type provided. e.g. - all Projects.")
-    parser.add_option("-d", "--rebuild_grouped", 
+    parser.add_option("-R", "--rebuild_grouped", 
                       action="store_const", const=Action.REBUILD_GROUPED, dest="action",  
                       help="Rebuild the data file grouped by distinct values for the Element type provided. e.g. - grouped by Title.")
     parser.add_option("-b", "--backup", 
@@ -50,7 +50,7 @@ def main(argv):
     parser.add_option("-x", "--regex", 
                       action="store_true", dest=ActionArg.REGEX, default=False,  
                       help="Forces all matching for a --find or --remove operation to use regex matching on the pattern passed in.")
-    parser.add_option("-n", "--filename", 
+    parser.add_option("-F", "--filename", 
                       action="store", dest=ActionArg.FILENAME,
                       help="The file to be used in the action passed in.  e.g. - backup --filename 'file of stuff.txt'")
     # Grouping Modifiers
@@ -75,22 +75,22 @@ def main(argv):
     parser.add_option("-t", "--title", 
                       action="store", dest=Elem.TITLE, default="DEFAULT TITLE",
                       help="Title of the Item. Mandatory")
-    parser.add_option("-r", "--area", 
+    parser.add_option("-A", "--area", 
                       action="store", dest=Elem.AREA, default="",
                       help="Area of Responsibility for the Item. Optional.")                      
     parser.add_option("-p", "--project", 
                       action="store", dest=Elem.PROJECT, default="",
                       help="Project for the Item. Optional.")
-    parser.add_option("-s", "--tags", 
+    parser.add_option("-T", "--tags", 
                       action="store", dest=Elem.TAGS, default="",
                       help="Tags for the Item. Enclose in quotes and each token will be a separate Tag. Optional.")
     parser.add_option("-c", "--actions", 
                       action="store", dest=Elem.ACTIONS, default="",
                       help="Actions for the Item. Enclose in quotes and each token will be a separate Action. Optional.")
-    parser.add_option("-u", "--due_date", 
+    parser.add_option("-d", "--due_date", 
                       action="store", dest=Elem.DUE_DATE, default="",
                       help="Due date for first due Action for the Item. Optional.")
-    parser.add_option("-o", "--note", 
+    parser.add_option("-n", "--note", 
                       action="store", dest=Elem.NOTE, default="",
                       help="Additional note for the Item. Optional.")
       
