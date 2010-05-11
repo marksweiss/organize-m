@@ -202,7 +202,7 @@ class Item(object):
         ret.append(str(self._actions))
         ret.append(str(self._due_date))
         ret.append(str(self._note))
-        return "\n".join(ret)
+        return '\n'.join(ret)
 
         
         
