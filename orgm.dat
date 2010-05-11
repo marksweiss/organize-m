@@ -75,3 +75,13 @@
   - due_date: ''
   - note: |
       
+
+- item:
+  - title: my title
+  - area: my area
+  - project: my project
+  - tags: ['tag_1', ' tag_2']
+  - actions: ['my action 1', ' my action 2']
+  - due_date: 5-8-2010
+  - note: |
+      my note http://www.note.com
