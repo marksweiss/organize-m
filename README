@@ -4,9 +4,20 @@ Overview
 
 Everyone organizes their thoughts and work differently.  Many try different organizing/TODO/GTD etc. systems, starting with lists on paper and working up to nifty handheld gadgets, web-based organizers and so on.  If you are like me, you have tried several, and none are quite right.  
 
-It seems many people have this experience, because there are many commercial and free organizer tools.  And it seems many programmers have this experience, because there are many commercial, free and personal organizer projects.  The combination of highly personalized requirements and high motivation (you want to organize things, in a way that seems organized to you) seems to spawn many solutions to (nearly) the same problem.
+So I wrote my own. This is my perfect organizer.  
 
-So here's mine.  If you try it and like it, great, please let me know.  If you want to suggest features, contribute, fork it and make it your own, please do.  And if nobody cares, that's OK too, because after all I'm building the perfect organizer for me.
+These are the main goals:
+* Support fast item entry, search and reporting from the command line
+* Support more involved editing of items in a text editor
+* Support a small set of standard fields that provide just enough consistent structure, but don't constrict flexible use for many purposes
+* Have command line and editor work together seamlessly
+
+
+-------------
+Installation
+-------------
+
+It's easy.  See here: http://github.com/marksweiss/organize-m/blob/master/INSTALL
 
 
 --------
@@ -94,6 +105,17 @@ Item Format
 ...
 ...
 ...
+
+
+----------------------
+Manually Editing Items
+----------------------
+
+Item data is stored in the file orgm.dat, in the directory in which you install Organize-m.  You can edit this text file in the editor of your choice.  Data is stored in YAML format, so an editor with YAML support might be preferable.  
+
+All changes to the data file made by hand must create new valid items with the same fields in the same order, with string elements enclosed in single quotes, and with list elements enclosed by single quotes and separating individual list elements with a comma. The Note element is multiline and must follow YAML multiline format, which indents each line of text after the first with six spaces.
+
+Any changes made by hand will be available to the command line interface as soon as they are saved.  So, for example, you can create or edit an item in and editor, save the change, and the use the --find command (see below) to find and retrieve to the console the item just saved.
 
 
 -------------------------------
@@ -191,6 +213,7 @@ python orgm.py -R -4
 * Backup the data file, perhaps after a --reguild_grouped to get a copy of your items in a certain view, or perhaps to a remote network directory or Dropbox or a USB key or whatever to back it up
 python orgm.py --backup 'my_backup_data_file.txt'
 python orgm.py -b 'my_backup_data_file.txt'
+
 
 --------------------------------
 Command Line Interface Reference
