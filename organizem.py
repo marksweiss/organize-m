@@ -123,18 +123,12 @@ class Organizem(object):
         items = []
         if grouped_items is None:
             return ""
-        for group_key in grouped_items.keys():        
-            for item in grouped_items[group_key]:
-                # Call item util method to convert PyItem returned by get_grouped_items()
-                #  to Item that can be converted to YAML by self._rewrite()
-                items.append(item)
+        for group_key in grouped_items.keys():
+            items.extend(grouped_items[group_key])
         # Pass the Items, regrouped, to be written to data file
         self._rewrite(items)
-        # Now as conveniennce and for debugging, pass the same output back to stdout
-        ret = []        
-        for item in items:
-            ret.append(str(item))
-        return "\n".join(ret)
+        # For conveninence, testing/debugging pass the same output back to stdout
+        return "\n".join([str(item) for item in items])
         
     def backup(self, bak_data_file=None):
         if not bak_data_file:
@@ -250,7 +244,6 @@ class Organizem(object):
             for elem in elems:              
                 print elem
                     
-        # TODO    
         elif action == Action.REBUILD_GROUPED:
             self.regroup_data_file(group_elem)
             
@@ -373,21 +366,15 @@ class Organizem(object):
     # Useful for debugging, though doesn't support any current feature
     def _dump(self):
         with open(self.data_file, 'r') as f:         
-            lines = f.readlines()
-            for line in lines:
+            for line in f:
                 print line        
-
-    # Utility and used by regroup_data_file
+    
     def _backup(self, bak_data_file):
-        with open(self.data_file, 'r') as fr:
-            lines = fr.readlines()
-            with open(bak_data_file, 'w') as fw:
-                for line in lines:
-                    fw.write(line)
-            
+  	    import shutil
+  	    shutil.copyfile(self.data_file, bak_data_file)
+
     def _rewrite(self, items):
         self._backup(self.data_file + '_bak')
         with open(self.data_file, 'w') as f:     
             for item in items:
                 f.write(str(item))
-                
