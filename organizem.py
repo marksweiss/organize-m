@@ -80,16 +80,15 @@ class Organizem(object):
         
         for item in self.data:
             # Skip empty string and empty list, not interesting to return anyway
-            # Handle case of list elements, loop over those to get their values
             val = item.get_elem_val(element)
             if val and len(val):
+                # Handle case of list and string
                 if isinstance(val, str):
-                    ret.add(val)
-                elif isinstance(val, list):
-                    for v in val:
-                        ret.add(v)
-        # Now convert the set of uniqe values to list to sort it for return. Return contract is
-        #  is sorted in descending order.
+                    val = [val]
+                for v in val:
+                    ret.add(v)
+        # Now convert the set of uniqe values to list to sort it for return. 
+        # Return contract is is sorted in descending order.
         ret = list(ret)
         ret.sort()
         return ret
@@ -106,10 +105,10 @@ class Organizem(object):
             return ret
 
         for item in self.data:
-            group_keys = item.get_elem_val(element)            
+            group_keys = item.get_elem_val(element) 
             if isinstance(group_keys, str):
                 group_keys = [group_keys]
-            for group_key in group_keys:
+            for group_key in group_keys:              
                 if group_key not in ret:
                     ret[group_key] = []
                 ret[group_key].append(item)        
@@ -119,7 +118,7 @@ class Organizem(object):
     #  data file to [file_name]_bak, writes the grouped items to the file
     #  and also returns them for convenience and testing purposes
     def regroup_data_file(self, element):
-        grouped_items = self.get_grouped_items(element)
+        grouped_items = self.get_grouped_items(element)        
         items = []
         if grouped_items is None:
             return ""
@@ -137,76 +136,25 @@ class Organizem(object):
     
     # CLI API
     # Command line users use only this call, indirectly, by passing command lines
+    #  to orgm.py#__main__(). Arg 'a' is optparser.args. Short here for cleaner code   
+    # CLI API
+    # Command line users use only this call, indirectly, by passing command lines
     #  to orgm.py#__main__()     
     def run_cli(self, title, args):  
-        # Get the action to be taken
-        action = args.action
-        # Get the mandatory title Element
-        title = args.title
-        # Get any optional Element values
-        area = args.area
-        project = args.project
-        # Must split() the two list element types, so the string becomes Py list
-        tags = args.tags.split(',')
-        actions = args.actions.split(',')
-        due_date = args.due_date
-        note = args.note
-        # Get optional Modifiers, regex, filename
-        is_regex_match = args.regex
-        # Trim single- or double-quotes from filename -- annoying to have this in name
-        #  but CLI everywhere else has quotes around args, so this means user
-        #  doesn't need to remember to do that
-        filename = args.filename
-        if filename and len(filename):
-            first_char = filename[0]
-            # TODO This is obviously flimsy (can have different style quote at each end)
-            last_char = filename[len(filename) - 1]
-            if ((first_char == "'" or first_char == '"') and \
-                (last_char == "'" or last_char == '"')):
-                filename = filename[1:-1]
-        # group_by_* Modifiers
-        # Required for --show_grouped, --rebuild_grouped, --show_elements
-        # TODO add validation
-        by_title = args.by_title 
-        by_area = args.by_area 
-        by_project = args.by_project 
-        by_tags = args.by_tags 
-        by_actions = args.by_actions 
+        # Validate (TODO) and load args
+        action, title, area, project, tags, actions, due_date, note, \
+            is_regex_match, filename, \
+            by_title, by_area, by_project, by_tags, by_actions = \
+            self._run_cli_load_args(args)
         
         # For actions matching on an element value, figure out which one
-        # NOTE: Just uses first one that by usine if/elif.  DOES NOT
-        #  validate only one was passed in and raise Exception
-        match_elem = None
-        match_val = None        
-        if action == Action.FIND or action == Action.REMOVE:
-            if len(title):
-                match_elem = Elem.TITLE
-                match_val = title
-            elif len(tags):
-                match_elem = Elem.TAGS
-                match_val = tags                
-            elif len(actions):
-                match_elem = Elem.ACTIONS
-                match_val = actions            
-            elif len(note):
-                match_elem = Elem.NOTE
-                match_val = note
+        # NOTE: Just uses first one. DOES NOT validate only one passed in 
+        match_elem, match_val = \
+            self._run_cli_get_match(action, title, tags, actions, note)        
                 
         # For actions modified by a group_by arg, figure out which one
-        group_elem = None
-        if action == Action.SHOW_GROUPED or \
-            action == Action.REBUILD_GROUPED or \
-            action == Action.SHOW_ELEMENTS:
-            if by_title:
-                group_elem = Elem.TITLE
-            elif by_area:
-                group_elem = Elem.AREA
-            elif by_project:
-                group_elem = Elem.PROJECT
-            elif by_tags:
-                group_elem = Elem.TAGS
-            elif by_actions:
-                group_elem = Elem.ACTIONS
+        group_elem = \
+            self._run_cli_get_group_elem(action, by_title, by_area, by_project, by_tags, by_actions)
 
         # Now turn cmd line action and arguments into Organizem API call
         if action == Action.ADD:
@@ -252,6 +200,63 @@ class Organizem(object):
 
 
     # Helpers
+
+    # TODO add validation here
+    def _run_cli_load_args(self, args):
+        # Must split() the two list element types, so the string becomes Py list
+        tags = args.tags.split(',')
+        actions = args.actions.split(',')
+        # Trim single- or double-quotes from filename -- annoying to have this in name
+        #  but CLI everywhere else has quotes around args, so this means user
+        #  doesn't need to remember to do that
+        filename = args.filename
+        if filename and len(filename):
+            first_char = filename[0]
+            # TODO This is obviously flimsy (can have different style quote at each end)
+            last_char = filename[len(filename) - 1]
+            if ((first_char == "'" or first_char == '"') and \
+                (last_char == "'" or last_char == '"')):
+                filename = filename[1:-1]
+        return (args.action, args.title, \
+            args.area, args.project, tags, actions, args.due_date, args.note, \
+            args.regex, filename, \
+            args.by_title, args.by_area, args.by_project, args.by_tags, args.by_actions) 
+      
+
+    def _run_cli_get_match(self, action, title, tags, actions, note):
+        match_elem = None
+        match_val = None
+        if action == Action.FIND or action == Action.REMOVE:
+            if len(title):
+                match_elem = Elem.TITLE
+                match_val = title
+            elif len(tags):
+                match_elem = Elem.TAGS
+                match_val = tags                
+            elif len(actions):
+                match_elem = Elem.ACTIONS
+                match_val = actions            
+            elif len(note):
+                match_elem = Elem.NOTE
+                match_val = note
+        return (match_elem, match_val)
+      
+    def _run_cli_get_group_elem(self, action, by_title, by_area, by_project, by_tags, by_actions):
+        group_elem = None
+        if action == Action.SHOW_GROUPED or \
+            action == Action.REBUILD_GROUPED or \
+            action == Action.SHOW_ELEMENTS:
+            if by_title:
+                group_elem = Elem.TITLE
+            elif by_area:
+                group_elem = Elem.AREA
+            elif by_project:
+                group_elem = Elem.PROJECT
+            elif by_tags:
+                group_elem = Elem.TAGS
+            elif by_actions:
+                group_elem = Elem.ACTIONS
+        return group_elem
     
     # This is just to avoid code duplication.  Loops over elements and matches predicate
     #  that is matching pattern.  Applies regex match or not, based on flag, and either
