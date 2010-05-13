@@ -19,3 +19,5 @@ To run Organize-m you only need Python 2.6 or higher and the latest .zip or .tar
 * Organize-m commands are consistent and intuitive.  To quickly become productive and see one-liners for many common uses, read the command-line interface (CLI) cookbook here: http://wiki.github.com/marksweiss/organize-m/command-line-interface-cookbook
 
 * A complete CLI reference with examples for every command is here: http://wiki.github.com/marksweiss/organize-m/command-line-interface-reference
+
+* To see an example of the Organize-m item data format and learn about manual editing of items, go here: http://wiki.github.com/marksweiss/organize-m/manual-editing 
