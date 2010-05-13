@@ -1,10 +1,10 @@
 Organize-m aims for one sweet spot -- fast and useful command-line operation seamlessly combined with editing of organizer items in an editor.
 
-Add, delete and find items from the command line, switch to add a longer note to an item. Switch back to find and display that item and the others in its project -- if that sounds like how you work, or might want to work, then Organize-m is for you.
+Add, delete and find items from the command line, switch to your editor to add a longer note to an item.  Switch back to find and display that item and the others in its project -- if that sounds like how you work, or might want to work, then Organize-m is for you.
 
 The Organize-m command-line interface is simple and intuitive:
 
-> python orgm.py --add --title 'my item title' --project 'my project' --tags 'tag 1, tag 2'  --actions 'do this now, do this later' --due_date '5-5-2010'
+> python orgm.py --add --title 'my item title' --project 'my project' --tags 'tag 1, tag 2' --actions 'do this now, do this later' --due_date '5-5-2010'
 > python orgm.py --find --regex --title 'my proj*'
 
 
@@ -12,7 +12,7 @@ Now that you are interested, here's how to get started and learn more.
 
 To run Organize-m you only need Python 2.6 or higher and the latest .zip or .tar unpacked into the directory of your choice.
 * The (very short) installation instructions are here: http://github.com/marksweiss/organize-m/blob/master/INSTALL
-* The installer is here: http://github.com/marksweiss/organize-m/downloads
+* The installers are here: http://github.com/marksweiss/organize-m/downloads.  These are in synch with the latest release version of the code.
 
 * Read the complete list of features here: http://wiki.github.com/marksweiss/organize-m/features
 
