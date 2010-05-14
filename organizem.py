@@ -46,7 +46,6 @@ class Organizem(object):
     #  which only uses #run_cli()
     def __init__(self, data_file=DATA_FILE):
         self.data_file = data_file
-        self.data = []
         
     # Just appends item to end of file using Item.__str__()
     # Maybe there is a way to leverage the library to yaml-ize transparently?
@@ -72,13 +71,13 @@ class Organizem(object):
         self._rewrite(filtered_items)
     
     def get_elements(self, element):
-        self.data = self._load()
+        items = self._load()
         # Use set to get unique values only
         ret = set()
-        if self.data is None:
+        if items is None:
             return ret
         
-        for item in self.data:
+        for item in items:
             # Skip empty string and empty list, not interesting to return anyway
             val = item.get_elem_val(element)
             if val and len(val):
@@ -96,15 +95,15 @@ class Organizem(object):
     # Groups all items by the distinct values in the element passed in, e.g.
     #  groups by all the tags in the file, or projects or areas.
     def get_grouped_items(self, element):
-        self.data = self._load()
+        items = self._load()
         # Use dictionary that keeps keys in sorted order to return items sorted
         #  by the values for the element key that is being used to group the items
         # NOTE: This is 3p module, odict.py
         ret = OrderedDict()
-        if self.data is None:
+        if items is None:
             return ret
 
-        for item in self.data:
+        for item in items:
             group_keys = item.get_elem_val(element) 
             if isinstance(group_keys, str):
                 group_keys = [group_keys]
@@ -262,85 +261,44 @@ class Organizem(object):
     #  that is matching pattern.  Applies regex match or not, based on flag, and either
     #  includes matches (if is_filter=False) or excludes matches (if is_filter=True).  Used by
     #  both find_items() and remove_items(), with remove_items() having is_filter=True
+
+    # Support case that some elements are str, and some are list
+    # These are the match cases:
+    # 1) pattern is str, match_val is str, not is_filter
+    # 2) pattern is str, match_val is str, is_filter
+    # 3) pattern is str, match_val is list, not is_filter
+    # 4) pattern is str, match_val is list, is_filter
+    # 5) pattern is list, match_val is str, not is_filter
+    # 6) pattern is list, match_val is str, is_filter
+    # 7) pattern is list, match_val is list, not is_filter
+    # 8) pattern is list, match_val is list, is_filter
+
     def _find_or_filter_items(self, element, pattern, is_regex_match, is_filter):
         ret = []
-        self.data = self._load()
-        for item in self.data: 
-            match_val = item.get_elem_val(element)
-
-            # Support case that some elements are str, and some are list
-            # These are the match cases:
-            # 1) pattern is str, match_val is str, not is_filter
-            # 2) pattern is str, match_val is str, is_filter
-            # 3) pattern is str, match_val is list, not is_filter
-            # 4) pattern is str, match_val is list, is_filter
-            # 5) pattern is list, match_val is str, not is_filter
-            # 6) pattern is list, match_val is str, is_filter
-            # 7) pattern is list, match_val is list, not is_filter
-            # 8) pattern is list, match_val is list, is_filter
-            
-            # 1) and 2)
-            # Straight match scalar value to scalar value
-            if isinstance(pattern, str) and isinstance(match_val, str):
-                is_match = self._is_match(pattern, match_val, element, is_regex_match)
-                # 1)
-                if (is_match and not is_filter):
-                    ret.append(item)
-                # 2)
-                elif(not is_match and is_filter):
-                    ret.append(item)
-            # 3) and 4)
-            # Match scalar pattern to any element of elem_val list
-            elif isinstance(pattern, str) and isinstance(match_val, list):
-                # Scope outside loop because we only include this item in is_filter case
-                #  if we've checked every item and *none* match
-                is_match = False
-                for v in match_val:
-                    is_match = self._is_match(pattern, v, element, is_regex_match)
-                     # 3)
-                     # Matched and we aren't filtering, so first match means we can short-circuit
-                    if (is_match and not is_filter):
-                        ret.append(item)
-                        break
-                # 4)
-                # Filtering, we checked every val in elem_val and none matched pattern, so include item
-                if is_filter and not is_match:
-                    ret.append(item)
-            # 5) and 6)
-            # Match any element in list pattern to scalar elem_val
-            elif isinstance(pattern, list) and isinstance(match_val, str):
-                is_match = False
+        # Some patterns are lists, some strings, so make all lists
+        # Do the same below with element values, since some of those are str and list
+        if isinstance(pattern, str): pattern = [pattern]
+        # Load item data, pull vals from each item for elem being matched to pattern
+        items = self._load()
+        match_vals = [item.get_elem_val(element) for item in items]
+        for i, match_val in enumerate(match_vals):
+            if isinstance(match_val, str): match_val = [match_val]            
+            # Only add item once to return values
+            matched  = False  
+            for v in match_val:
+                if matched:   # Only add item once to return values
+                    break
                 for p in pattern:
-                    is_match = self._is_match(p, match_val, element, is_regex_match)
-                     # 5)
-                     # Matched and we aren't filtering, so first match means we can short-circuit
-                    if (is_match and not is_filter):
-                        ret.append(item)
+                    if self._is_match(p, v, element, is_regex_match):
+                        matched = True  # Only add item once to return values
+                        # Only add to output if we are not filtering
+                        if not is_filter:
+                            ret.append(items[i])  
                         break
-                # 6)
-                # Filtering, we checked every p in pattern and none matched elem_val, so include item
-                if is_filter and not is_match:
-                    ret.append(item)                        
-            # 7) and 8)
-            # Match any element in list pattern to any elmentn in list elem_val
-            elif isinstance(pattern, list) and isinstance(match_val, list):
-                is_match = False
-                for p in pattern:
-                    for v in match_val:
-                        is_match = self._is_match(p, v, element, is_regex_match)
-                        # 7)
-                        # Matched and we aren't filtering, so first match means we can short-circuit
-                        if (is_match and not is_filter):
-                            ret.append(item)
-                            break
-                    # Now break out of outer loop in case of match and not filter, second short-circuit
-                    if (is_match and not is_filter):
-                        break
-                # 8)
-                # Filtering, we checked every p in pattern and none matched elem_val, so include item
-                if is_filter and not is_match:
-                    ret.append(item)
-        # If no matches this returns empty list, which evaluates to "False"
+            # Checked all pattern values for all match_val values, no match
+            # So append to output if we are filtering (not returning items that match)
+            if not matched and is_filter:
+                ret.append(items[i])            
         return ret
             
     def _is_match(self, pattern, match_val, element, is_regex_match):
@@ -355,18 +313,17 @@ class Organizem(object):
             return rgx.search(match_val) != None
     
     def _load(self):
+        items = []
         with open(self.data_file) as f:
             # NOTE: PyYaml returns list/dict hybrid deserialization from YAML, not class Item
             #  objects we want to manipulate throughout our code (to have one standard, clean, OO
             #  representation of an Item).  So we convert her on _load() and then use Items everywhere
             py_items = yaml.load(f)
             if py_items and len(py_items):
-                # We got back to data to load, clear any previous state in self.data
-                del self.data[:]
                 for py_item in py_items:
                     # Convert each item retrieved from the file to a class Item object
-                    self.data.append(Item.init_from_py_item(py_item))             
-        return self.data
+                    items.append(Item.init_from_py_item(py_item))             
+        return items
 
     # Useful for debugging, though doesn't support any current feature
     def _dump(self):
