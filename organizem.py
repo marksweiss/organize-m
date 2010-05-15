@@ -60,13 +60,13 @@ class Organizem(object):
     #  in, e.g. TITLE and a title value, PROJECT and a project value, etc.
     # NOTE: element must be one of the "enums" in class Element (other than ROOT)
     # NOTE: Returns list of 0 or more Items
-    def find_items(self, element, pattern, is_regex_match=False):
-        return self._find_or_filter_items(element, pattern, is_regex_match, is_filter=False)
+    def find_items(self, element, pattern, use_regex_match=False):
+        return self._find_or_filter_items(element, pattern, use_regex_match, is_filter=False)
         
-    def remove_items(self, element, pattern, is_regex_match=False):
+    def remove_items(self, element, pattern, use_regex_match=False):
         # Call helper with filtering on and filter predicate the pattern passed in
         # Result is we get back (all rows) - (those that match)
-        filtered_items = self._find_or_filter_items(element, pattern, is_regex_match, is_filter=True)              
+        filtered_items = self._find_or_filter_items(element, pattern, use_regex_match, is_filter=True)              
         # Send all the rewrites to the helper to create new data file        
         self._rewrite(filtered_items)
     
@@ -142,7 +142,7 @@ class Organizem(object):
     def run_cli(self, title, args):  
         # Validate (TODO) and load args
         action, title, area, project, tags, actions, due_date, note, \
-            is_regex_match, filename, \
+            use_regex_match, filename, \
             by_title, by_area, by_project, by_tags, by_actions = \
             self._run_cli_load_args(args)
         
@@ -169,10 +169,10 @@ class Organizem(object):
             self.add_empty()
         
         elif action == Action.REMOVE:
-            self.remove_items(match_elem, match_val, is_regex_match)            
+            self.remove_items(match_elem, match_val, use_regex_match)            
 
         elif action == Action.FIND:
-            items = self.find_items(match_elem, match_val, is_regex_match)            
+            items = self.find_items(match_elem, match_val, use_regex_match)            
             for item in items:              
                 print str(item)
         
@@ -257,59 +257,56 @@ class Organizem(object):
                 group_elem = Elem.ACTIONS
         return group_elem
     
-    # This is just to avoid code duplication.  Loops over elements and matches predicate
-    #  that is matching pattern.  Applies regex match or not, based on flag, and either
-    #  includes matches (if is_filter=False) or excludes matches (if is_filter=True).  Used by
-    #  both find_items() and remove_items(), with remove_items() having is_filter=True
-
-    # Support case that some elements are str, and some are list
-    # These are the match cases:
-    # 1) pattern is str, match_val is str, not is_filter
-    # 2) pattern is str, match_val is str, is_filter
-    # 3) pattern is str, match_val is list, not is_filter
-    # 4) pattern is str, match_val is list, is_filter
-    # 5) pattern is list, match_val is str, not is_filter
-    # 6) pattern is list, match_val is str, is_filter
-    # 7) pattern is list, match_val is list, not is_filter
-    # 8) pattern is list, match_val is list, is_filter
-
-    def _find_or_filter_items(self, element, pattern, is_regex_match, is_filter):
+    # Applies regex match or not, based on flag, and includes matches 
+    #  (if is_filter=False) or excludes matches (if is_filter=True)
+    def _find_or_filter_items(self, element, pattern, use_regex_match, is_filter):
         ret = []
         # Some patterns are lists, some strings, so make all lists
-        # Do the same below with element values, since some of those are str and list
         if isinstance(pattern, str): pattern = [pattern]
-        # Load item data, pull vals from each item for elem being matched to pattern
+        # pattern is the same every time in loop below, so just make it a set once here
+        pattern = set(pattern)
+        # Get the item data, and get the element values from each item
         items = self._load()
-        match_vals = [item.get_elem_val(element) for item in items]
-        for i, match_val in enumerate(match_vals):
-            if isinstance(match_val, str): match_val = [match_val]            
-            # Only add item once to return values
-            matched  = False  
-            for v in match_val:
-                if matched:   # Only add item once to return values
-                    break
-                for p in pattern:
-                    if self._is_match(p, v, element, is_regex_match):
-                        matched = True  # Only add item once to return values
-                        # Only add to output if we are not filtering
-                        if not is_filter:
-                            ret.append(items[i])  
-                        break
-            # Checked all pattern values for all match_val values, no match
-            # So append to output if we are filtering (not returning items that match)
-            if not matched and is_filter:
-                ret.append(items[i])            
+        elem_vals = [item.get_elem_val(element) for item in items]
+        # Set intersection tests each element value against the pattern to match on
+        for i, val in enumerate(elem_vals):
+            if isinstance(val, str): val = [val]
+            val = set(val)
+            is_match = False
+            # Handle case of simple value comparison vs. predicate comparison for regex
+            if not use_regex_match:
+                is_match = pattern & val 
+            else:
+                is_match = self._is_rgx_intersect(pattern, val, element)            
+            # Handle logic of filtering elems that match vs. including elems that match
+            if (is_match and not is_filter) or (not is_match and is_filter):
+                ret.append(items[i])                  
         return ret
-            
-    def _is_match(self, pattern, match_val, element, is_regex_match):
-        if not is_regex_match:
+    
+    def _is_rgx_intersect(self, pattern, elem_val, element):
+        for p in pattern:
+           for v in elem_val:
+               if self._is_match(p, v, element, use_regex_match=True):
+                  return True
+        return False
+    
+    def _is_match(self, pattern, match_val, element, use_regex_match):
+        if not use_regex_match:
             return pattern == match_val
         else:
             # Note types can have line breaks and lots of crap.
             # Increase our chances of avoiding trouble by removing line breaks
             if element == Elem.NOTE:
                match_val = match_val.replace('\n', ' ')    
-            rgx = re.compile(pattern, re.IGNORECASE)
+               
+            try:
+                rgx = re.compile(pattern, re.IGNORECASE)
+            except:
+                # TEMP DEBUG
+                print "EXCEPTION"
+                print pattern
+                print ''
+                
             return rgx.search(match_val) != None
     
     def _load(self):
