@@ -1,0 +1,18 @@
+Installation Instructions
+-------------------------
+
+Requires Python 2.6 or higher.  On Windows, make sure you have added Python to the PATH environment variable.
+
+On Windows:
+* Download the .zip archive from here: http://github.com/marksweiss/organize-m/downloads
+* Unzip into any directory you desire
+* Open a CMD window
+* cd to YOUR_DIR/organizem
+* Run Organizem from there, using 'python orgm.py ...' commands  
+
+On Mac or Linux:
+* Download the .tar archive from here: http://github.com/marksweiss/organize-m/downloads. 
+* Untar into any directory you desire: 'tar -xvf organize-m_vX.XX.tar'
+* Open a shell
+* cd to YOUR_DIR/organizem
+* Run Organizem from there, using 'python orgm.py ...' commands  

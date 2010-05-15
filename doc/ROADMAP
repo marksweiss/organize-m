@@ -1,0 +1,8 @@
+* Add support for importing items in defined YAML format from a file
+* Add support for configuing orgm data file and specifying which data file you are working on in CLI
+
+* Just adding these two features would support the following:
+** import of machine-generated items
+** in combination with --find and --rebuild_grouped and --backup, these features support a very flexible system allowing users to create and save different filtered and grouped views of the data and recombine them arbitrarily
+
+* Full text search on Notes

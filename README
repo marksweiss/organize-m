@@ -11,7 +11,7 @@ The Organize-m command-line interface is simple and intuitive:
 Now that you are interested, here's how to get started and learn more.
 
 To run Organize-m you only need Python 2.6 or higher and the latest .zip or .tar unpacked into the directory of your choice.
-* The (very short) installation instructions are here: http://github.com/marksweiss/organize-m/blob/master/INSTALL
+* The (very short) installation instructions are here: http://github.com/marksweiss/organize-m/doc/INSTALL
 * The installers are here: http://github.com/marksweiss/organize-m/downloads.  These are in synch with the latest release version of the code.
 
 * Read the complete list of features here: http://wiki.github.com/marksweiss/organize-m/features

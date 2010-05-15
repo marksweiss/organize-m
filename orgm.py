@@ -1,8 +1,15 @@
 import sys
 from optparse import OptionParser
 
-from item import Elem
-from organizem import Organizem, Action, ActionArg
+from lib.item import Elem
+from lib.organizem import Organizem, Action, ActionArg
+
+__author__ = ('Mark S. Weiss <nico-NoSp@m-tekNico.net>,'
+    'Mark S. Weiss <markswess AT yahoo DOT com>')
+__docformat__ = "textile en"
+# __revision__ = '$Id: odict.py 129 2005-09-12 18:15:28Z teknico $'
+__version__ = '0.8.1'
+# __all__ = ['']
 
 
 def main(argv):

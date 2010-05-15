@@ -1,0 +1,24 @@
+The Organize-m data format for items looks like this:
+
+@- item:@<br/>
+&nbsp;&nbsp;@- title: 'My Title'@<br/>
+&nbsp;&nbsp;@- area: 'My Area'@<br/>
+&nbsp;&nbsp;@- project: 'My Project'@<br/>
+&nbsp;&nbsp;@- tags: 'Tag 1, Tag 2'@<br/>
+&nbsp;&nbsp;@- actions: 'Action 1, Action 2'@<br/>
+&nbsp;&nbsp;@- due: '5-5-2010'@<br/>
+&nbsp;&nbsp;@- note: |@<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;@My Note on multiple lines and lines@<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;@and lines and lines@<br/>
+    
+Item data is stored in the file @orgm.dat.@  You can edit it in a text editor and changes made will be available to the command line the next time it's run.  Likewise item changes such as adding or removing items will change orgm.dat.
+
+The data is stored in YAML format.  YAML is lightly structured, so the file is easily readable and edited.  But it *is* structured -- new items you had must follow the format above.  In particular:
+* The item element fields title through note above must be in the same order in any new item you create
+* The root 'item' field must be called that, and each child element field, 'title', 'area', etc., must also be called by the same name
+* Values for @title, area, project@ and @due_date@ are one-line strings.  These should be enclosed in single or double quotes for safest operation, even though YAML doesn't require this
+* Values for @tags@ and @actions@ are multi-value lists, enclosed in quotes with items separated by commas.  You must write them this way.
+* @due_date@ doesn't have any special date handling at this time.
+* @note@ is a special YAML multi-line field.  This means it can contain arbitrary text of any number of lines desired.  However, each line must be indented six spaces.
+
+If you know you need a new item, but it includes a long note or some other feature most easily created in your editor, you can use the @add_empty@ command as a convenience.  run @--add_empty@ from the command line and then switch to the editor.  Your new empty item is waiting at the bottom of the file.
