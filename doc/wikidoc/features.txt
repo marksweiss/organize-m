@@ -10,20 +10,20 @@
 ** tags (exact or regex match of terms provided)
 
 * Simple, intuitive, consistent command line actions.
-** python orgm --add --title 'cut the grass' --project 'fix up the house' --due_date 5-10-2010 --note 'This has been a long time coming'
-** python orgm -a -t 'cut the grass' -p 'fix up the house' -d 5-10-2010 -n 'This has been a long time coming'
-** python orgm --find --project 'fix up the house'
-** python orgm -f -p 'fix up the house'
-** python orgm --find --title 'cut the grass'
-** python orgm --find --regex --title 'cut the grass'
-** python orgm -f -x -t 'cut the grass'
-** python orgm --remove --title 'cut the grass'
+** python orgm --add --title "cut the grass" --project "fix up the house" --due_date 5-10-2010 --note "This has been a long time coming"
+** python orgm -a -t "cut the grass" -p "fix up the house" -d 5-10-2010 -n "This has been a long time coming"
+** python orgm --find --project "fix up the house"
+** python orgm -f -p "fix up the house"
+** python orgm --find --title "cut the grass"
+** python orgm --find --regex --title "cut the grass"
+** python orgm -f -x -t "cut the grass"
+** python orgm --remove --title "cut the grass"
 ** python orgm --show_grouped --by_title
 ** python orgm --show_elements --by_area
 ** python orgm -s --by_title
 ** python orgm -S --by_area
 ** python orgm --rebuild_grouped --by_project
-** python orgm --backup 'my_backup_data.dat'
+** python orgm --backup "my_backup_data.dat"
 
 * Associate each entry with any of the following metadata (all metadata besides title is optional)
 ** title

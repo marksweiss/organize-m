@@ -144,8 +144,7 @@ class Organizem(object):
         action, title, area, project, tags, actions, due_date, note, \
             use_regex_match, filename, \
             by_title, by_area, by_project, by_tags, by_actions = \
-            self._run_cli_load_args(args)
-        
+            self._run_cli_load_args(args)        
         # For actions matching on an element value, figure out which one
         # NOTE: Just uses first one. DOES NOT validate only one passed in 
         match_elem, match_val = \
@@ -201,26 +200,39 @@ class Organizem(object):
     # Helpers
 
     # TODO add validation here
-    def _run_cli_load_args(self, args):
+    def _run_cli_load_args(self, args):    
         # Must split() the two list element types, so the string becomes Py list
+        # Trim single and double quotes from each element
+        # Do this to avoid matching bugs depending on how elements were entered
+        #  in data file or from CLI
         tags = args.tags.split(',')
+        tags = [self._trim_quotes(t) for t in tags]        
         actions = args.actions.split(',')
-        # Trim single- or double-quotes from filename -- annoying to have this in name
-        #  but CLI everywhere else has quotes around args, so this means user
-        #  doesn't need to remember to do that
-        filename = args.filename
-        if filename and len(filename):
-            first_char = filename[0]
-            # TODO This is obviously flimsy (can have different style quote at each end)
-            last_char = filename[len(filename) - 1]
-            if ((first_char == "'" or first_char == '"') and \
-                (last_char == "'" or last_char == '"')):
-                filename = filename[1:-1]
-        return (args.action, args.title, \
-            args.area, args.project, tags, actions, args.due_date, args.note, \
+        actions = [self._trim_quotes(a) for a in actions]
+        # Trim single or double quotes from elements that have string values
+        action = self._trim_quotes(args.action)
+        title = self._trim_quotes(args.title)
+        area = self._trim_quotes(args.area)
+        project = self._trim_quotes(args.project)
+        due_date = self._trim_quotes(args.due_date)
+        note = self._trim_quotes(args.note)
+        filename = self._trim_quotes(args.filename)
+
+        return (action, title, area, project, tags, actions, due_date, note, \
             args.regex, filename, \
             args.by_title, args.by_area, args.by_project, args.by_tags, args.by_actions) 
-      
+     
+    def _trim_quotes(self, arg):
+        if arg is None or len(arg) < 2:
+            return arg
+        # Count leading and trailing quotes and slice them all away. Hacky.
+        j = 0
+        k = len(arg)
+        while j < k and (arg[j] == '"' or arg[j] == "'"):
+            j += 1
+        while k > 0 and (arg[k-1] == '"' or arg[k-1] == "'"):
+            k -= 1
+        return arg[j:k]
 
     def _run_cli_get_match(self, action, title, tags, actions, note):
         match_elem = None
@@ -279,6 +291,15 @@ class Organizem(object):
             else:
                 is_match = self._is_rgx_intersect(pattern, val, element)            
             # Handle logic of filtering elems that match vs. including elems that match
+            
+            # TEMP DEBUG
+            print 'element: ' + element
+            print 'pattern: ' + str(pattern)
+            print 'val: ' + str(val)
+            print 'regex ' + str(use_regex_match)
+            print 'is_match: ' + str(is_match)
+            
+            
             if (is_match and not is_filter) or (not is_match and is_filter):
                 ret.append(items[i])                  
         return ret

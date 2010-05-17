@@ -170,7 +170,7 @@ def main(argv):
     # Elements
     # The data to be --add(ed), or the data to match on for --find and --remove
     parser.add_option("-t", "--title", 
-                      action="store", dest=Elem.TITLE, default="DEFAULT TITLE",
+                      action="store", dest=Elem.TITLE, default="",
                       help="Title of the Item. Mandatory")
     parser.add_option("-A", "--area", 
                       action="store", dest=Elem.AREA, default="",

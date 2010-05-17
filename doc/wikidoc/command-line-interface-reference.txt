@@ -1,16 +1,16 @@
 Precede all commands shown below by: @python orgm.py@
 
-@python orgm.py --add --title 'my item title' --area 'my area' --project 'my project' --tags 'tag 1, tag 2'  --actions "['do this now', 'do this later']" --due_date '5-5-2010' --note 'This is a short note. Long ones should be edited in the file'@
+@python orgm.py --add --title "my item title" --area "my area" --project "my project" --tags "tag 1, tag 2"  --actions "["do this now", "do this later"]" --due_date "5-5-2010" --note "This is a short note. Long ones should be edited in the file"@
 
 Rules for using arguments and argument values:
 * Title is required.  All other elements are optional
-* Title is a string of oneor more tokens enclosed in quotes.
-* Project is a string of one or more tokens enclosed in quotes
-* Area is a string of one or more tokens enclosed in quotes
-* Tags are a list of elements of one or more tokens, separated by commas, enclosed in quotes
-* Actions are a list of elements of one or more tokens, separated by commas, enclosed in quotes
-* Due Date is a string enclosed in quotes. TODO for future is support a real date type
-* Note is a string of one ore more tokens enclosed in quotes
+* Title is a string of one or more tokens enclosed in _double_ quotes
+* Project is a string of one or more tokens enclosed in _double_ quotes
+* Area is a string of one or more tokens enclosed in _double_ quotes
+* Tags are a list of elements of one or more tokens, separated by commas, enclosed in _double_ quotes
+* Actions are a list of elements of one or more tokens, separated by commas, enclosed in _double_ quotes
+* Due Date is a string enclosed in _double_ quotes. TODO for future is support a real date type
+* Note is a string of one ore more tokens enclosed in _double_ quotes
 
 <br/>
 *Command Reference*
@@ -26,16 +26,16 @@ Rules for using arguments and argument values:
 @[-d | --due_date]@  - date first action associated with item is due 
 @[-n | --note]@  - additional freeform text associated with item
 
-@--add --title 'my item title' --area 'my area' --project 'my project' --tags 'tag 1, tag 2'  --actions "['do this now', 'do this later']" --due_date '5-5-2010' --note 'This is a short note. Long ones should be edited in the file'@
+@--add --title "my item title" --area "my area" --project "my project" --tags "tag 1, tag 2"  --actions "["do this now", "do this later"]" --due_date "5-5-2010" --note "This is a short note. Long ones should be edited in the file"@
 
 @--add@
-      @--title 'my item title'@
-      @--area 'my area'@ 
-      @--project 'my project'@ 
-      @--tags 'tag 1, tag 2'@  
-      @--actions 'do this now, do this later'@ 
-      @--due_date '5-5-2010'@
-      @--note 'This is a short note. Long ones should be edited in the file'@
+      @--title "my item title"@
+      @--area "my area"@ 
+      @--project "my project"@ 
+      @--tags "tag 1, tag 2"@  
+      @--actions "do this now, do this later"@ 
+      @--due_date "5-5-2010"@
+      @--note "This is a short note. Long ones should be edited in the file"@
 
 <br/>      
 @[-e | --add_empty]@  - appends an empty new Item to the bottom of the data file
@@ -47,13 +47,13 @@ Rules for using arguments and argument values:
 * Can supply optional arg to match Items on a regex rather than literal match
 @[-x | --regex ]@
 
-@--remove --title 'my item title'@
-@--remove --title 'my item t*'@    
-@--remove --tags 'tag1, tag2'@
-@--remove --tags 'tag1'@
-@--remove --actions 'do this now, do this later'@
-@--remove --actions 'do this now'@
-@--remove --note 'This is a short note. Long ones should be edited in the file'@
+@--remove --title "my item title"@
+@--remove --title "my item t*"@    
+@--remove --tags "tag1, tag2"@
+@--remove --tags "tag1"@
+@--remove --actions "do this now, do this later"@
+@--remove --actions "do this now"@
+@--remove --note "This is a short note. Long ones should be edited in the file"@
 
 
 <br/> 
@@ -62,13 +62,13 @@ Rules for using arguments and argument values:
 * Can supply optional --regex arg to match Items on a regex rather than literal match
 @[-x | --regex ]@
 
-@--find --title 'my item title'@
-@--find --tags 'tag1, tag2'@
-@--find --tags 'tag1'@
-@--find --actions 'do this now, do this later'@
-@--find --actions 'do this now'@
-@--find --note 'This is a short note. Long ones should be edited in the file'@
-@--find --regex --title 'my item t*'@
+@--find --title "my item title"@
+@--find --tags "tag1, tag2"@
+@--find --tags "tag1"@
+@--find --actions "do this now, do this later"@
+@--find --actions "do this now"@
+@--find --note "This is a short note. Long ones should be edited in the file"@
+@--find --regex --title "my item t*"@
 
 <br/>
 @[-s | --show_grouped]@ - show Items grouped by an Element type, sent to stdout 
@@ -107,4 +107,4 @@ Rules for using arguments and argument values:
 @[-F | --filename]@
 
 <br/>
-@--backup --filename '/MyPath/MyBackupOrgmFile.dat'@
+@--backup --filename "/MyPath/MyBackupOrgmFile.dat"@
