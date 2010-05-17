@@ -290,16 +290,7 @@ class Organizem(object):
                 is_match = pattern & val 
             else:
                 is_match = self._is_rgx_intersect(pattern, val, element)            
-            # Handle logic of filtering elems that match vs. including elems that match
-            
-            # TEMP DEBUG
-            print 'element: ' + element
-            print 'pattern: ' + str(pattern)
-            print 'val: ' + str(val)
-            print 'regex ' + str(use_regex_match)
-            print 'is_match: ' + str(is_match)
-            
-            
+            # Handle logic of filtering elems that match vs. including elems that match            
             if (is_match and not is_filter) or (not is_match and is_filter):
                 ret.append(items[i])                  
         return ret
