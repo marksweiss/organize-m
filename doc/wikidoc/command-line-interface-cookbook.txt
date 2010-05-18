@@ -1,4 +1,4 @@
-Rules for using arguments and argument values:
+*Rules for using arguments and argument values:*
 * Title is required.  All other elements are optional
 * Title is a string of one or more tokens enclosed in _double_ quotes
 * Project is a string of one or more tokens enclosed in _double_ quotes
@@ -9,171 +9,172 @@ Rules for using arguments and argument values:
 * Note is a string of one ore more tokens enclosed in _double_ quotes
 
 <br/>
-* Add item with all elements taking values
+*Add item with all elements taking values*
 
-@python orgm.py --add --title "my item title" --area "my area" --project "my project" --tags "tag 1, tag 2"  --actions "do this now, do this later" --due_date "5-5-2010" --note "This is a short note. Long ones should be edited in the file"@
+@--add --title "my item title" --area "my area" --project "my project" --tags "tag 1, tag 2"  --actions "do this now, do this later" --due_date "5-5-2010" --note "This is a short note. Long ones should be edited in the file"@
 
-@python orgm.py -a -t "my item title" -A "my area" -p "my project" -T "tag 1, tag 2"  -c "do this now, do this later" -d "5-5-2010" -n "This is a short note. Long ones should be edited in the file"@
-
-<br/>
-* Append an empty item to the end of the data file because you want to then go into the file and edit it
-
-@python orgm.py --add_empty@
-
-@python orgm.py -e@
+@-a -t "my item title" -A "my area" -p "my project" -T "tag 1, tag 2"  -c "do this now, do this later" -d "5-5-2010" -n "This is a short note. Long ones should be edited in the file"@
 
 <br/>
-* Add quick reminder with just an item title
+*Append an empty item to the end of the data file because you want to then go into the file and edit it*
 
-@python orgm.py --add --title "my item title"@
+@--add_empty@
 
-@python orgm.py -a -t "my item title"@
-
-<br/>
-* Add a quick near-term item with a title and some TODO actions
-
-@python orgm.py --add --title "my item title" --actions "do this right away, do this later"@
-
-@python orgm.py -a -t "my item title" -c "do this right away, do this later"@
+@-e@
 
 <br/>
-* Add a floating non-project item with a title, actions and a due_date
+*Add quick reminder with just an item title*
 
-@python orgm.py --add --title "my item title" --actions "do this right away, do this later" --due_date "5-10-2010"@
+@--add --title "my item title"@
 
-@python orgm.py -a -t "my item title" -c "do this right away, do this later" -d "5-10-2010"@
-
-<br/>
-* Add a project item
-
-@python orgm.py --add --title "my item title" --project "my project" --actions "do this right away, do this later" --due_date "5-10-2010"@
-
-@python orgm.py -a -t "my item title" -p "my project" -c "do this right away, do this later" -d "5-10-2010"@
+@-a -t "my item title"@
 
 <br/>
-* Use areas of responsibility to group items and projects
+*Add a quick near-term item with a title and some TODO actions*
 
-* Grouping items
+@--add --title "my item title" --actions "do this right away, do this later"@
 
-@python orgm.py --add --title "music to listen to" --area "Cultural Erudition" --actions "Snippy"s Greatest Hits, Exile on Main Street"@
-
-@python orgm.py -a -t "music to listen to" -A "Cultural Erudition" -c "Snippy"s Greatest Hits, Exile on Main Street"@
-
-@python orgm.py --add --title "movies to watch" --area "Cultural Erudition" --actions "Metropolis, The Deer Hunter"@
-
-@python orgm.py -a -t "movies to watch" -A "Cultural Erudition" -c "Metropolis, The Deer Hunter"@
-
-* Grouping projects
-
-@python orgm.py --add --title "my item title 1" --area "departmental delivery of all projects" --project "the project I manage directly" --actions "do this right away, do this later" --due_date "5-10-2010"@
-
-@python orgm.py -a -t "my item title 1" -A "departmental delivery of all projects" -p "the project I manage directly" -c "do this right away, do this later" -d "5-10-2010"@
-
-@python orgm.py --add --title "my item title 2" --area "departmental delivery of all projects" --project "the project managed by my underling" --actions "do this right away, do this later" --due_date "5-10-2010"@
-
-@python orgm.py -a -t "my item title 2" -A"departmental delivery of all projects" -p "the project managed by my underling" -c "do this right away, do this later" -d "5-10-2010"@
+@-a -t "my item title" -c "do this right away, do this later"@
 
 <br/>
-* Use tags to apply the same searchable label across items, whatever project or area they are in
+*Add a floating non-project item with a title, actions and a due_date*
 
-@python orgm.py --add --title "an issue with project 1" --project "project 1" --tags "project issues, project 1 release"@
+@--add --title "my item title" --actions "do this right away, do this later" --due_date "5-10-2010"@
 
-@python orgm.py -a -t "an issue with project 1" -p "project 1" -T "project issues, project 1 release"@
-
-@python orgm.py --add --title "an issue with project 2" --project "project 2" --tags "project issues, project 2 release"@
-
-@python orgm.py -a -t "an issue with project 2" -p "project 2" -T "project issues, project 2 release"@
+@-a -t "my item title" -c "do this right away, do this later" -d "5-10-2010"@
 
 <br/>
-* Find and display to stdout all items matching a literal or regular expression. For example, you may wnat to find all items in a project or with a partial title
+*Add a project item*
 
-* Match partial titles by passing --regex flag and --title match predicate
+@--add --title "my item title" --project "my project" --actions "do this right away, do this later" --due_date "5-10-2010"@
 
-@python orgm.py --find --regex --title "issue with proj*"@
-
-@python orgm.py -f -x -t "issue with proj*"@
+@-a -t "my item title" -p "my project" -c "do this right away, do this later" -d "5-10-2010"@
 
 <br/>
-* Find and display to stdout all items in a project or area
+*Use areas of responsibility to group items and projects*
 
-@python orgm.py --find --project "my project 1"@
+_Grouping Items_
 
-@python orgm.py -f -p "my project 1"@
+@--add --title "music to listen to" --area "Cultural Erudition" --actions "Snippy"s Greatest Hits, Exile on Main Street"@
 
-@python orgm.py --find --area "my area of extreme responsibility"@
+@-a -t "music to listen to" -A "Cultural Erudition" -c "Snippy"s Greatest Hits, Exile on Main Street"@
 
-@python orgm.py -f -A "my area of extreme responsibility"@
+@--add --title "movies to watch" --area "Cultural Erudition" --actions "Metropolis, The Deer Hunter"@
 
-<br/>
-* Find and display to stdout all items with a given tag or having any of a list of tags
+@-a -t "movies to watch" -A "Cultural Erudition" -c "Metropolis, The Deer Hunter"@
 
-@python orgm.py --find --tags "tag 1, tag 2"@
+_Grouping Projects_
 
-@python orgm.py -f -T "tag 1, tag 2"@
+@--add --title "my item title 1" --area "departmental delivery of all projects" --project "the project I manage directly" --actions "do this right away, do this later" --due_date "5-10-2010"@
 
-@python orgm.py --find --regex --tags "tag*"@
+@-a -t "my item title 1" -A "departmental delivery of all projects" -p "the project I manage directly" -c "do this right away, do this later" -d "5-10-2010"@
 
-@python orgm.py -f -x -T "tag*"@
+@--add --title "my item title 2" --area "departmental delivery of all projects" --project "the project managed by my underling" --actions "do this right away, do this later" --due_date "5-10-2010"@
 
-<br/>
-* Quickly display to stdout all values for title, area of responsibility, project, tags and actions, ordered alpha descending
-
-* This is handy to, for example, see what tags you have used already to keep them consistent
-
-@python orgm.py --show_elements --by_title@
-
-@python orgm.py --show_elements --by_area@
-
-@python orgm.py --show_elements --by_project@
-
-@python orgm.py --show_elements --by_tags@
-
-@python orgm.py --show_elements --by_actions@
-
-@python orgm.py -S -1@
-
-@python orgm.py -S -2@
-
-@python orgm.py -S -3@
-
-@python orgm.py -S -4@
-
-@python orgm.py -S -5@
+@-a -t "my item title 2" -A"departmental delivery of all projects" -p "the project managed by my underling" -c "do this right away, do this later" -d "5-10-2010"@
 
 <br/>
-* Quickly display to stdout all items, grouped by distinct values for areas of responsibility, projects or tags
-* This is a handy report to create a "checklist" of grouped items
+*Use tags to apply the same searchable label across items, whatever project or area they are in*
 
-@python orgm.py --show_grouped --by_area@
+@--add --title "an issue with project 1" --project "project 1" --tags "project issues, project 1 release"@
 
-@python orgm.py --show_grouped --by_project@
+@-a -t "an issue with project 1" -p "project 1" -T "project issues, project 1 release"@
 
-@python orgm.py --show_grouped --by_tags@
+@--add --title "an issue with project 2" --project "project 2" --tags "project issues, project 2 release"@
 
-@python orgm.py -s -2@
-
-@python orgm.py -s -3@
-
-@python orgm.py -s -4@
+@-a -t "an issue with project 2" -p "project 2" -T "project issues, project 2 release"@
 
 <br/>
-* As above, but rewrite the item data file because you want to go in and work with it, and you want the items grouped a certain way
+*Find and display to stdout all items matching a literal or regular expression.*
 
-@python orgm.py --rebuild_grouped --by_area@
+_Match partial titles by passing --regex flag and --title match predicate_
 
-@python orgm.py --rebuild_grouped --by_project@
+@--find --regex --title "issue with proj*"@
 
-@python orgm.py --rebuild_grouped --by_tags@
-
-@python orgm.py -R -2@
-
-@python orgm.py -R -3@
-
-@python orgm.py -R -4@
+@-f -x -t "issue with proj*"@
 
 <br/>
-* Backup the data file, perhaps after a --reguild_grouped to get a copy of your items in a certain view, or perhaps to a remote network directory or Dropbox or a USB key or whatever to back it up
+*Find and display to stdout all items in a project or area*
 
-@python orgm.py --backup "my_backup_data_file.txt"@
+@--find --project "my project 1"@
 
-@python orgm.py -b "my_backup_data_file.txt"@
+@-f -p "my project 1"@
+
+@--find --area "my area of extreme responsibility"@
+
+@-f -A "my area of extreme responsibility"@
+
+<br/>
+*Find and display to stdout all items with a given tag or having any of a list of tags*
+
+@--find --tags "tag 1, tag 2"@
+
+@-f -T "tag 1, tag 2"@
+
+@--find --regex --tags "tag*"@
+
+@-f -x -T "tag*"@
+
+<br/>
+*Quickly display to stdout all values for title, area of responsibility, project, tags and actions*
+
+_This is handy to, for example, see what tags you have used already to keep them consistent_
+
+@--show_elements --by_title@
+
+@--show_elements --by_area@
+
+@--show_elements --by_project@
+
+@--show_elements --by_tags@
+
+@--show_elements --by_actions@
+
+@-S -1@
+
+@-S -2@
+
+@-S -3@
+
+@-S -4@
+
+@-S -5@
+
+<br/>
+*Quickly display to stdout all items, grouped by distinct values for areas of responsibility, projects or tags*
+
+_This is a handy report to create a "checklist" of grouped items_
+
+@--show_grouped --by_area@
+
+@--show_grouped --by_project@
+
+@--show_grouped --by_tags@
+
+@-s -2@
+
+@-s -3@
+
+@-s -4@
+
+<br/>
+*As above, but rewrite the item data file because you want to go in and work with it, and you want the items grouped a certain way*
+
+@--rebuild_grouped --by_area@
+
+@--rebuild_grouped --by_project@
+
+@--rebuild_grouped --by_tags@
+
+@-R -2@
+
+@-R -3@
+
+@-R -4@
+
+<br/>
+*Backup your data*
+
+@--backup "my_backup_data_file.txt"@
+
+@-b "my_backup_data_file.txt"@

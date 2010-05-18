@@ -5,7 +5,7 @@ The Organize-m data format for items looks like this:
 &nbsp;&nbsp;@- area: world climate@<br/>
 &nbsp;&nbsp;@- project: save my children's future on Earth@<br/>
 &nbsp;&nbsp;@- tags: ['world climate, children']@<br/>
-&nbsp;&nbsp;@- actions: ['write congressman, join organizatin promoting alternative energy']@<br/>
+&nbsp;&nbsp;@- actions: ['write congressman, join organization promoting alternative energy']@<br/>
 &nbsp;&nbsp;@- due_date: 1-1-2012@<br/>
 &nbsp;&nbsp;@- note: |@<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;@My Note on multiple lines and lines@<br/>
