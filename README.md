@@ -13,8 +13,7 @@ Examples
 --------
 The Organize-m command-line interface is simple and intuitive:
 
-`> python orgm.py --add --title "my item title" --project "my project" --tags "tag 1, tag 2" --actions "do this now, do this later" --due_date "5-5-2010"`
-<br/><br/>
+`> python orgm.py --add --title "my item title" --project "my project" --tags "tag 1, tag 2" --actions "do this now, do this later" --due_date "5-5-2010"`<br/>
 `> python orgm.py --find --regex --title "my proj*"`
 
 Download and Install
