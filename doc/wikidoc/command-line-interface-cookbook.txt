@@ -1,3 +1,5 @@
+NOTE: Windows users must precede all commands shown below with: @python orgm.py@
+
 *Rules for using arguments and argument values:*
 * Title is required.  All other elements are optional
 * Title is a string of one or more tokens enclosed in _double_ quotes
