@@ -1,4 +1,5 @@
 NOTE: Windows users must precede all commands shown below with: @python orgm.py@
+NOTE: Mac and Linux/Unix users must precede all commands show below with @./orgm.py@
 
 *Rules for using arguments and argument values:*
 * Title is required.  All other elements are optional

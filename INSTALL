@@ -49,6 +49,6 @@ On Mac or Linux
 
 3. Unpack the archive with: tar -xvf organize-m_vX.XX.tar, into any directory you desire
 
-4. Open a shell and cd to YOUR_DIR/organizem. Run this command to make orgm an executable: chmod +x orgm.py
+4. Open a shell and cd to YOUR_DIR/organizem. Run this command to make orgm.py an executable: chmod +x orgm.py
 
-5. - Run Organizem from YOUR_DIR/organizem, using the commands documented here: http://wiki.github.com/marksweiss/organize-m/
+5. - Run Organizem from YOUR_DIR/organizem, using './orgm.py ' followed by the commands documented here: http://wiki.github.com/marksweiss/organize-m/

@@ -1,6 +1,5 @@
 NOTE: Windows users must precede all commands shown below with: @python orgm.py@
-
-@--add --title "my item title" --area "my area" --project "my project" --tags "tag 1, tag 2"  --actions "["do this now", "do this later"]" --due_date "5-5-2010" --note "This is a short note. Long ones should be edited in the file"@
+NOTE: Mac and Linux/Unix users must precede all commands show below with @./orgm.py@
 
 Rules for using arguments and argument values:
 * Title is required.  All other elements are optional
