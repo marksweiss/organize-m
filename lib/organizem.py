@@ -61,7 +61,10 @@ class Organizem(object):
     # NOTE: element must be one of the "enums" in class Element (other than ROOT)
     # NOTE: Returns list of 0 or more Items
     def find_items(self, element, pattern, use_regex_match=False):
-        return self._find_or_filter_items(element, pattern, use_regex_match, is_filter=False)
+        ret = self._find_or_filter_items(element, pattern, use_regex_match, is_filter=False)
+        if len(ret) == 0:
+            print 'No Items found matching Element = %s. Pattern to match = %s' % (element, pattern)
+        return ret
         
     def remove_items(self, element, pattern, use_regex_match=False):
         # Call helper with filtering on and filter predicate the pattern passed in
