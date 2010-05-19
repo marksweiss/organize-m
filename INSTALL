@@ -1,18 +1,54 @@
+-------------------------
 Installation Instructions
 -------------------------
 
-Requires Python 2.6 or higher.  On Windows, make sure you have added Python to the PATH environment variable.
+Requirements:
+-------------
+- Python 2.6 or higher
+- PyYAML Python library 
+
 
 On Windows:
-* Download the .zip archive from here: http://github.com/marksweiss/organize-m/downloads
-* Unzip into any directory you desire
-* Open a CMD window
-* cd to YOUR_DIR/organizem
-* Run Organizem from there, using 'python orgm.py ...' commands  
+-----------
 
-On Mac or Linux:
-* Download the .tar archive from here: http://github.com/marksweiss/organize-m/downloads. 
-* Untar into any directory you desire: 'tar -xvf organize-m_vX.XX.tar'
-* Open a shell
-* cd to YOUR_DIR/organizem
-* Run Organizem from there, using 'python orgm.py ...' commands  
+1. Install Python.  
+- Downloads of Windows installers are here: http://www.python.org/download/releases/.  
+- Organize-m was tested with Python 2.6.5.  Links to Python 2.6.5 32-bit and 64-bit Windows MSI installers are here: http://www.python.org/download/releases/2.6.5/
+
+2. Add Python to your path. 
+(In WinXP) 
+- Settings -> Control Panel -> Administrative Tools -> Computer Management
+- Right-click Computer Management -> Properties -> Advanced -> Environment Variables Settings
+- Under System Variables scroll to Path.  Click Edit.  
+- Append the path to Python you installed to the end of the values in Variable Value (for example): C:\Python26
+
+3. Install PyYAML.
+- Get the latest version for Windows here: http://pyyaml.org/wiki/PyYAML
+- There are Win32 .exe installers available for Python 2.6 - 3.1
+- Run the installer and accept the default settings
+
+4. Download the latest Organize-m .zip archive from here: http://github.com/marksweiss/organize-m/downloads
+
+5. Unzip into any directory you desire
+
+6. To Run Organize-m
+- Open a CMD window
+- cd to YOUR_DIR/organizem
+- Run Organizem from there, using 'python orgm.py ' followed by the commands documented here: http://wiki.github.com/marksweiss/organize-m/
+  
+
+On Mac or Linux
+----------------
+
+1. Install PyYAML.
+- Get the latest version here: http://pyyaml.org/wiki/PyYAML
+- Download and unpack the archive with: tar -xvf PyYAML-X.xx.tar.gz
+- Run: python setup.py install
+
+2. Download the latest Organize-m tar archive from here: http://github.com/marksweiss/organize-m/downloads
+
+3. Unpack the archive with: tar -xvf organize-m_vX.XX.tar, into any directory you desire
+
+4. Open a shell and cd to YOUR_DIR/organizem. Run this command to make orgm an executable: chmod +x orgm.py
+
+5. - Run Organizem from YOUR_DIR/organizem, using the commands documented here: http://wiki.github.com/marksweiss/organize-m/
