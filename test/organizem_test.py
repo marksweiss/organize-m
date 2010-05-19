@@ -507,7 +507,7 @@ class OrganizemTestCase(unittest.TestCase):
         orgm.add_item(item4)
 
         grouped_items = orgm.get_grouped_items(Elem.PROJECT)
-        new_data_file_str = orgm.regroup_data_file(Elem.PROJECT)
+        new_data_file_str = orgm.regroup_data_file(Elem.PROJECT, with_group_labels=False)
         grouped_items_str = []
         for group_key in grouped_items.keys():          
             for item in grouped_items[group_key]:
@@ -534,7 +534,7 @@ class OrganizemTestCase(unittest.TestCase):
         orgm.add_item(item4)
 
         grouped_items = orgm.get_grouped_items(Elem.AREA)
-        new_data_file_str = orgm.regroup_data_file(Elem.AREA)
+        new_data_file_str = orgm.regroup_data_file(Elem.AREA, with_group_labels=False)
         grouped_items_str = []
         for group_key in grouped_items.keys():          
             for item in grouped_items[group_key]:
@@ -565,7 +565,7 @@ class OrganizemTestCase(unittest.TestCase):
         orgm.add_item(item4)
 
         grouped_items = orgm.get_grouped_items(Elem.TAGS)
-        new_data_file_str = orgm.regroup_data_file(Elem.TAGS)
+        new_data_file_str = orgm.regroup_data_file(Elem.TAGS, with_group_labels=False)
         grouped_items_str = []
         for group_key in grouped_items.keys():          
             for item in grouped_items[group_key]:

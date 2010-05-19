@@ -116,12 +116,22 @@ class Organizem(object):
     # Groups items as get_grouped_items() does, then backs up the current
     #  data file to [file_name]_bak, writes the grouped items to the file
     #  and also returns them for convenience and testing purposes
-    def regroup_data_file(self, element):
+    # NOTE: with_group_labels=True is used so default behavior is to
+    #  include group labels as YAML comments.  But tests can pass False
+    #  to bypass this and just test items written correctly.
+    def regroup_data_file(self, element, with_group_labels=True):
         grouped_items = self.get_grouped_items(element)        
         items = []
         if grouped_items is None:
             return ""
         for group_key in grouped_items.keys():
+            # Mark each group in the regrouped file with a group name label
+            if with_group_labels:
+                group_label = ('# %s' % group_key)
+                border =  '# ' + ((len(group_label) - 2) * '-')
+                label = '\n' + border + '\n' + group_label + '\n' + border
+                items.append(label)
+            # Append the list of items for this group
             items.extend(grouped_items[group_key])
         # Pass the Items, regrouped, to be written to data file
         self._rewrite(items)
@@ -309,16 +319,11 @@ class Organizem(object):
             # Note types can have line breaks and lots of crap.
             # Increase our chances of avoiding trouble by removing line breaks
             if element == Elem.NOTE:
-               match_val = match_val.replace('\n', ' ')    
-               
+               match_val = match_val.replace('\n', ' ')                 
             try:
                 rgx = re.compile(pattern, re.IGNORECASE)
             except:
-                # TEMP DEBUG
-                print "EXCEPTION"
-                print pattern
-                print ''
-                
+                print 'EXCEPTION: Illegal regular expression pattern: ' + pattern + '\n'         
             return rgx.search(match_val) != None
     
     def _load(self):
