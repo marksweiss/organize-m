@@ -7,6 +7,7 @@ from lib.organizem import Organizem
 
 
 TEST_DATA_FILE = "orgm_test.dat"
+IS_UNIT_TESTING = True
 
 
 class OrganizemTestCase(unittest.TestCase):
@@ -27,7 +28,7 @@ class OrganizemTestCase(unittest.TestCase):
 
     def test_init_organizem(self):
         self._init_test_data_file()
-        orgm = Organizem(TEST_DATA_FILE)
+        orgm = Organizem(TEST_DATA_FILE, IS_UNIT_TESTING)
         self.assertTrue(orgm != None)
         self.assertTrue(isinstance(orgm, Organizem))
         self.assertTrue(orgm.data_file == TEST_DATA_FILE)
@@ -36,7 +37,7 @@ class OrganizemTestCase(unittest.TestCase):
         self._init_test_data_file()
         title = "title"
         item = Item(title)
-        orgm = Organizem(TEST_DATA_FILE)
+        orgm = Organizem(TEST_DATA_FILE, IS_UNIT_TESTING)
         orgm.add_item(item)                
         self.assertTrue(orgm.find_items(Elem.TITLE, title))
 
@@ -45,7 +46,7 @@ class OrganizemTestCase(unittest.TestCase):
         title = "title"
         rgx_match = "titl*"
         item = Item(title)
-        orgm = Organizem(TEST_DATA_FILE)
+        orgm = Organizem(TEST_DATA_FILE, IS_UNIT_TESTING)
         orgm.add_item(item)                
         self.assertTrue(orgm.find_items(Elem.TITLE, rgx_match, use_regex_match=True))
         
@@ -54,7 +55,7 @@ class OrganizemTestCase(unittest.TestCase):
         title = "title"
         area = "my area"
         item = Item(title, area=area)
-        orgm = Organizem(TEST_DATA_FILE)
+        orgm = Organizem(TEST_DATA_FILE, IS_UNIT_TESTING)
         orgm.add_item(item)                
         self.assertTrue(orgm.find_items(Elem.AREA, area))
 
@@ -64,7 +65,7 @@ class OrganizemTestCase(unittest.TestCase):
         area = "area"
         rgx_match = "are*"
         item = Item(title, area=area)
-        orgm = Organizem(TEST_DATA_FILE)
+        orgm = Organizem(TEST_DATA_FILE, IS_UNIT_TESTING)
         orgm.add_item(item)                
         self.assertTrue(orgm.find_items(Elem.AREA, rgx_match, use_regex_match=True))
 
@@ -73,7 +74,7 @@ class OrganizemTestCase(unittest.TestCase):
         title = "title"
         project = "my project"
         item = Item(title, project=project)
-        orgm = Organizem(TEST_DATA_FILE)
+        orgm = Organizem(TEST_DATA_FILE, IS_UNIT_TESTING)
         orgm.add_item(item)                
         self.assertTrue(orgm.find_items(Elem.PROJECT, project))
 
@@ -83,7 +84,7 @@ class OrganizemTestCase(unittest.TestCase):
         project = "my project"
         rgx_match = "my proj*"
         item = Item(title, project=project)
-        orgm = Organizem(TEST_DATA_FILE)
+        orgm = Organizem(TEST_DATA_FILE, IS_UNIT_TESTING)
         orgm.add_item(item)                
         self.assertTrue(orgm.find_items(Elem.PROJECT, rgx_match, use_regex_match=True))
 
@@ -95,7 +96,7 @@ class OrganizemTestCase(unittest.TestCase):
         tag1 = 'tag 1'
         tags1 = [tag1]
         item1 = Item(title, tags=tags1)
-        orgm = Organizem(TEST_DATA_FILE)
+        orgm = Organizem(TEST_DATA_FILE, IS_UNIT_TESTING)
         orgm.add_item(item1)
         self.assertTrue(orgm.find_items(Elem.TAGS, tag1))
         # Test case of multi-value list passed to find_items() for a 
@@ -116,7 +117,7 @@ class OrganizemTestCase(unittest.TestCase):
         tag1_rgx = 'tag 100*'
         tags1 = [tag1]
         item1 = Item(title, tags=tags1)
-        orgm = Organizem(TEST_DATA_FILE)
+        orgm = Organizem(TEST_DATA_FILE, IS_UNIT_TESTING)
         orgm.add_item(item1)
         self.assertTrue(orgm.find_items(Elem.TAGS, tag1_rgx, use_regex_match=True))
         # Test case of multi-value list passed to find_items() for a 
@@ -135,7 +136,7 @@ class OrganizemTestCase(unittest.TestCase):
         action1_rgx = 'action 10*'
         actions1 = [action1]
         item1 = Item(title, actions=actions1)
-        orgm = Organizem(TEST_DATA_FILE)
+        orgm = Organizem(TEST_DATA_FILE, IS_UNIT_TESTING)
         orgm.add_item(item1)
         self.assertTrue(orgm.find_items(Elem.ACTIONS, action1_rgx, use_regex_match=True))
         action2 = 'action 200'
@@ -154,7 +155,7 @@ class OrganizemTestCase(unittest.TestCase):
         action1_rgx = 'action 101*'
         actions1 = [action1]
         item1 = Item(title, actions=actions1)
-        orgm = Organizem(TEST_DATA_FILE)
+        orgm = Organizem(TEST_DATA_FILE, IS_UNIT_TESTING)
         orgm.add_item(item1)
         self.assertTrue(orgm.find_items(Elem.ACTIONS, action1_rgx, use_regex_match=True))
         # Test case of multi-value list passed to find_items() for a 
@@ -165,6 +166,25 @@ class OrganizemTestCase(unittest.TestCase):
         item2 = Item(title, actions=actions2)
         orgm.add_item(item2)
         self.assertTrue(orgm.find_items(Elem.ACTIONS, action2_rgx, use_regex_match=True))
+
+    def test_add_item__find_items_by_priority(self):
+        self._init_test_data_file()
+        title = "title"
+        priority = "P1"
+        item = Item(title, priority=priority)
+        orgm = Organizem(TEST_DATA_FILE, IS_UNIT_TESTING)
+        orgm.add_item(item)                
+        self.assertTrue(orgm.find_items(Elem.PRIORITY, priority))
+
+    def test_add_item__find_rgx_items_by_priority(self):
+        self._init_test_data_file()
+        title = "title"
+        priority = "P1"
+        rgx_match = "P*"
+        item = Item(title, priority=priority)
+        orgm = Organizem(TEST_DATA_FILE, IS_UNIT_TESTING)
+        orgm.add_item(item)                
+        self.assertTrue(orgm.find_items(Elem.PRIORITY, rgx_match, use_regex_match=True))
 
     def test_add_item__find_items_by_note(self):
         self._init_test_data_file()
@@ -180,7 +200,7 @@ class OrganizemTestCase(unittest.TestCase):
     ljalj;
   a             dafs            asdfdsa           wkwjl;qq;q;"""
         item = Item(title, note=note)
-        orgm = Organizem(TEST_DATA_FILE)
+        orgm = Organizem(TEST_DATA_FILE, IS_UNIT_TESTING)
         orgm.add_item(item)                
         self.assertTrue(orgm.find_items(Elem.NOTE, note))
 
@@ -199,7 +219,7 @@ class OrganizemTestCase(unittest.TestCase):
   a             dafs            asdfdsa           wkwjl;qq;q;"""
         note_rgx = "\* Support for reporting *"
         item = Item(title, note=note)
-        orgm = Organizem(TEST_DATA_FILE)
+        orgm = Organizem(TEST_DATA_FILE, IS_UNIT_TESTING)
         orgm.add_item(item)                
         self.assertTrue(orgm.find_items(Elem.NOTE, note_rgx, use_regex_match=True))
 
@@ -208,7 +228,7 @@ class OrganizemTestCase(unittest.TestCase):
         title = "title"
         rgx_match = "titl*"
         item = Item(title)
-        orgm = Organizem(TEST_DATA_FILE)
+        orgm = Organizem(TEST_DATA_FILE, IS_UNIT_TESTING)
         orgm.add_item(item)
         self.assertTrue(orgm.find_items(Elem.TITLE, rgx_match, use_regex_match=True))
         # NOTE: Now remove the item and check that it's not there any more
@@ -221,7 +241,7 @@ class OrganizemTestCase(unittest.TestCase):
         area = "area"
         rgx_match = "are*"
         item = Item(title, area=area)
-        orgm = Organizem(TEST_DATA_FILE)
+        orgm = Organizem(TEST_DATA_FILE, IS_UNIT_TESTING)
         orgm.add_item(item)
         self.assertTrue(orgm.find_items(Elem.AREA, rgx_match, use_regex_match=True))
         orgm.remove_items(Elem.AREA, rgx_match, use_regex_match=True)
@@ -232,7 +252,7 @@ class OrganizemTestCase(unittest.TestCase):
         title = "title"
         project = "project"
         item = Item(title, project=project)
-        orgm = Organizem(TEST_DATA_FILE)
+        orgm = Organizem(TEST_DATA_FILE, IS_UNIT_TESTING)
         orgm.add_item(item)
         self.assertTrue(orgm.find_items(Elem.PROJECT, project))
         orgm.remove_items(Elem.PROJECT, project)
@@ -244,7 +264,7 @@ class OrganizemTestCase(unittest.TestCase):
         tag1 = 'tag 1'
         tags1 = [tag1]
         item1 = Item(title, tags=tags1)
-        orgm = Organizem(TEST_DATA_FILE)
+        orgm = Organizem(TEST_DATA_FILE, IS_UNIT_TESTING)
         orgm.add_item(item1)
         self.assertTrue(orgm.find_items(Elem.TAGS, tag1))
         orgm.remove_items(Elem.TAGS, tag1)
@@ -265,7 +285,7 @@ class OrganizemTestCase(unittest.TestCase):
         rgx_match = "action 11*"
         actions1 = [action1]
         item1 = Item(title, actions=actions1)
-        orgm = Organizem(TEST_DATA_FILE)
+        orgm = Organizem(TEST_DATA_FILE, IS_UNIT_TESTING)
         orgm.add_item(item1)
         self.assertTrue(orgm.find_items(Elem.ACTIONS, action1))
         orgm.remove_items(Elem.ACTIONS, rgx_match, use_regex_match=True)
@@ -294,7 +314,7 @@ class OrganizemTestCase(unittest.TestCase):
     ljalj;
   a             dafs            asdfdsa           wkwjl;qq;q;"""
         item = Item(title, note=note)
-        orgm = Organizem(TEST_DATA_FILE)
+        orgm = Organizem(TEST_DATA_FILE, IS_UNIT_TESTING)
         orgm.add_item(item)                
         self.assertTrue(orgm.find_items(Elem.NOTE, note))
         orgm.remove_items(Elem.NOTE, note)        
@@ -315,7 +335,7 @@ class OrganizemTestCase(unittest.TestCase):
   a             dafs            asdfdsa           wkwjl;qq;q;"""
         note_rgx = "\* Support for reporting *"
         item = Item(title, note=note)
-        orgm = Organizem(TEST_DATA_FILE)
+        orgm = Organizem(TEST_DATA_FILE, IS_UNIT_TESTING)
         orgm.add_item(item)                
         self.assertTrue(orgm.find_items(Elem.NOTE, note_rgx, use_regex_match=True))
         orgm.remove_items(Elem.NOTE, note_rgx, use_regex_match=True)        
@@ -327,7 +347,7 @@ class OrganizemTestCase(unittest.TestCase):
         title2 = 'title 2'
         item1 = Item(title1)
         item2 = Item(title2)
-        orgm = Organizem(TEST_DATA_FILE)
+        orgm = Organizem(TEST_DATA_FILE, IS_UNIT_TESTING)
         orgm.add_item(item1)
         orgm.add_item(item2) 
         # Have to handle the fact that init of test dat file includes dummy item with "TEST_ITEM" title       
@@ -341,7 +361,7 @@ class OrganizemTestCase(unittest.TestCase):
         project2 = 'project 2'
         item1 = Item(title1, project=project1)
         item2 = Item(title2, project=project2)
-        orgm = Organizem(TEST_DATA_FILE)
+        orgm = Organizem(TEST_DATA_FILE, IS_UNIT_TESTING)
         orgm.add_item(item1)
         orgm.add_item(item2)
         expected = ["''", 'project 1', 'project 2']
@@ -357,7 +377,7 @@ class OrganizemTestCase(unittest.TestCase):
         area2 = 'area 2'
         item1 = Item(title1, area=area1)
         item2 = Item(title2, area=area2)
-        orgm = Organizem(TEST_DATA_FILE)
+        orgm = Organizem(TEST_DATA_FILE, IS_UNIT_TESTING)
         orgm.add_item(item1)
         orgm.add_item(item2)
         expected = ["''", 'area 1', 'area 2']
@@ -373,7 +393,7 @@ class OrganizemTestCase(unittest.TestCase):
         tags2 = ['tag 3', 'tag 4']
         item1 = Item(title1, tags=tags1)
         item2 = Item(title2, tags=tags2)
-        orgm = Organizem(TEST_DATA_FILE)
+        orgm = Organizem(TEST_DATA_FILE, IS_UNIT_TESTING)
         orgm.add_item(item1)
         orgm.add_item(item2)
         expected = ['tag 1', 'tag 2', 'tag 3', 'tag 4']
@@ -389,7 +409,7 @@ class OrganizemTestCase(unittest.TestCase):
         actions2 = ['action 3', 'action 4']
         item1 = Item(title1, actions=actions1)
         item2 = Item(title2, actions=actions2)
-        orgm = Organizem(TEST_DATA_FILE)
+        orgm = Organizem(TEST_DATA_FILE, IS_UNIT_TESTING)
         orgm.add_item(item1)
         orgm.add_item(item2)
         expected = ['action 1', 'action 2', 'action 3', 'action 4']
@@ -409,13 +429,13 @@ class OrganizemTestCase(unittest.TestCase):
         item2 = Item(title2, project=project2)
         item3 = Item(title3, project=project1)
         item4 = Item(title4, project=project2)
-        orgm = Organizem(TEST_DATA_FILE)
+        orgm = Organizem(TEST_DATA_FILE, IS_UNIT_TESTING)
         orgm.add_item(item1)
         orgm.add_item(item2)
         orgm.add_item(item3)
         orgm.add_item(item4)
-        expected1 = repr([{'item' : [{'title': 'title 1'}, {'area': "''"}, {'project': 'project 1'}, {'tags': []}, {'actions': []}, {'due_date': "''"}, {'note': ''}]}, {'item' : [{'title': 'title 3'}, {'area': "''"}, {'project': 'project 1'}, {'tags': []}, {'actions': []}, {'due_date': "''"}, {'note': ''}]}])
-        expected2 = repr([{'item' : [{'title': 'title 2'}, {'area': "''"}, {'project': 'project 2'}, {'tags': []}, {'actions': []}, {'due_date': "''"}, {'note': ''}]}, {'item' : [{'title': 'title 4'}, {'area': "''"}, {'project': 'project 2'}, {'tags': []}, {'actions': []}, {'due_date': "''"}, {'note': ''}]}])
+        expected1 = repr([{'item' : [{'title': 'title 1'}, {'area': "''"}, {'project': 'project 1'}, {'tags': []}, {'actions': []}, {'priority': "''"}, {'due_date': "''"}, {'note': ''}]}, {'item' : [{'title': 'title 3'}, {'area': "''"}, {'project': 'project 1'}, {'tags': []}, {'actions': []}, {'priority': "''"}, {'due_date': "''"}, {'note': ''}]}])
+        expected2 = repr([{'item' : [{'title': 'title 2'}, {'area': "''"}, {'project': 'project 2'}, {'tags': []}, {'actions': []}, {'priority': "''"}, {'due_date': "''"}, {'note': ''}]}, {'item' : [{'title': 'title 4'}, {'area': "''"}, {'project': 'project 2'}, {'tags': []}, {'actions': []}, {'priority': "''"}, {'due_date': "''"}, {'note': ''}]}])
         actual = orgm.get_grouped_items(Elem.PROJECT)
         actual1 = repr(actual[project1])
         actual2 = repr(actual[project2])        
@@ -434,16 +454,16 @@ class OrganizemTestCase(unittest.TestCase):
         item2 = Item(title2, area=area2)
         item3 = Item(title3, area=area1)
         item4 = Item(title4, area=area2)
-        orgm = Organizem(TEST_DATA_FILE)
+        orgm = Organizem(TEST_DATA_FILE, IS_UNIT_TESTING)
         orgm.add_item(item1)
         orgm.add_item(item2)
         orgm.add_item(item3)
         orgm.add_item(item4)        
-        expected1 = repr([{'item' : [{'title': 'title 1'}, {'area': 'area 1'}, {'project': "''"}, {'tags': []}, {'actions': []}, {'due_date': "''"}, {'note': ''}]}, {'item' : [{'title': 'title 3'}, {'area': 'area 1'}, {'project': "''"}, {'tags': []}, {'actions': []}, {'due_date': "''"}, {'note': ''}]}])
-        expected2 = repr([{'item' : [{'title': 'title 2'}, {'area': 'area 2'}, {'project': "''"}, {'tags': []}, {'actions': []}, {'due_date': "''"}, {'note': ''}]}, {'item' : [{'title': 'title 4'}, {'area': 'area 2'}, {'project': "''"}, {'tags': []}, {'actions': []}, {'due_date': "''"}, {'note': ''}]}])
+        expected1 = repr([{'item' : [{'title': 'title 1'}, {'area': 'area 1'}, {'project': "''"}, {'tags': []}, {'actions': []}, {'priority': "''"}, {'due_date': "''"}, {'note': ''}]}, {'item' : [{'title': 'title 3'}, {'area': 'area 1'}, {'project': "''"}, {'tags': []}, {'actions': []}, {'priority': "''"}, {'due_date': "''"}, {'note': ''}]}])
+        expected2 = repr([{'item' : [{'title': 'title 2'}, {'area': 'area 2'}, {'project': "''"}, {'tags': []}, {'actions': []}, {'priority': "''"}, {'due_date': "''"}, {'note': ''}]}, {'item' : [{'title': 'title 4'}, {'area': 'area 2'}, {'project': "''"}, {'tags': []}, {'actions': []}, {'priority': "''"}, {'due_date': "''"}, {'note': ''}]}])
         actual = orgm.get_grouped_items(Elem.AREA)      
         actual1 = repr(actual[area1])
-        actual2 = repr(actual[area2])        
+        actual2 = repr(actual[area2])           
         self.assertTrue(expected1 == actual1)
         self.assertTrue(expected2 == actual2)
 
@@ -463,19 +483,20 @@ class OrganizemTestCase(unittest.TestCase):
         item2 = Item(title2, tags=tags2)
         item3 = Item(title3, tags=tags1)
         item4 = Item(title4, tags=tags2)
-        orgm = Organizem(TEST_DATA_FILE)
+        orgm = Organizem(TEST_DATA_FILE, IS_UNIT_TESTING)
         orgm.add_item(item1)
         orgm.add_item(item2)
         orgm.add_item(item3)
         orgm.add_item(item4)
         
-        expected1 = repr([{'item' : [{'title': 'title 1'}, {'area': "''"}, {'project': "''"}, {'tags': [tag1, tag2]}, {'actions': []}, {'due_date': "''"}, {'note': ''}]}, {'item' : [{'title': 'title 3'}, {'area': "''"}, {'project': "''"}, {'tags': [tag1, tag2]}, {'actions': []}, {'due_date': "''"}, {'note': ''}]}])
-        expected2 = repr([{'item' : [{'title': 'title 1'}, {'area': "''"}, {'project': "''"}, {'tags': [tag1, tag2]}, {'actions': []}, {'due_date': "''"}, {'note': ''}]}, \
-                     {'item' : [{'title': 'title 3'}, {'area': "''"}, {'project': "''"}, {'tags': [tag1, tag2]}, {'actions': []}, {'due_date': "''"}, {'note': ''}]}])
-        expected3 = repr([{'item' : [{'title': 'title 2'}, {'area': "''"}, {'project': "''"}, {'tags': [tag3, tag4]}, {'actions': []}, {'due_date': "''"}, {'note': ''}]}, \
-                     {'item' : [{'title': 'title 4'}, {'area': "''"}, {'project': "''"}, {'tags': [tag3, tag4]}, {'actions': []}, {'due_date': "''"}, {'note': ''}]}])
-        expected4 = repr([{'item' : [{'title': 'title 2'}, {'area': "''"}, {'project': "''"}, {'tags': [tag3, tag4]}, {'actions': []}, {'due_date': "''"}, {'note': ''}]}, \
-                     {'item' : [{'title': 'title 4'}, {'area': "''"}, {'project': "''"}, {'tags': [tag3, tag4]}, {'actions': []}, {'due_date': "''"}, {'note': ''}]}])
+        expected1 = repr([{'item' : [{'title': 'title 1'}, {'area': "''"}, {'project': "''"}, {'tags': [tag1, tag2]}, {'actions': []}, {'priority': "''"}, {'due_date': "''"}, {'note': ''}]}, \
+                     {'item' : [{'title': 'title 3'}, {'area': "''"}, {'project': "''"}, {'tags': [tag1, tag2]}, {'actions': []}, {'priority': "''"}, {'due_date': "''"}, {'note': ''}]}])
+        expected2 = repr([{'item' : [{'title': 'title 1'}, {'area': "''"}, {'project': "''"}, {'tags': [tag1, tag2]}, {'actions': []}, {'priority': "''"}, {'due_date': "''"}, {'note': ''}]}, \
+                     {'item' : [{'title': 'title 3'}, {'area': "''"}, {'project': "''"}, {'tags': [tag1, tag2]}, {'actions': []}, {'priority': "''"}, {'due_date': "''"}, {'note': ''}]}])
+        expected3 = repr([{'item' : [{'title': 'title 2'}, {'area': "''"}, {'project': "''"}, {'tags': [tag3, tag4]}, {'actions': []}, {'priority': "''"}, {'due_date': "''"}, {'note': ''}]}, \
+                     {'item' : [{'title': 'title 4'}, {'area': "''"}, {'project': "''"}, {'tags': [tag3, tag4]}, {'actions': []}, {'priority': "''"}, {'due_date': "''"}, {'note': ''}]}])
+        expected4 = repr([{'item' : [{'title': 'title 2'}, {'area': "''"}, {'project': "''"}, {'tags': [tag3, tag4]}, {'actions': []}, {'priority': "''"}, {'due_date': "''"}, {'note': ''}]}, \
+                     {'item' : [{'title': 'title 4'}, {'area': "''"}, {'project': "''"}, {'tags': [tag3, tag4]}, {'actions': []},{'priority': "''"},  {'due_date': "''"}, {'note': ''}]}])
 
         actual = orgm.get_grouped_items(Elem.TAGS)
         actual1 = repr(actual[tag1])
@@ -500,7 +521,7 @@ class OrganizemTestCase(unittest.TestCase):
         item2 = Item(title2, project=project2)
         item3 = Item(title3, project=project1)
         item4 = Item(title4, project=project2)
-        orgm = Organizem(TEST_DATA_FILE)
+        orgm = Organizem(TEST_DATA_FILE, IS_UNIT_TESTING)
         orgm.add_item(item1)
         orgm.add_item(item2)
         orgm.add_item(item3)
@@ -527,7 +548,7 @@ class OrganizemTestCase(unittest.TestCase):
         item2 = Item(title2, area=area2)
         item3 = Item(title3, area=area1)
         item4 = Item(title4, area=area2)
-        orgm = Organizem(TEST_DATA_FILE)
+        orgm = Organizem(TEST_DATA_FILE, IS_UNIT_TESTING)
         orgm.add_item(item1)
         orgm.add_item(item2)
         orgm.add_item(item3)
@@ -558,7 +579,7 @@ class OrganizemTestCase(unittest.TestCase):
         item2 = Item(title2, tags=tags2)
         item3 = Item(title3, tags=tags1)
         item4 = Item(title4, tags=tags2)
-        orgm = Organizem(TEST_DATA_FILE)
+        orgm = Organizem(TEST_DATA_FILE, IS_UNIT_TESTING)
         orgm.add_item(item1)
         orgm.add_item(item2)
         orgm.add_item(item3)
@@ -589,7 +610,7 @@ class OrganizemTestCase(unittest.TestCase):
         item2 = Item(title2, tags=tags2)
         item3 = Item(title3, tags=tags1)
         item4 = Item(title4, tags=tags2)
-        orgm = Organizem(TEST_DATA_FILE)
+        orgm = Organizem(TEST_DATA_FILE, IS_UNIT_TESTING)
         orgm.add_item(item1)
         orgm.add_item(item2)
         orgm.add_item(item3)
@@ -604,12 +625,12 @@ class OrganizemTestCase(unittest.TestCase):
     #  and confirm there is a new empty item
     def test_add_empty(self):
         self._init_test_data_file()
-        orgm = Organizem(TEST_DATA_FILE)
+        orgm = Organizem(TEST_DATA_FILE, IS_UNIT_TESTING)
         orgm.add_empty()
  
     #def test_add_item__find_item_by_title__cli(self):
     #    self._init_test_data_file()
-    #    orgm = Organizem(TEST_DATA_FILE)
+    #    orgm = Organizem(TEST_DATA_FILE, IS_UNIT_TESTING)
     #    title = 'my item title'
     #    cmd = ['-- add', '--title', title]
     #    orgm.run_shell_cmd(cmd)                

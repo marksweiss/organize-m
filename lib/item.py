@@ -68,13 +68,14 @@ class Elem(object):
     PROJECT = 'project'
     TAGS = 'tags'
     ACTIONS = 'actions'
+    PRIORITY = 'priority'
     DUE_DATE = 'due_date'
     NOTE = 'note'
 
     # Child lists of parent list come back as individual ordered dicts 
     #  in a list, one dict for each child name/value pair (child list).             
     ITEM_INDEXES = {TITLE : 0, AREA : 1, PROJECT : 2, TAGS : 3, 
-                    ACTIONS : 4, DUE_DATE : 5, NOTE : 6}
+                    ACTIONS : 4, PRIORITY : 5, DUE_DATE : 6, NOTE : 7}
 
     @staticmethod
     def index(element):  # TODO RENAME elem_index() or get rid of it
@@ -99,12 +100,14 @@ class Item(object):
         # Now handle all the optional args, using kwargs because we want the 
         #  flexibility to pass any of these, skipping any we don't care about
         #  so it's not the right use for just default args
-        area, project, tags, actions, due_date, note = self.__load_elems(kwelements)          
+        area, project, tags, actions, priority, due_date, note = \
+            self.__load_elems(kwelements)          
         # Now load element properties, with vals or None returned from __load_elems()
         self._area = ChildTextElement(Elem.AREA, area)
         self._project = ChildTextElement(Elem.PROJECT, project)        
         self._tags = ChildListElement(Elem.TAGS, tags)
         self._actions = ChildListElement(Elem.ACTIONS, actions)
+        self._priority = ChildTextElement(Elem.PRIORITY, priority)
         # TODO real date type and validation - create a new Element type
         self._due_date = ChildTextElement(Elem.DUE_DATE, due_date)
         self._note = ChildMultilineTextElement(Elem.NOTE, note)
@@ -119,9 +122,11 @@ class Item(object):
         project = elems[Elem.index(Elem.PROJECT)][Elem.PROJECT]
         tags = elems[Elem.index(Elem.TAGS)][Elem.TAGS]        
         actions = elems[Elem.index(Elem.ACTIONS)][Elem.ACTIONS]
+        priority = elems[Elem.index(Elem.PRIORITY)][Elem.PRIORITY]
         due_date = elems[Elem.index(Elem.DUE_DATE)][Elem.DUE_DATE]
         note = elems[Elem.index(Elem.NOTE)][Elem.NOTE]
-        return Item(title, area=area, project=project, tags=tags, actions=actions, due_date=due_date, note=note)
+        return Item(title, area=area, project=project, tags=tags, actions=actions, \
+            priority=priority, due_date=due_date, note=note)
     
     def get_elem_val(self, element):
         if element == Elem.TITLE:
@@ -134,6 +139,8 @@ class Item(object):
             return self.tags
         elif element == Elem.ACTIONS:
             return self.actions
+        elif element == Elem.PRIORITY:
+            return self.priority
         elif element == Elem.DUE_DATE:
             return self.due_date
         elif element == Elem.NOTE:
@@ -161,6 +168,10 @@ class Item(object):
         return self._actions.val
     
     @property
+    def priority(self):
+        return self._priority.val
+
+    @property
     def due_date(self):
         return self._due_date.val
     
@@ -173,6 +184,45 @@ class Item(object):
     def __str__(self):
         return self._to_yaml()
     
+    def _to_yaml(self):
+        ret = []
+        ret.append(str(self._root))
+        ret.append(str(self._title))
+        ret.append(str(self._area))
+        ret.append(str(self._project))
+        ret.append(str(self._tags))
+        ret.append(str(self._actions))
+        ret.append(str(self._priority))        
+        ret.append(str(self._due_date))
+        ret.append(str(self._note))
+        return '\n'.join(ret)
+        
+    def __load_elems(self, kwelements):
+      area = None
+      project = None
+      tags = None
+      actions = None
+      priority = None
+      due_date = None
+      note = None        
+      elems = kwelements.keys()        
+      if Elem.AREA in elems:
+          area = kwelements[Elem.AREA]
+      if Elem.PROJECT in elems:
+          project = kwelements[Elem.PROJECT]
+      if Elem.TAGS in elems: 
+          tags = kwelements[Elem.TAGS]
+      if Elem.ACTIONS in elems: 
+          actions = kwelements[Elem.ACTIONS]
+      if Elem.PRIORITY in elems: 
+          priority = kwelements[Elem.PRIORITY]
+      if Elem.DUE_DATE in elems: 
+          due_date = kwelements[Elem.DUE_DATE]
+      if Elem.NOTE in elems: 
+          note = kwelements[Elem.NOTE]
+      return area, project, tags, actions, priority, due_date, note
+
+    # NOTE: Used by organizem_test.py unit tests
     def __repr__(self):
         """
         Returns form of object matching form produced by PyYaml.#load() when it loads
@@ -186,44 +236,8 @@ class Item(object):
         elems.append({Elem.PROJECT : self.project})
         elems.append({Elem.TAGS : self.tags})
         elems.append({Elem.ACTIONS : self.actions})
+        elems.append({Elem.PRIORITY : self.priority})
         elems.append({Elem.DUE_DATE : self.due_date})
         elems.append({Elem.NOTE : self.note})
         item_repr[Elem.ROOT] = elems
         return repr(item_repr)
-    
-    
-    def _to_yaml(self):
-        ret = []
-        ret.append(str(self._root))
-        ret.append(str(self._title))
-        ret.append(str(self._area))
-        ret.append(str(self._project))
-        ret.append(str(self._tags))
-        ret.append(str(self._actions))
-        ret.append(str(self._due_date))
-        ret.append(str(self._note))
-        return '\n'.join(ret)
-
-        
-        
-    def __load_elems(self, kwelements):
-      area = None
-      project = None
-      tags = None
-      actions = None
-      due_date = None
-      note = None        
-      elems = kwelements.keys()        
-      if Elem.AREA in elems:
-          area = kwelements[Elem.AREA]
-      if Elem.PROJECT in elems:
-          project = kwelements[Elem.PROJECT]
-      if Elem.TAGS in elems: 
-          tags = kwelements[Elem.TAGS]
-      if Elem.ACTIONS in elems: 
-          actions = kwelements[Elem.ACTIONS]
-      if Elem.DUE_DATE in elems: 
-          due_date = kwelements[Elem.DUE_DATE]
-      if Elem.NOTE in elems: 
-          note = kwelements[Elem.NOTE]
-      return area, project, tags, actions, due_date, note

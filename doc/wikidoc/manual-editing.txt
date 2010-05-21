@@ -6,6 +6,7 @@ The Organize-m data format for items looks like this:
 &nbsp;&nbsp;@- project: save my children's future on Earth@<br/>
 &nbsp;&nbsp;@- tags: ['world climate, children']@<br/>
 &nbsp;&nbsp;@- actions: ['write congressman, join organization promoting alternative energy']@<br/>
+&nbsp;&nbsp;@- priority: P1@<br/>
 &nbsp;&nbsp;@- due_date: 1-1-2012@<br/>
 &nbsp;&nbsp;@- note: |@<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;@My Note on multiple lines and lines@<br/>
@@ -17,8 +18,8 @@ The data is stored in YAML format.  YAML is lightly structured, so the file is e
 
 In particular:
 * The root @item@ field must be called that
-* Each child element field -- @title@, @area@, @project@, @tags@, @actions@, @due_date@ and @note@ -- must be called by the names shown here and appear in the order shown here
-* Values for @title, area, project@ and @due_date@ are one-line strings. Do _not_ enclose these in single or double quotes.
+* Each child element field -- @title@, @area@, @project@, @tags@, @actions@, @priority@, @due_date@ and @note@ -- must be called by the names shown here and appear in the order shown here
+* Values for @title, area, project, priority@ and @due_date@ are one-line strings. Do _not_ enclose these in single or double quotes.
 * Values for @tags@ and @actions@ are multi-value lists, enclosed in square brackets, with single or double quotes around each item, with items separated by commas.
 * @due_date@ doesn't have any special date handling at this time.
 * @note@ is a special YAML multi-line field.  This means it can contain arbitrary text of any number of lines desired.  However, each line must be indented six spaces.  An editor with YAML support will indent each line as you create it.

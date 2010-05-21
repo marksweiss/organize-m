@@ -7,7 +7,8 @@ from item import Elem, Item
 
 
 # TODO Move into real config? Make user-configurable?
-DATA_FILE = "orgm.dat"
+DATA_FILE = "orgm_test.dat" # "orgm.dat"
+# TEST_DATA_FILE = "orgm_test.dat"
 
 
 class OrganizemIllegalUsageException(Exception): pass
@@ -31,6 +32,7 @@ class ActionArg(object):
     BY_PROJECT = 'by_project'
     BY_TAGS = 'by_tags'
     BY_ACTIONS = 'by_actions'
+    BY_PRIORITY = 'by_priority'
 
 
 class Organizem(object):
@@ -44,8 +46,11 @@ class Organizem(object):
     # Testers, extenders or anyone who wants to use Organizem programatically
     #  can call these public methods directly. Regular usage is from commmand line
     #  which only uses #run_cli()
-    def __init__(self, data_file=DATA_FILE):
+    def __init__(self, data_file=DATA_FILE, is_unit_testing=False):
         self.data_file = data_file
+        # Just a flag used by organizem_test.py to turn off find() message
+        #  when no matches are found -- it's distracting when running tests
+        self._is_unit_test = is_unit_testing
         
     # Just appends item to end of file using Item.__str__()
     # Maybe there is a way to leverage the library to yaml-ize transparently?
@@ -61,8 +66,8 @@ class Organizem(object):
     # NOTE: element must be one of the "enums" in class Element (other than ROOT)
     # NOTE: Returns list of 0 or more Items
     def find_items(self, element, pattern, use_regex_match=False):
-        ret = self._find_or_filter_items(element, pattern, use_regex_match, is_filter=False)
-        if len(ret) == 0:
+        ret = self._find_or_filter_items(element, pattern, use_regex_match, is_filter=False)        
+        if len(ret) == 0 and not self._is_unit_test:
             print 'No Items found matching Element = %s. Pattern to match = %s' % (element, pattern)
         return ret
         
@@ -123,11 +128,20 @@ class Organizem(object):
     #  include group labels as YAML comments.  But tests can pass False
     #  to bypass this and just test items written correctly.
     def regroup_data_file(self, element, with_group_labels=True):
-        grouped_items = self.get_grouped_items(element)        
+        grouped_items = self.get_grouped_items(element) 
+        
+        # TEMP DEBUG
+        keys = grouped_items.keys()
+        print keys
+        keys.sort()
+        print keys
+               
         items = []
         if grouped_items is None:
             return ""
-        for group_key in grouped_items.keys():
+        group_keys = grouped_items.keys()
+        group_keys.sort()
+        for group_key in group_keys:
             # Mark each group in the regrouped file with a group name label
             if with_group_labels:
                 group_label = ('# %s' % group_key)
@@ -154,9 +168,9 @@ class Organizem(object):
     #  to orgm.py#__main__()     
     def run_cli(self, title, args):  
         # Validate (TODO) and load args
-        action, title, area, project, tags, actions, due_date, note, \
+        action, title, area, project, tags, actions, priority, due_date, note, \
             use_regex_match, filename, \
-            by_title, by_area, by_project, by_tags, by_actions = \
+            by_title, by_area, by_project, by_tags, by_actions, by_priority = \
             self._run_cli_load_args(args)        
         # For actions matching on an element value, figure out which one
         # NOTE: Just uses first one. DOES NOT validate only one passed in 
@@ -165,7 +179,8 @@ class Organizem(object):
                 
         # For actions modified by a group_by arg, figure out which one
         group_elem = \
-            self._run_cli_get_group_elem(action, by_title, by_area, by_project, by_tags, by_actions)
+            self._run_cli_get_group_elem(action, by_title, by_area, by_project, \
+                by_tags, by_actions, by_priority)
 
         # Now turn cmd line action and arguments into Organizem API call
         if action == Action.ADD:
@@ -173,7 +188,7 @@ class Organizem(object):
                 raise OrganizemIllegalUsageException("'--add' action must include '--title' element and a value for title.")
             item = Item(title, \
                 area=area, project=project, tags=tags, \
-                actions=actions, due_date=due_date, \
+                actions=actions, priority=priority, due_date=due_date, \
                 note=note)
             self.add_item(item)
             
@@ -227,13 +242,15 @@ class Organizem(object):
         title = self._trim_quotes(args.title)
         area = self._trim_quotes(args.area)
         project = self._trim_quotes(args.project)
+        priority = self._trim_quotes(args.priority)
         due_date = self._trim_quotes(args.due_date)
         note = self._trim_quotes(args.note)
         filename = self._trim_quotes(args.filename)
 
-        return (action, title, area, project, tags, actions, due_date, note, \
+        return (action, title, area, project, tags, actions, priority, due_date, note, \
             args.regex, filename, \
-            args.by_title, args.by_area, args.by_project, args.by_tags, args.by_actions) 
+            args.by_title, args.by_area, args.by_project, args.by_tags, \
+            args.by_actions, args.by_priority) 
      
     def _trim_quotes(self, arg):
         if arg is None or len(arg) < 2:
@@ -265,7 +282,7 @@ class Organizem(object):
                 match_val = note
         return (match_elem, match_val)
       
-    def _run_cli_get_group_elem(self, action, by_title, by_area, by_project, by_tags, by_actions):
+    def _run_cli_get_group_elem(self, action, by_title, by_area, by_project, by_tags, by_actions, by_priority):
         group_elem = None
         if action == Action.SHOW_GROUPED or \
             action == Action.REBUILD_GROUPED or \
@@ -280,6 +297,8 @@ class Organizem(object):
                 group_elem = Elem.TAGS
             elif by_actions:
                 group_elem = Elem.ACTIONS
+            elif by_priority:
+                group_elem = Elem.PRIORITY
         return group_elem
     
     # Applies regex match or not, based on flag, and includes matches 

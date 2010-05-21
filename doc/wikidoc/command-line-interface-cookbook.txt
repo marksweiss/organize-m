@@ -14,9 +14,9 @@ NOTE: Mac and Linux/Unix users must precede all commands show below with @./orgm
 <br/>
 *Add item with all elements taking values*
 
-@--add --title "my item title" --area "my area" --project "my project" --tags "tag 1, tag 2"  --actions "do this now, do this later" --due_date "5-5-2010" --note "This is a short note. Long ones should be edited in the file"@
+@--add --title "my item title" --area "my area" --project "my project" --tags "tag 1, tag 2"  --actions "do this now, do this later" priority "P1" --due_date "5-5-2010" --note "This is a short note. Long ones should be edited in the file"@
 
-@-a -t "my item title" -A "my area" -p "my project" -T "tag 1, tag 2"  -c "do this now, do this later" -d "5-5-2010" -n "This is a short note. Long ones should be edited in the file"@
+@-a -t "my item title" -A "my area" -p "my project" -T "tag 1, tag 2"  -c "do this now, do this later" -P "P" -d "5-5-2010" -n "This is a short note. Long ones should be edited in the file"@
 
 <br/>
 *Append an empty item to the end of the data file because you want to then go into the file and edit it*
@@ -40,11 +40,11 @@ NOTE: Mac and Linux/Unix users must precede all commands show below with @./orgm
 @-a -t "my item title" -c "do this right away, do this later"@
 
 <br/>
-*Add a floating non-project item with a title, actions and a due_date*
+*Add a floating non-project item with a title, actions, priority and a due_date*
 
-@--add --title "my item title" --actions "do this right away, do this later" --due_date "5-10-2010"@
+@--add --title "my item title" --actions "do this right away, do this later" --priority "P1" --due_date "5-10-2010"@
 
-@-a -t "my item title" -c "do this right away, do this later" -d "5-10-2010"@
+@-a -t "my item title" -c "do this right away, do this later" -P "P1" -d "5-10-2010"@
 
 <br/>
 *Add a project item*
@@ -54,7 +54,7 @@ NOTE: Mac and Linux/Unix users must precede all commands show below with @./orgm
 @-a -t "my item title" -p "my project" -c "do this right away, do this later" -d "5-10-2010"@
 
 <br/>
-*Use areas of responsibility to group items and projects*
+*Use various attributes to quickly report on items grouped by various elements*
 
 _Grouping Items_
 
@@ -119,6 +119,13 @@ _Match partial titles by passing --regex flag and --title match predicate_
 @-f -x -T "tag*"@
 
 <br/>
+*Show items grouped in priority order*
+
+@--show-grouped --by_priority@
+
+@-a -P
+
+<br/>
 *Quickly display to stdout all values for title, area of responsibility, project, tags and actions*
 
 _This is handy to, for example, see what tags you have used already to keep them consistent_
@@ -169,11 +176,15 @@ _This is a handy report to create a "checklist" of grouped items_
 
 @--rebuild_grouped --by_tags@
 
+@--rebuild_grouped --by_priority@
+
 @-R -2@
 
 @-R -3@
 
 @-R -4@
+
+@-R -6
 
 <br/>
 *Backup your data*

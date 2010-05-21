@@ -10,6 +10,8 @@
 ** tags (exact or regex match of terms provided)
 
 NOTE: Windows users must precede all commands shown below with: @python orgm.py@
+NOTE: Mac and Linux users must precede all commands shown below with: @./orgm.py@
+
 * Simple, intuitive, consistent command line actions.
 ** --add --title "cut the grass" --project "fix up the house" --due_date 5-10-2010 --note "This has been a long time coming"
 ** -a -t "cut the grass" -p "fix up the house" -d 5-10-2010 -n "This has been a long time coming"
@@ -32,6 +34,7 @@ NOTE: Windows users must precede all commands shown below with: @python orgm.py@
 ** project
 ** tags
 ** actions
+** priority
 ** earliest action due date
 ** note (free text of any any length)
 
@@ -45,11 +48,15 @@ NOTE: Windows users must precede all commands shown below with: @python orgm.py@
 ** project
 ** area of responsibility
 ** tags
+** priority
+** actions
 
 * Rebuild the text file from the command line, to regroup it by
 ** project
 ** area of responsibility
 ** tags
+** priority
+** actions
 
 * Report on item element values
 ** all titles (alpha order, due date order)
@@ -57,5 +64,6 @@ NOTE: Windows users must precede all commands shown below with: @python orgm.py@
 ** all areas (alpha order)
 ** all tags (alpha order)
 ** all actions (alpha order)
+** all prioities (alpha order)
 
 * Support for backup of data file to provided backup file name

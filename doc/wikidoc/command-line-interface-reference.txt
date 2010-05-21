@@ -24,6 +24,7 @@ _Add_
 @[-p | --project]@  - project the item is part of
 @[-T | --tags]@  - tags associated with the item
 @[-c | --actions]@  - item actions that need to be taken
+@[-P | --priority]@  - priority of the item
 @[-d | --due_date]@  - date first action associated with item is due 
 @[-n | --note]@  - additional freeform text associated with item
 
@@ -35,6 +36,7 @@ _Add_
       @--project "my project"@ 
       @--tags "tag 1, tag 2"@  
       @--actions "do this now, do this later"@ 
+      @--priority "P1"@ 
       @--due_date "5-5-2010"@
       @--note "This is a short note. Long ones should be edited in the file"@
 
@@ -81,10 +83,12 @@ _Show Items, Grouped_
 @[-3 | --by_project]@
 @[-4 | --by_tags]@
 @[-5 | --by_actions]@
+@[-6 | --by_priority]@
 
 @--show_grouped --by_area@
 @--show_grouped --by_project@
 @--show_grouped --by_tags@
+@--show_grouped --by_priority@
 
 <br/>
 _Show Element Values_
@@ -96,6 +100,7 @@ _Show Element Values_
 @--show_elements --by_project@
 @--show_elements --by_tags@
 @--show_elements --by_actions@
+@--show_elements --by_priority@
 
 <br/>
 _Rebuild/Regroup Data File_
@@ -105,6 +110,7 @@ _Rebuild/Regroup Data File_
 @--rebuild_grouped --by_area@
 @--rebuild_grouped --by_project@
 @--rebuild_grouped --by_tags@
+@--rebuild_grouped --by_priority@
 
 <br/>
 _Backup_
