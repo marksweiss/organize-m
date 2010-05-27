@@ -128,14 +128,7 @@ class Organizem(object):
     #  include group labels as YAML comments.  But tests can pass False
     #  to bypass this and just test items written correctly.
     def regroup_data_file(self, element, with_group_labels=True):
-        grouped_items = self.get_grouped_items(element) 
-        
-        # TEMP DEBUG
-        keys = grouped_items.keys()
-        print keys
-        keys.sort()
-        print keys
-               
+        grouped_items = self.get_grouped_items(element)               
         items = []
         if grouped_items is None:
             return ""
