@@ -236,13 +236,13 @@ def main(argv):
     parser.add_option("-n", "--note", 
                       action="store", dest=Elem.NOTE, default="",
                       help="Additional note for the Item. Optional.")
-    
-    
+     
     (options, args) = parser.parse_args()
 
-    # Check for config from command line
-    if args.data_file:
-        data_file = args.data_file
+    # Check for config from command line for data file
+    data_file = None
+    if options.action == 'setconf_data_file':
+        data_file = eval('options.' + ActionArg.FILENAME)
     
     orgm = Organizem(data_file=data_file)
     orgm.run_cli(options.title, options)

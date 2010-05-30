@@ -1,5 +1,5 @@
-# Manually change orgm.py to use a different data file
-"orgm_mantest.dat"
+# Change orgm.py to use a test data file
+python orgm.py --setconf_data_file --filename "../test/orgm_mantest.dat"
 
 # Test --add and populate items used in --show_grouped, --show_elements and --rebuild_groups
 # Run this and check the file orgm.dat
@@ -17,7 +17,7 @@ python orgm.py --add --title "my title 3" --area "my area" --project "my project
 
 # Test --add_empty
 # Run this and check the file orgm.dat
-python orgm.py --add_empty 
+python orgm.py --add_empty
 
 # Test --find
 python orgm.py --find --title "my title"
@@ -43,5 +43,9 @@ python orgm.py --rebuild_grouped --by_area
 python orgm.py --rebuild_grouped --by_priority
 
 # Test --backup
+# Change orgm.py to use a test backup data file
+python orgm.py --setconf_backup_file --filename "test/orgm_mantest_bak.dat"
 # Run this and check the file --filename
-python orgm.py --backup --filename "MyOrgmData.bak"
+python orgm.py --backup
+# Run again with --filename arg to check that it overrides
+python orgm.py --backup --filename "test/orgm_mantest_bak_override.dat"

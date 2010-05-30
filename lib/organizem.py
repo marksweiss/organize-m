@@ -13,8 +13,10 @@ class Conf(object):
     DATA_FILE_DFLT_PATH = '../orgm.dat'
     BAK_FILE = 'bak_file'
     BAK_FILE_DFLT_PATH = '../orgm_bak.dat'
-    CONF_PATH = '../conf/orgm.conf'
-        
+    CONF_PATH = 'conf/orgm.conf'
+    CONF_TEST_PATH = '../conf/orgm.conf'
+    
+    
     # TODO GET RID OF THIS
     # Config stores version of current installation of Organizem
     # VERSION_PATH = 'conf/VERSION'
@@ -65,6 +67,9 @@ class Organizem(object):
     #  can call these public methods directly. Regular usage is from commmand line
     #  which only uses #run_cli()
     def __init__(self, data_file=None, is_unit_testing=False):
+        # Flag used by find() and _init_conf(), so must be set here at top of init
+        self._is_unit_testing = is_unit_testing
+
         # Load any previously stored config settings
         self._conf = self._init_conf()
         
@@ -82,10 +87,6 @@ class Organizem(object):
             self.bak_file = self._conf[Conf.BAK_FILE]
         else:
             self.bak_file = Conf.DATA_FILE_DFLT_PATH
-
-        # Just a flag used by organizem_test.py to turn off find() message
-        #  when no matches are found -- it's distracting when running tests
-        self._is_unit_test = is_unit_testing
            
         # TODO GET RID OF THIS
         # Test to see if a new version of Organizem was installed since last use
@@ -101,7 +102,7 @@ class Organizem(object):
             f.write(str(item))
     
     def add_empty(self):
-        self.add_item(Item(''))
+        self.add_item(Item('DUMMY REQUIRED TITLE ELEMENT'))
     
     # NOTE: Finds all matching items, trying to match the element, value passed
     #  in, e.g. TITLE and a title value, PROJECT and a project value, etc.
@@ -109,7 +110,7 @@ class Organizem(object):
     # NOTE: Returns list of 0 or more Items
     def find_items(self, element, pattern, use_regex_match=False):
         ret = self._find_or_filter_items(element, pattern, use_regex_match, is_filter=False)        
-        if len(ret) == 0 and not self._is_unit_test:
+        if len(ret) == 0 and not self._is_unit_testing:
             print 'No Items found matching Element = %s. Pattern to match = %s' % (element, pattern)
         return ret
         
@@ -179,9 +180,7 @@ class Organizem(object):
         for group_key in group_keys:
             # Mark each group in the regrouped file with a group name label
             if with_group_labels:
-                group_label = ('# %s' % group_key)
-                border =  '# ' + ((len(group_label) - 2) * '-')
-                label = '\n' + border + '\n' + group_label + '\n' + border
+                label = self._format_group_label(element, group_key)
                 items.append(label)
             # Append the list of items for this group
             items.extend(grouped_items[group_key])
@@ -255,7 +254,8 @@ class Organizem(object):
             group_keys = grouped_items.keys()
             group_keys.sort()
             for group_key in group_keys:
-                print '\n\n*** ' + group_key + ' ***'
+                label = self._format_group_label(group_elem, group_key)
+                print label
                 for item in grouped_items[group_key]:                    
                     print str(item)
         
@@ -297,9 +297,9 @@ class Organizem(object):
         # Do this to avoid matching bugs depending on how elements were entered
         #  in data file or from CLI
         tags = args.tags.split(',')
-        tags = [self._trim_quotes(t) for t in tags]        
+        tags = [self._trim_quotes(t).strip() for t in tags]        
         actions = args.actions.split(',')
-        actions = [self._trim_quotes(a) for a in actions]
+        actions = [self._trim_quotes(a).strip() for a in actions]
         # Trim single or double quotes from elements that have string values
         action = self._trim_quotes(args.action)
         title = self._trim_quotes(args.title)
@@ -311,10 +311,10 @@ class Organizem(object):
         filename = self._trim_quotes(args.filename)
         
         # Validation
-        if action == ACTION.ADD and (title is None or len(title) == 0):
+        if action == Action.ADD and not title:
             raise OrganizemIllegalUsageException("'--add' action must include '--title' element and a value for title.")            
-        if (action == ACTION.SETCONF_DATAFILE or action == ACTION.SETCONF_BAK_FILE) \
-            and (filename is None or len(filename) == 0):
+        if (action == Action.SETCONF_DATA_FILE or action == Action.SETCONF_BAK_FILE) \
+            and not filename:
             raise OrganizemIllegalUsageException("'--setconf_*' actions must include '--filename' element and a value for filename.")
 
         return (action, title, area, project, tags, actions, priority, due_date, note, \
@@ -333,6 +333,12 @@ class Organizem(object):
         while k > 0 and (arg[k-1] == '"' or arg[k-1] == "'"):
             k -= 1
         return arg[j:k]
+        
+    def _format_group_label(self, elem, group_key):
+        group_label = ('# %s: %s' % (elem, group_key))
+        border = '# ' + ((len(group_label) - 2) * '-')
+        label = '\n\n' + border + '\n' + group_label + '\n' + border              
+        return label
 
     def _run_cli_get_match(self, action, title, tags, actions, note):
         match_elem = None
@@ -473,7 +479,10 @@ class Organizem(object):
         self._conf[conf] = value
         # Always persist current state to disk. Next call to _init_conf()
         #  must retrieve the latest configuration values
-        with open(Conf.CONF_PATH, 'w') as f:
+        conf_path = Conf.CONF_PATH
+        if self._is_unit_testing:
+            conf_path = Conf.CONF_TEST_PATH
+        with open(conf_path, 'w') as f:
             f.write(str(self._conf))
     
     def _get_conf(self, conf):
@@ -482,7 +491,10 @@ class Organizem(object):
 
     def _init_conf(self):
         self._conf = {}
-        with open(Conf.CONF_PATH) as f:
+        conf_path = Conf.CONF_PATH
+        if self._is_unit_testing:
+            conf_path = Conf.CONF_TEST_PATH
+        with open(conf_path) as f:
             stored_conf = f.read()
             if stored_conf:
                 self._conf = eval(stored_conf)

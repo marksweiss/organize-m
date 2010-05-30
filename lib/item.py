@@ -160,53 +160,40 @@ class Item(object):
     def init_from_py_item(py_item):
         """Converts Item serialized to Python object form, dicts and lists, to YAML"""
         
-        # The list of elements an Item must have for this version of Organizem
+        # The list of names of elements an Item must have for this version
         elem_names = Elem.elem_list()
-        # Elements in the py_item
-        py_elems = py_item[Elem.ROOT]
         # List of names of elements in the py_item
-        py_elem_names = Item._get_py_item_elem_names(py_item)
-        
+        py_elem_names = Item._get_py_item_elem_list(py_item)
+
         # Item must have title element, so check for that first
-        # Note: PyItems come back as list of dicts, one dict per element, one
-        #  entry per dict, key/val being the name and value of the element 
-        if Elem.TITLE not in py_elem_names:
-            raise OrganizemIllegalDataFormatException("Attempted to load Item from data file without required 'title' element")
-        idx = py_elem_names.index(Elem.TITLE)
-        title = py_elems[idx][Elem.TITLE]
+        title = Item._get_py_item_title(py_item, py_elem_names)
         # Now reset elem_names to skip TITLE
         elem_names = elem_names[1:]
         
-        # Store these and eval by reference to a bound name in local scope
-        #  because eval(x) where x is a multiline string literal fails on
-        #  exception from scanning literal and finding an EOL in it
-        # So, store the multiline string in this local List.  Put the
-        #  note_vals[idx] into the string to be evaled.  Eval will evaluate
-        #  that var reference, resolve it to this list in local scope, and 
-        #  evaluate with the multiline string value
-        # And, yes, this is a pretty sweet hack
-        note_vals = []        
         # Handling dynamic list of kwargs to __init__(), so build string
         #  dynamically and make __init__() call an eval()
         init_call = []
-        init_call.append('Item(title')       
+        init_call.append('Item(title')
+        # eval(x) where x is a multiline string literal fails on
+        #  exception from scanning literal and finding an EOL in it
+        # So, store the multiline string in this local List.  Put the
+        #  note_vals[idx] into the string to be evaled.
+        # And, yes, this is a pretty sweet hack
+        note_vals = []                
+        # Algo:
         #  - Iterate the list of expected elements, item_elems
         #  - Test for matching elem in py_item passed in (which was loaded from data)
-        #  - Make sure this test is order independent, to not miss matching
         #  - If found, add to kwargs list with py_item value for Item.__init__()
         #  - If not found, add to kwargs list with None value for Item.__init__()
-        # This insures that all Items have current set of Elements                
         for elem_name in elem_names:
             if elem_name in py_elem_names:
                 idx = py_elem_names.index(elem_name)
+                py_elems = py_item[Elem.ROOT]
                 py_elem_val = py_elems[idx][elem_name]
                 py_elem_val = Elem.elem_val_to_str(elem_name, py_elem_val)                
                 if py_elem_val:
                     # Handle special case of multiline string value for Note elem
-                    # Bind to local list at index storing this multiline string value
-                    #  If don't do this, eval() fails because it can't contain a 
-                    #  multiline string literal.  See comment above where note_vals[]
-                    #  is declared
+                    # See comment above where note_vals[] is declared
                     if elem_name == Elem.NOTE:
                         note_vals.append(py_elem_val)
                         val_idx = len(note_vals) - 1
@@ -224,10 +211,22 @@ class Item(object):
         return item
     
     @staticmethod
-    def _get_py_item_elem_names(py_item):
+    def _get_py_item_elem_list(py_item):
         elems = py_item[Elem.ROOT]
         num_elems = len(elems)
         return [elems[j].keys()[0] for j in range(0, num_elems)]
+
+    @staticmethod
+    def _get_py_item_title(py_item, py_elem_names):
+        # Elements in the py_item
+        py_elems = py_item[Elem.ROOT]                
+        if Elem.TITLE not in py_elem_names:
+            raise OrganizemIllegalDataFormatException("Attempted to load Item from data file without required 'title' element")
+        idx = py_elem_names.index(Elem.TITLE)
+        title = py_elems[idx][Elem.TITLE]
+        if not title:
+            raise OrganizemIllegalDataFormatException("Attempted to load Item from data file without value for required 'title' element")
+        return title
                 
     def get_elem_val(self, element):
         if element == Elem.TITLE:

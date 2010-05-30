@@ -3,12 +3,14 @@ import unittest
 import sys
 sys.path.insert(0, '..')
 from lib.item import Item, Elem
-from lib.organizem import Organizem
+from lib.organizem import Organizem, Conf
 
 
 TEST_DATA_FILE = "orgm_test.dat"
+TEST_BAK_FILE = "orgm_test_bak.dat"
 IS_UNIT_TESTING = True
-
+Organizem(TEST_DATA_FILE, IS_UNIT_TESTING).setconf(Conf.BAK_FILE, TEST_BAK_FILE)
+      
 
 class OrganizemTestCase(unittest.TestCase):
     
@@ -17,7 +19,7 @@ class OrganizemTestCase(unittest.TestCase):
         with open(TEST_DATA_FILE, 'w') as f:
             item = Item("TEST_ITEM")
             f.write(str(item))
-
+            
     # Tests
     def test_init_item(self):
         title = "title"
