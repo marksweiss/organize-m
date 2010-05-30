@@ -13,6 +13,11 @@ __version__ = "0.8.4"
 # __all__ = [""]
 
 
+# TODO Move into real config? Make user-configurable?
+data_file = 'orgm.dat'
+bak_file = data_file + '_bak'
+
+
 def main(argv):
     """
     Collect the command line arguments and pass them to Organizem.py for processing.
@@ -116,7 +121,14 @@ def main(argv):
 [-F | --filename]
 
 --backup --file_name "/MyPath/MyBackupOrgmFile.dat"
+
+[-D | --setconf_data_file] - Store a configuration for location of data file. Persisted and will be reused across Organize-m sessions.
+--setconf_data_file --file_name "/MyPath/MyOrgmFile.dat"
+[-B | --setconf_backup_file] - Store a configuration for location of backup file. Persisted and will be reused across Organize-m sessions.
+--setconf_backup_file --file_name "/MyPath/MyBackupOrgmFile.dat"
   """
+# TODO GET RID OF THIS   [-l | --reload] - reload all item data. Required to add new Elements to existing Items if upgrade adds Element(s)
+
     parser = OptionParser(usage=usage)
     
     # CLI Action. All map to storing in same dest variable, so only one can be
@@ -146,7 +158,27 @@ def main(argv):
     parser.add_option("-b", "--backup", 
                       action="store_const", const=Action.BACKUP, dest="action",  
                       help="Backup data file. Takes mandatory additonal argument --filename [My_Filename.txt]")
-        
+    # TODO GET RID OF THIS
+    #parser.add_option("-l", "--reload", 
+    #                  action="store_const", const=Action.RELOAD, dest="action",  
+    #                  help="Reload data file.  Required to add new Elements to existing Items if upgrade adds new Element(s)"
+                      
+    # Configuration
+    # Users call these to set config options that persist across calls to Organizem 
+    #  and across shell sessions.  These are managed in a config by the app, but
+    #  the user interacts with them only from CLI.  Thought about making the config
+    #  editable, but it seemed to add a third interface for the user with no benefit.
+    # The cost is that these CLI commands have slightly different semantics -- they
+    #  are not per-call, but rather they are persistent.  To denote this they are
+    #  all preceded with --setconf_*.
+    # TODO ADD TO DOCS
+    parser.add_option("-D", "--setconf_data_file",
+                      action="store_const", const=Action.SETCONF_DATA_FILE, dest="action",
+                      help="Alternate location for Organize-m data file. Optional. Default data file is 'orgm.dat'.")
+    parser.add_option("-B", "--setconf_backup_file",
+                      action="store_const", const=Action.SETCONF_BAK_FILE, dest="action",
+                      help="Location for Organize-m backup file. If set, each call to --backup uses this location, unless that call passes a --filename arg, in which case the value for --filename will be used. Optional. Default data file is 'orgm.dat_bak'.")
+  
     # CLI Modifiers/Options (or for the APL-ers in the room, "adverbs")
     # These modify the action which is the first arg.  
     # They must be second, preceding any element arguments.
@@ -204,10 +236,15 @@ def main(argv):
     parser.add_option("-n", "--note", 
                       action="store", dest=Elem.NOTE, default="",
                       help="Additional note for the Item. Optional.")
-      
+    
+    
     (options, args) = parser.parse_args()
 
-    orgm = Organizem()
+    # Check for config from command line
+    if args.data_file:
+        data_file = args.data_file
+    
+    orgm = Organizem(data_file=data_file)
     orgm.run_cli(options.title, options)
 
     

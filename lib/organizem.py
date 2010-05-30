@@ -6,13 +6,25 @@ from odict import OrderedDict
 from item import Elem, Item
 
 
-# TODO Move into real config? Make user-configurable?
-DATA_FILE = "orgm_test.dat" # "orgm.dat"
-# TEST_DATA_FILE = "orgm_test.dat"
-
-
 class OrganizemIllegalUsageException(Exception): pass
 
+class Conf(object):
+    DATA_FILE = 'data_file'
+    DATA_FILE_DFLT_PATH = '../orgm.dat'
+    BAK_FILE = 'bak_file'
+    BAK_FILE_DFLT_PATH = '../orgm_bak.dat'
+    CONF_PATH = '../conf/orgm.conf'
+        
+    # TODO GET RID OF THIS
+    # Config stores version of current installation of Organizem
+    # VERSION_PATH = 'conf/VERSION'
+    # Config stores version of previous installation of Organizem
+    # If these don't match when checked, then all items must be checked to see
+    #  if fields have been added by new version.  If they have, Organizem rewrites
+    #  the data file with all values for existing items and empty new Elements
+    #  in each Item for new Elements
+    # TODO GET RID OF THIS
+    # USER_DATA_VERSION_PATH = 'conf/USER_DATA_VERSION'
 
 class Action(object):
     ADD = 'add'
@@ -23,6 +35,10 @@ class Action(object):
     SHOW_ELEMENTS = 'show_elements'
     REBUILD_GROUPED = 'rebuild_grouped'
     BACKUP = 'backup'
+    # TODO GET RID OF THIS
+    # RELOAD = 'reload'
+    SETCONF_DATA_FILE = 'setconf_data_file'
+    SETCONF_BAK_FILE = 'setconf_bak_file'
 
 class ActionArg(object):
     REGEX = 'regex'
@@ -42,16 +58,42 @@ class Organizem(object):
     in class Actions.
     """
 
+    ############
     # Public API
+    
     # Testers, extenders or anyone who wants to use Organizem programatically
     #  can call these public methods directly. Regular usage is from commmand line
     #  which only uses #run_cli()
-    def __init__(self, data_file=DATA_FILE, is_unit_testing=False):
-        self.data_file = data_file
+    def __init__(self, data_file=None, is_unit_testing=False):
+        # Load any previously stored config settings
+        self._conf = self._init_conf()
+        
+        # Value passed as arg overrides configuration
+        if data_file:
+            self.data_file = data_file
+        # If no path passed as arg, config value is used if found
+        elif Conf.DATA_FILE in self._conf:
+            self.data_file = self._conf[Conf.DATA_FILE]
+        # No value passed as arg or previously stored in config, use default
+        else:
+            self.data_file = Conf.DATA_FILE_DFLT_PATH
+            
+        if Conf.BAK_FILE in self._conf:
+            self.bak_file = self._conf[Conf.BAK_FILE]
+        else:
+            self.bak_file = Conf.DATA_FILE_DFLT_PATH
+
         # Just a flag used by organizem_test.py to turn off find() message
         #  when no matches are found -- it's distracting when running tests
         self._is_unit_test = is_unit_testing
-        
+           
+        # TODO GET RID OF THIS
+        # Test to see if a new version of Organizem was installed since last use
+        # If yes, new Element may have been added to Item format, so reload all
+        #  Items with Element values they had before plus empty new Element
+        #  for newly added Elements
+        # self.reload()
+    
     # Just appends item to end of file using Item.__str__()
     # Maybe there is a way to leverage the library to yaml-ize transparently?
     def add_item(self, item):
@@ -148,12 +190,26 @@ class Organizem(object):
         # For conveninence, testing/debugging pass the same output back to stdout
         return "\n".join([str(item) for item in items])
         
-    def backup(self, bak_data_file=None):
-        if not bak_data_file:
-            bak_data_file = self.data_file + '_bak'
-        self._backup(bak_data_file)
+    def backup(self, bak_file=None):
+        if not bak_file:
+            bak_file = self.bak_file
+        self._backup(bak_file)
+  
+    # TODO GET RID OF THIS
+    #def reload(self):
+    #    version = self._get_version()
+    #    user_data_version = self._get_user_data_version()
+    #    if version != user_data_version:
+    #        self._set_user_data_version(version)
+    #        self._reload()
+
+    def setconf(self, conf, value):
+        self._set_conf(conf, value)
+
     
+    #########
     # CLI API
+    
     # Command line users use only this call, indirectly, by passing command lines
     #  to orgm.py#__main__(). Arg 'a' is optparser.args. Short here for cleaner code   
     # CLI API
@@ -163,7 +219,7 @@ class Organizem(object):
         # Validate (TODO) and load args
         action, title, area, project, tags, actions, priority, due_date, note, \
             use_regex_match, filename, \
-            by_title, by_area, by_project, by_tags, by_actions, by_priority = \
+            by_title, by_area, by_project, by_tags, by_actions, by_priority =\
             self._run_cli_load_args(args)        
         # For actions matching on an element value, figure out which one
         # NOTE: Just uses first one. DOES NOT validate only one passed in 
@@ -174,11 +230,9 @@ class Organizem(object):
         group_elem = \
             self._run_cli_get_group_elem(action, by_title, by_area, by_project, \
                 by_tags, by_actions, by_priority)
-
+        
         # Now turn cmd line action and arguments into Organizem API call
         if action == Action.ADD:
-            if len(title) == 0:
-                raise OrganizemIllegalUsageException("'--add' action must include '--title' element and a value for title.")
             item = Item(title, \
                 area=area, project=project, tags=tags, \
                 actions=actions, priority=priority, due_date=due_date, \
@@ -217,10 +271,26 @@ class Organizem(object):
         elif action == Action.BACKUP:
             self.backup(filename)
 
+        # TODO GET RID OF THIS
+        #elif action == Action.RELOAD:
+        #    self.reload()
 
+        elif action == Action.SETCONF_DATA_FILE:
+            self.setconf(Conf.DATA_FILE, filename)
+            
+        elif action == Action.SETCONF_BAK_FILE:
+            self.setconf(Conf.BAK_FILE, filename)
+
+
+    #########
     # Helpers
+    #########
+    
+    #####
+    # CLI
 
     # TODO add validation here
+    # TODO validate that --set_conf* also have non-empty --filename
     def _run_cli_load_args(self, args):    
         # Must split() the two list element types, so the string becomes Py list
         # Trim single and double quotes from each element
@@ -239,6 +309,13 @@ class Organizem(object):
         due_date = self._trim_quotes(args.due_date)
         note = self._trim_quotes(args.note)
         filename = self._trim_quotes(args.filename)
+        
+        # Validation
+        if action == ACTION.ADD and (title is None or len(title) == 0):
+            raise OrganizemIllegalUsageException("'--add' action must include '--title' element and a value for title.")            
+        if (action == ACTION.SETCONF_DATAFILE or action == ACTION.SETCONF_BAK_FILE) \
+            and (filename is None or len(filename) == 0):
+            raise OrganizemIllegalUsageException("'--setconf_*' actions must include '--filename' element and a value for filename.")
 
         return (action, title, area, project, tags, actions, priority, due_date, note, \
             args.regex, filename, \
@@ -294,6 +371,10 @@ class Organizem(object):
                 group_elem = Elem.PRIORITY
         return group_elem
     
+    
+    ###############################
+    # Find/Filter/Match Elem Values
+    
     # Applies regex match or not, based on flag, and includes matches 
     #  (if is_filter=False) or excludes matches (if is_filter=True)
     def _find_or_filter_items(self, element, pattern, use_regex_match, is_filter):
@@ -341,6 +422,10 @@ class Organizem(object):
                 print 'EXCEPTION: Illegal regular expression pattern: ' + pattern + '\n'         
             return rgx.search(match_val) != None
     
+    
+    ######################
+    # Data File Management
+    
     def _load(self):
         items = []
         with open(self.data_file) as f:
@@ -365,7 +450,66 @@ class Organizem(object):
   	    shutil.copyfile(self.data_file, bak_data_file)
 
     def _rewrite(self, items):
-        self._backup(self.data_file + '_bak')
+        self._backup(self.bak_file)
         with open(self.data_file, 'w') as f:     
             for item in items:
                 f.write(str(item))
+    
+    # TODO GET RID OF THIS
+    #def _reload(self):
+    #    items = self._load()
+    #    if not items or len(items) == 0:
+    #        return
+    #    # This is the current list of elements in an item, in order
+    #    elem_list = Elem.elem_list()
+    #    # Get the first Item from data -- if it's elements don't match, then
+    #    #  user data version doesn't match current version.  So rewrite all elements
+    #    #  to have the correct updated Elements per item, and then update user_data_
+    #    #  versions so we only have to do this once per version chnage per new element
+    #    item = items[0]
+    #    # TODO WRITE THIS COMPARISON OF ELEMENTS IN CURRENT ITEM AND ITEMS IN LIST FOR THIS VERSION
+                            
+    def _set_conf(self, conf, value):
+        self._conf[conf] = value
+        # Always persist current state to disk. Next call to _init_conf()
+        #  must retrieve the latest configuration values
+        with open(Conf.CONF_PATH, 'w') as f:
+            f.write(str(self._conf))
+    
+    def _get_conf(self, conf):
+        self._conf = self._init_conf()
+        return self._conf[conf]
+
+    def _init_conf(self):
+        self._conf = {}
+        with open(Conf.CONF_PATH) as f:
+            stored_conf = f.read()
+            if stored_conf:
+                self._conf = eval(stored_conf)
+        return self._conf
+
+    # TODO GET RID OF THIS and FILS IN Conf
+    #def _get_version(self):
+    #    if self._version:
+    #        return self._version
+    #    with open(Conf.VERSION_PATH) as f:
+    #        self._version = f.readline()
+    #    return self._version
+
+    # TODO GET RID OF THIS
+    #def _get_user_data_version(self):
+    #    if self._user_version:
+    #        return self._user_version
+    #    with open(Conf.USER_DATA_VERSION_PATH) as f:
+    #        self._user_version = f.readline()
+    #    return self._user_version
+
+    # TODO GET RID OF THIS
+    # Only set() for user version, because this can be updated if reload()
+    #  finds version of data file and current Organizem version don't match.
+    #  So, after reload, user version is updated.
+    # But software version is never programatically updated.  It can only be set
+    #  by the VERSION file included with each release of Organizem.
+    #def _set_user_data_version(self, version):
+    #    with open(Conf.USER_DATA_VERSION_PATH, "w") as f:
+    #        f.write(version)
