@@ -120,12 +120,12 @@ def main(argv):
 * Can optionally supply name of file to backup to. If none supplied default is used.
 [-F | --filename]
 
---backup --file_name "/MyPath/MyBackupOrgmFile.dat"
+--backup --filename "/MyPath/MyBackupOrgmFile.dat"
 
 [-D | --setconf_data_file] - Store a configuration for location of data file. Persisted and will be reused across Organize-m sessions.
---setconf_data_file --file_name "/MyPath/MyOrgmFile.dat"
+--setconf_data_file --filename "/MyPath/MyOrgmFile.dat"
 [-B | --setconf_backup_file] - Store a configuration for location of backup file. Persisted and will be reused across Organize-m sessions.
---setconf_backup_file --file_name "/MyPath/MyBackupOrgmFile.dat"
+--setconf_backup_file --filename "/MyPath/MyBackupOrgmFile.dat"
   """
 
     parser = OptionParser(usage=usage)
