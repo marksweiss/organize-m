@@ -8,6 +8,7 @@ NOTE: Mac and Linux/Unix users must precede all commands show below with @./orgm
 * Area is a string of one or more tokens enclosed in _double_ quotes
 * Tags are a list of elements of one or more tokens, separated by commas, enclosed in _double_ quotes
 * Actions are a list of elements of one or more tokens, separated by commas, enclosed in _double_ quotes
+* Priority is a string enclosed in _double_ quotes.
 * Due Date is a string enclosed in _double_ quotes. TODO for future is support a real date type
 * Note is a string of one ore more tokens enclosed in _double_ quotes
 
@@ -123,7 +124,7 @@ _Match partial titles by passing --regex flag and --title match predicate_
 
 @--show-grouped --by_priority@
 
-@-a -P
+@-a -P@
 
 <br/>
 *Quickly display to stdout all values for title, area of responsibility, project, tags and actions*
@@ -184,7 +185,7 @@ _This is a handy report to create a "checklist" of grouped items_
 
 @-R -4@
 
-@-R -6
+@-R -6@
 
 <br/>
 *Backup your data*
@@ -192,3 +193,17 @@ _This is a handy report to create a "checklist" of grouped items_
 @--backup "my_backup_data_file.txt"@
 
 @-b "my_backup_data_file.txt"@
+
+<br/>
+*Change location of data file*
+
+@--setconf_data_file --filename "my_data_file.txt"@
+
+@-D -F "my_data_file.txt"@
+
+<br/>
+*Change location of backup file to network or online location*
+
+@--setconf_backup_file --filename "~/Dropbox/my_data_file_bak.txt"@
+
+@-B -F "~/Dropbox/my_data_file_bak.txt"@

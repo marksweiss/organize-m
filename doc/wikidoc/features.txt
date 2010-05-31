@@ -28,6 +28,14 @@ NOTE: Mac and Linux users must precede all commands shown below with: @./orgm.py
 ** --rebuild_grouped --by_project
 ** --backup "my_backup_data.dat"
 
+* Configuration of data file file location.
+** --setconf_data_file --filename "my_data.data"
+
+* Configuration of backup file location, with optional override
+** --setconf_backup_file --filename "my_data.data"
+** --backup
+** --backup "my_backup_data.dat"
+
 * Associate each entry with any of the following metadata (all metadata besides title is optional)
 ** title
 ** area of responsibility

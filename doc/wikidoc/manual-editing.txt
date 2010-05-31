@@ -14,9 +14,12 @@ The Organize-m data format for items looks like this:
     
 Item data is stored in the file @orgm.dat.@  You can edit it in a text editor and changes made will be available to the command line the next time it's run.  Likewise item changes such as adding or removing items will change orgm.dat.
 
-The data is stored in YAML format.  YAML is lightly structured, so the file is easily readable and edited.  But it *is* structured -- new items you had must follow the format above.  
+The data is stored in YAML format.  YAML is lightly structured, so the file is easily readable and edited.  But it *is* structured and Organize-m needs to manipulate items with the above format.  Practically this means two things:
+* If you create items that are missing elements or put them in a different order, they will be recreated with all element fields in the correct order the next time you take an action.  All existing values for an item will be preserved.
+* Upgrading to new versions that add elements is painless -- your data is ported and reformatted automatically
 
-In particular:
+It's probably simpler to just follow the format, so that your items are consistent.  Here are slightly more formal rules.
+
 * The root @item@ field must be called that
 * Each child element field -- @title@, @area@, @project@, @tags@, @actions@, @priority@, @due_date@ and @note@ -- must be called by the names shown here and appear in the order shown here
 * Values for @title, area, project, priority@ and @due_date@ are one-line strings. Do _not_ enclose these in single or double quotes.

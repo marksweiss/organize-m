@@ -4,7 +4,7 @@ __Organize-m__ is a TODO tool that lets you seamlessly move from command line to
 
 Features
 --------
-* Items can have: **title, area of responsibility, project, tags, actions, earliest action due date, note**
+* Items can have: **title, area of responsibility, project, tags, actions, priority, earliest action due date, note**
 * Search for items from the command line
 * Report grouped items from the command line
 * Regroup the text file from the command line
