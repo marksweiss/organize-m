@@ -42,6 +42,168 @@ class ActionArg(object):
     BY_PRIORITY = 'by_priority'
 
 
+class OrgmBaseController(object):
+    def run_cmd(self, title, args):
+        pass
+
+class OrgmCliController(OrgmBaseController):
+
+    def __init__(self, data_file=None, is_unit_testing=False):
+        self._orgm_api = Organizem(data_file, is_unit_testing)
+
+    # Command line users use only this call, indirectly, by passing command lines
+    #  to orgm.py#__main__(). Arg 'a' is optparser.args. Short here for cleaner code   
+    # CLI API
+    # Command line users use only this call, indirectly, by passing command lines
+    #  to orgm.py#__main__()     
+    def run_cmd(self, title, args):  
+        # Validate (TODO) and load args
+        action, title, area, project, tags, actions, priority, due_date, note, \
+            use_regex_match, filename, \
+            by_title, by_area, by_project, by_tags, by_actions, by_priority =\
+            self._run_cli_load_args(args)        
+        # For actions matching on an element value, figure out which one
+        # NOTE: Just uses first one. DOES NOT validate only one passed in 
+        match_elem, match_val = \
+            self._run_cli_get_match(action, title, tags, actions, note)        
+            
+        # For actions modified by a group_by arg, figure out which one
+        group_elem = \
+            self._run_cli_get_group_elem(action, by_title, by_area, by_project, \
+                by_tags, by_actions, by_priority)
+    
+        # Now turn cmd line action and arguments into Organizem API call
+        if action == Action.ADD:
+            item = Item(title, \
+                area=area, project=project, tags=tags, \
+                actions=actions, priority=priority, due_date=due_date, \
+                note=note)
+            self._orgm_api.add_item(item)
+        
+        elif action == Action.ADD_EMPTY:
+            self._orgm_api.add_empty()
+    
+        elif action == Action.REMOVE:
+            self._orgm_api.remove_items(match_elem, match_val, use_regex_match)            
+
+        elif action == Action.FIND:
+            items = self._orgm_api.find_items(match_elem, match_val, use_regex_match)            
+            for item in items:              
+                print str(item)
+    
+        elif action == Action.SHOW_GROUPED:
+            grouped_items = self._orgm_api.get_grouped_items(group_elem)            
+            group_keys = grouped_items.keys()
+            group_keys.sort()
+            for group_key in group_keys:
+                label = self._orgm_api.format_group_label(group_elem, group_key)
+                print label
+                for item in grouped_items[group_key]:                    
+                    print str(item)
+    
+        elif action == Action.SHOW_ELEMENTS:
+            elems = self._orgm_api.get_elements(group_elem)
+            elems.sort()
+            for elem in elems:              
+                print elem
+                
+        elif action == Action.REBUILD_GROUPED:
+            self._orgm_api.regroup_data_file(group_elem)
+        
+        elif action == Action.BACKUP:
+            self._orgm_api.backup(filename)
+
+        elif action == Action.SETCONF_DATA_FILE:
+            self._orgm_api.setconf(Conf.DATA_FILE, filename)
+        
+        elif action == Action.SETCONF_BAK_FILE:
+            self._orgm_api.setconf(Conf.BAK_FILE, filename)
+
+    # Helpers
+
+    # TODO add validation here
+    # TODO validate that --set_conf* also have non-empty --filename
+    def _run_cli_load_args(self, args):    
+        # Must split() the two list element types, so the string becomes Py list
+        # Trim single and double quotes from each element
+        # Do this to avoid matching bugs depending on how elements were entered
+        #  in data file or from CLI
+        tags = args.tags.split(',')
+        tags = [self._trim_quotes(t).strip() for t in tags]        
+        actions = args.actions.split(',')
+        actions = [self._trim_quotes(a).strip() for a in actions]
+        # Trim single or double quotes from elements that have string values
+        action = self._trim_quotes(args.action)
+        title = self._trim_quotes(args.title)
+        area = self._trim_quotes(args.area)
+        project = self._trim_quotes(args.project)
+        priority = self._trim_quotes(args.priority)
+        due_date = self._trim_quotes(args.due_date)
+        note = self._trim_quotes(args.note)
+        filename = self._trim_quotes(args.filename)
+    
+        # Validation
+        if action == Action.ADD and not title:
+            raise OrganizemIllegalUsageException("'--add' action must include '--title' element and a value for title.")            
+        if (action == Action.SETCONF_DATA_FILE or action == Action.SETCONF_BAK_FILE) \
+            and not filename:
+            raise OrganizemIllegalUsageException("'--setconf_*' actions must include '--filename' element and a value for filename.")
+
+        return (action, title, area, project, tags, actions, priority, due_date, note, \
+            args.regex, filename, \
+            args.by_title, args.by_area, args.by_project, args.by_tags, \
+            args.by_actions, args.by_priority) 
+ 
+    def _trim_quotes(self, arg):
+        if arg is None or len(arg) < 2:
+            return arg
+        # Count leading and trailing quotes and slice them all away. Hacky.
+        j = 0
+        k = len(arg)
+        while j < k and (arg[j] == '"' or arg[j] == "'"):
+            j += 1
+        while k > 0 and (arg[k-1] == '"' or arg[k-1] == "'"):
+            k -= 1
+        return arg[j:k]
+
+    def _run_cli_get_match(self, action, title, tags, actions, note):
+        match_elem = None
+        match_val = None
+        if action == Action.FIND or action == Action.REMOVE:
+            if len(title):
+                match_elem = Elem.TITLE
+                match_val = title
+            elif len(tags):
+                match_elem = Elem.TAGS
+                match_val = tags                
+            elif len(actions):
+                match_elem = Elem.ACTIONS
+                match_val = actions            
+            elif len(note):
+                match_elem = Elem.NOTE
+                match_val = note
+        return (match_elem, match_val)
+  
+    def _run_cli_get_group_elem(self, action, by_title, by_area, by_project, by_tags, by_actions, by_priority):
+        group_elem = None
+        if action == Action.SHOW_GROUPED or \
+            action == Action.REBUILD_GROUPED or \
+            action == Action.SHOW_ELEMENTS:
+            if by_title:
+                group_elem = Elem.TITLE
+            elif by_area:
+                group_elem = Elem.AREA
+            elif by_project:
+                group_elem = Elem.PROJECT
+            elif by_tags:
+                group_elem = Elem.TAGS
+            elif by_actions:
+                group_elem = Elem.ACTIONS
+            elif by_priority:
+                group_elem = Elem.PRIORITY
+        return group_elem
+  
+
 class Organizem(object):
     """
     Manages an Organizem TODO data file, binding to a data file by name
@@ -49,7 +211,6 @@ class Organizem(object):
     in class Actions.
     """
 
-    ############
     # Public API
     
     # Testers, extenders or anyone who wants to use Organizem programatically
@@ -162,7 +323,7 @@ class Organizem(object):
         for group_key in group_keys:
             # Mark each group in the regrouped file with a group name label
             if with_group_labels:
-                label = self._format_group_label(element, group_key)
+                label = self.format_group_label(element, group_key)
                 items.append(label)
             # Append the list of items for this group
             items.extend(grouped_items[group_key])
@@ -178,177 +339,15 @@ class Organizem(object):
   
     def setconf(self, conf, value):
         self._set_conf(conf, value)
-
-    
-    #########
-    # CLI API
-    
-    # Command line users use only this call, indirectly, by passing command lines
-    #  to orgm.py#__main__(). Arg 'a' is optparser.args. Short here for cleaner code   
-    # CLI API
-    # Command line users use only this call, indirectly, by passing command lines
-    #  to orgm.py#__main__()     
-    def run_cli(self, title, args):  
-        # Validate (TODO) and load args
-        action, title, area, project, tags, actions, priority, due_date, note, \
-            use_regex_match, filename, \
-            by_title, by_area, by_project, by_tags, by_actions, by_priority =\
-            self._run_cli_load_args(args)        
-        # For actions matching on an element value, figure out which one
-        # NOTE: Just uses first one. DOES NOT validate only one passed in 
-        match_elem, match_val = \
-            self._run_cli_get_match(action, title, tags, actions, note)        
-                
-        # For actions modified by a group_by arg, figure out which one
-        group_elem = \
-            self._run_cli_get_group_elem(action, by_title, by_area, by_project, \
-                by_tags, by_actions, by_priority)
         
-        # Now turn cmd line action and arguments into Organizem API call
-        if action == Action.ADD:
-            item = Item(title, \
-                area=area, project=project, tags=tags, \
-                actions=actions, priority=priority, due_date=due_date, \
-                note=note)
-            self.add_item(item)
-            
-        elif action == Action.ADD_EMPTY:
-            self.add_empty()
-        
-        elif action == Action.REMOVE:
-            self.remove_items(match_elem, match_val, use_regex_match)            
-
-        elif action == Action.FIND:
-            items = self.find_items(match_elem, match_val, use_regex_match)            
-            for item in items:              
-                print str(item)
-        
-        elif action == Action.SHOW_GROUPED:
-            grouped_items = self.get_grouped_items(group_elem)            
-            group_keys = grouped_items.keys()
-            group_keys.sort()
-            for group_key in group_keys:
-                label = self._format_group_label(group_elem, group_key)
-                print label
-                for item in grouped_items[group_key]:                    
-                    print str(item)
-        
-        elif action == Action.SHOW_ELEMENTS:
-            elems = self.get_elements(group_elem)
-            elems.sort()
-            for elem in elems:              
-                print elem
-                    
-        elif action == Action.REBUILD_GROUPED:
-            self.regroup_data_file(group_elem)
-            
-        elif action == Action.BACKUP:
-            self.backup(filename)
-
-        elif action == Action.SETCONF_DATA_FILE:
-            self.setconf(Conf.DATA_FILE, filename)
-            
-        elif action == Action.SETCONF_BAK_FILE:
-            self.setconf(Conf.BAK_FILE, filename)
-
-
-    #########
-    # Helpers
-    #########
-    
-    #####
-    # CLI
-
-    # TODO add validation here
-    # TODO validate that --set_conf* also have non-empty --filename
-    def _run_cli_load_args(self, args):    
-        # Must split() the two list element types, so the string becomes Py list
-        # Trim single and double quotes from each element
-        # Do this to avoid matching bugs depending on how elements were entered
-        #  in data file or from CLI
-        tags = args.tags.split(',')
-        tags = [self._trim_quotes(t).strip() for t in tags]        
-        actions = args.actions.split(',')
-        actions = [self._trim_quotes(a).strip() for a in actions]
-        # Trim single or double quotes from elements that have string values
-        action = self._trim_quotes(args.action)
-        title = self._trim_quotes(args.title)
-        area = self._trim_quotes(args.area)
-        project = self._trim_quotes(args.project)
-        priority = self._trim_quotes(args.priority)
-        due_date = self._trim_quotes(args.due_date)
-        note = self._trim_quotes(args.note)
-        filename = self._trim_quotes(args.filename)
-        
-        # Validation
-        if action == Action.ADD and not title:
-            raise OrganizemIllegalUsageException("'--add' action must include '--title' element and a value for title.")            
-        if (action == Action.SETCONF_DATA_FILE or action == Action.SETCONF_BAK_FILE) \
-            and not filename:
-            raise OrganizemIllegalUsageException("'--setconf_*' actions must include '--filename' element and a value for filename.")
-
-        return (action, title, area, project, tags, actions, priority, due_date, note, \
-            args.regex, filename, \
-            args.by_title, args.by_area, args.by_project, args.by_tags, \
-            args.by_actions, args.by_priority) 
-     
-    def _trim_quotes(self, arg):
-        if arg is None or len(arg) < 2:
-            return arg
-        # Count leading and trailing quotes and slice them all away. Hacky.
-        j = 0
-        k = len(arg)
-        while j < k and (arg[j] == '"' or arg[j] == "'"):
-            j += 1
-        while k > 0 and (arg[k-1] == '"' or arg[k-1] == "'"):
-            k -= 1
-        return arg[j:k]
-        
-    def _format_group_label(self, elem, group_key):
+    def format_group_label(self, elem, group_key):
         group_label = ('# %s: %s' % (elem, group_key))
         border = '# ' + ((len(group_label) - 2) * '-')
         label = '\n\n' + border + '\n' + group_label + '\n' + border              
         return label
-
-    def _run_cli_get_match(self, action, title, tags, actions, note):
-        match_elem = None
-        match_val = None
-        if action == Action.FIND or action == Action.REMOVE:
-            if len(title):
-                match_elem = Elem.TITLE
-                match_val = title
-            elif len(tags):
-                match_elem = Elem.TAGS
-                match_val = tags                
-            elif len(actions):
-                match_elem = Elem.ACTIONS
-                match_val = actions            
-            elif len(note):
-                match_elem = Elem.NOTE
-                match_val = note
-        return (match_elem, match_val)
-      
-    def _run_cli_get_group_elem(self, action, by_title, by_area, by_project, by_tags, by_actions, by_priority):
-        group_elem = None
-        if action == Action.SHOW_GROUPED or \
-            action == Action.REBUILD_GROUPED or \
-            action == Action.SHOW_ELEMENTS:
-            if by_title:
-                group_elem = Elem.TITLE
-            elif by_area:
-                group_elem = Elem.AREA
-            elif by_project:
-                group_elem = Elem.PROJECT
-            elif by_tags:
-                group_elem = Elem.TAGS
-            elif by_actions:
-                group_elem = Elem.ACTIONS
-            elif by_priority:
-                group_elem = Elem.PRIORITY
-        return group_elem
+  
+    # Helpers
     
-    
-    ###############################
     # Find/Filter/Match Elem Values
     
     # Applies regex match or not, based on flag, and includes matches 
@@ -397,9 +396,7 @@ class Organizem(object):
             except:
                 print 'EXCEPTION: Illegal regular expression pattern: ' + pattern + '\n'         
             return rgx.search(match_val) != None
-    
-    
-    ######################
+ 
     # Data File Management
     
     def _load(self):

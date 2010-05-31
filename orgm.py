@@ -4,7 +4,7 @@ import sys
 from optparse import OptionParser
 
 from lib.item import Elem
-from lib.organizem import Organizem, Action, ActionArg
+from lib.organizem import OrgmCliController, Action, ActionArg
 
 __author__ = ("Mark S. Weiss <markswess AT yahoo DOT com>")
 # __docformat__ = "en"
@@ -239,8 +239,8 @@ def main(argv):
     if options.action == 'setconf_data_file':
         data_file = eval('options.' + ActionArg.FILENAME)
     
-    orgm = Organizem(data_file=data_file)
-    orgm.run_cli(options.title, options)
+    orgm = OrgmCliController(data_file=data_file)
+    orgm.run_cmd(options.title, options)
 
     
 if __name__ == "__main__":  

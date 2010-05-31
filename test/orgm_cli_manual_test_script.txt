@@ -1,5 +1,5 @@
 # Change orgm.py to use a test data file
-python orgm.py --setconf_data_file --filename "../test/orgm_mantest.dat"
+python orgm.py --setconf_data_file --filename "test/orgm_mantest.dat"
 
 # Test --add and populate items used in --show_grouped, --show_elements and --rebuild_groups
 # Run this and check the file orgm.dat
