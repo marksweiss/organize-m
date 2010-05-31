@@ -9,7 +9,7 @@ from lib.organizem import OrgmCliController, Action, ActionArg
 __author__ = ("Mark S. Weiss <markswess AT yahoo DOT com>")
 # __docformat__ = "en"
 # __revision__ = "$Id: odict.py 129 2005-09-12 18:15:28Z teknico $"
-__version__ = "0.8.4"
+__version__ = "0.8.5"
 # __all__ = [""]
 
 
