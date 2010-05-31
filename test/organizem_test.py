@@ -17,7 +17,7 @@ class OrganizemTestCase(unittest.TestCase):
     # Helpers
     def _init_test_data_file(self):
         with open(TEST_DATA_FILE, 'w') as f:
-            item = Item("TEST_ITEM")
+            item = Item("TEST_ITEM")            
             f.write(str(item))
             
     # Tests
@@ -37,8 +37,8 @@ class OrganizemTestCase(unittest.TestCase):
 
     def test_add_item__find_item_by_title(self):
         self._init_test_data_file()
-        title = "title"
-        item = Item(title)
+        title = "title"        
+        item = Item(title)        
         orgm = Organizem(TEST_DATA_FILE, IS_UNIT_TESTING)
         orgm.add_item(item)                
         self.assertTrue(orgm.find_items(Elem.TITLE, title))
@@ -51,7 +51,7 @@ class OrganizemTestCase(unittest.TestCase):
         orgm = Organizem(TEST_DATA_FILE, IS_UNIT_TESTING)
         orgm.add_item(item)                
         self.assertTrue(orgm.find_items(Elem.TITLE, rgx_match, use_regex_match=True))
-        
+
     def test_add_item__find_items_by_area(self):
         self._init_test_data_file()
         title = "title"
@@ -236,7 +236,7 @@ class OrganizemTestCase(unittest.TestCase):
         # NOTE: Now remove the item and check that it's not there any more
         orgm.remove_items(Elem.TITLE, rgx_match, use_regex_match=True)
         self.assertFalse(orgm.find_items(Elem.TITLE, rgx_match, use_regex_match=True))
-        
+
     def test_remove_items_rgx_by_area(self):
         self._init_test_data_file()
         title = "title"
@@ -321,7 +321,7 @@ class OrganizemTestCase(unittest.TestCase):
         self.assertTrue(orgm.find_items(Elem.NOTE, note))
         orgm.remove_items(Elem.NOTE, note)        
         self.assertFalse(orgm.find_items(Elem.NOTE, note)) 
-        
+
     def test_remove_items_rgx_by_note(self):
         self._init_test_data_file()
         title = "title"
@@ -342,7 +342,7 @@ class OrganizemTestCase(unittest.TestCase):
         self.assertTrue(orgm.find_items(Elem.NOTE, note_rgx, use_regex_match=True))
         orgm.remove_items(Elem.NOTE, note_rgx, use_regex_match=True)        
         self.assertFalse(orgm.find_items(Elem.NOTE, note_rgx))  
-  
+
     def test_get_all_titles(self):
         self._init_test_data_file()
         title1 = 'title 1'
@@ -490,7 +490,7 @@ class OrganizemTestCase(unittest.TestCase):
         orgm.add_item(item2)
         orgm.add_item(item3)
         orgm.add_item(item4)
-        
+
         expected1 = repr([{'item' : [{'title': 'title 1'}, {'area': "''"}, {'project': "''"}, {'tags': [tag1, tag2]}, {'actions': []}, {'priority': "''"}, {'due_date': "''"}, {'note': ''}]}, \
                      {'item' : [{'title': 'title 3'}, {'area': "''"}, {'project': "''"}, {'tags': [tag1, tag2]}, {'actions': []}, {'priority': "''"}, {'due_date': "''"}, {'note': ''}]}])
         expected2 = repr([{'item' : [{'title': 'title 1'}, {'area': "''"}, {'project': "''"}, {'tags': [tag1, tag2]}, {'actions': []}, {'priority': "''"}, {'due_date': "''"}, {'note': ''}]}, \
@@ -505,7 +505,7 @@ class OrganizemTestCase(unittest.TestCase):
         actual2 = repr(actual[tag2])
         actual3 = repr(actual[tag3])
         actual4 = repr(actual[tag4])
-                
+
         self.assertTrue(expected1 == actual1)
         self.assertTrue(expected2 == actual2)
         self.assertTrue(expected3 == actual3)
@@ -617,19 +617,19 @@ class OrganizemTestCase(unittest.TestCase):
         orgm.add_item(item2)
         orgm.add_item(item3)
         orgm.add_item(item4)        
-        
+
         bak_data_file = 'orgm_test.dat_bak'
         orgm.backup(bak_data_file)
         import filecmp
         filecmp.cmp(TEST_DATA_FILE, bak_data_file)
- 
+
     # NOTE: This is a maual test, no assert().  User must look at TEST_DATA_FILE
     #  and confirm there is a new empty item
     def test_add_empty(self):
         self._init_test_data_file()
         orgm = Organizem(TEST_DATA_FILE, IS_UNIT_TESTING)
         orgm.add_empty()
- 
+
     #def test_add_item__find_item_by_title__cli(self):
     #    self._init_test_data_file()
     #    orgm = Organizem(TEST_DATA_FILE, IS_UNIT_TESTING)

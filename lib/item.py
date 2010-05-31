@@ -1,59 +1,8 @@
 import re
 
+
 class OrganizemIllegalDataFormatException(Exception): pass
-
-# Possibly overdesign, but we model each type of YAML element we can have in an
-#  Item entry with a class, which handles str(), validation and repr() TODO
-# So Item can add new Elements just by choosing on of these Element types
-class RootElement(object):
-    # Root has a label but no value
-    def __init__(self, key):
-        if not key: key = Elem.ROOT
-        self.key = key
-    
-    def __str__(self):
-        # Leading line break to always init a new Element block
-        #  validly at the start of a new line
-        return "\n\n- %s:" % self.key
-        
-# TODO - Validate val can validly convert to str if it's not None
-class ChildTextElement(object):
-    # Note the default value of literal empty string to be printed
-    # This is a convenience if you later want to fill in a value
-    def __init__(self, key, val):
-        if not val: val = "''"
-        self.key = key
-        self.val = val
-    
-    def __str__(self):
-        return "  - %s: %s" % (self.key, self.val)
-
-# TODO - Validate val is a List if it's not None
-class ChildListElement(object):
-    # Note the default value of a literal empty list
-    # This is a convenience that indicates in the file to the user that 
-    #  this is a list, so hand edits more likely to be valid
-    def __init__(self, key, val):
-        if not val: val = []
-        self.key = key
-        self.val = val
-    
-    def __str__(self):
-        return "  - %s: %s" % (self.key, self.val)
-
-# TODO - Validate val can validly convert to str if it's not None
-class ChildMultilineTextElement(object):
-  def __init__(self, key, val):
-      if not val: val = ""
-      self.key = key
-      self.val = val
-  
-  def __str__(self):
-      ret = []
-      ret.append('  - %s: |' % self.key)
-      for line in self.val.split('\n'):
-          ret.append('      %s' % line)          
-      return "\n".join(ret)
+class OrganizemIllegalDataTypeException(Exception): pass
 
 
 class Elem(object):
@@ -63,7 +12,8 @@ class Elem(object):
         Item to map Python objects deserialized from YAML to YAML representation
         and to Items
     """
-        
+    
+    # Element Field Names
     # Don't use this with #Item.find_item()
     ROOT = 'item'   
     # Use these with #Item.find_item()
@@ -76,99 +26,199 @@ class Elem(object):
     DUE_DATE = 'due_date'
     NOTE = 'note'
 
-    # ** Ordered ** list of Elements
+    # ** Ordered ** list of Element Field Names
     # ** NOTE: this defines format of Items in data file **
-    ELEM_LIST = [TITLE, AREA, PROJECT, TAGS, ACTIONS, PRIORITY, DUE_DATE, NOTE]
+    ELEM_LIST = [ROOT, TITLE, AREA, PROJECT, TAGS, ACTIONS, PRIORITY, DUE_DATE, NOTE]
 
-    # Mapping a separate const because Dict doesn't guarantee key order
-    ELEM_TYPES = {TITLE : 'ChildTextElement', AREA : 'ChildTextElement',
-                  PROJECT : 'ChildTextElement', TAGS : 'ChildListElement', 
-                  ACTIONS : 'ChildListElement', PRIORITY : 'ChildTextElement', 
-                  DUE_DATE : 'ChildTextElement', NOTE : 'ChildMultilineTextElement'}
-    
+    # Element Class Types
+    ROOT_TYPE = 'RootElement'
+    TEXT_TYPE = 'ChildTextElement'
+    LIST_TYPE = 'ChildListElement'
+    MULTILINE_TEXT_TYPE = 'ChildMultilineTextElement'
+
+    ELEM_TYPE_MAP = {ROOT: ROOT_TYPE, 
+                     TITLE : TEXT_TYPE, AREA : TEXT_TYPE,
+                     PROJECT : TEXT_TYPE, TAGS : LIST_TYPE, 
+                     ACTIONS : LIST_TYPE, PRIORITY : TEXT_TYPE, 
+                     DUE_DATE : TEXT_TYPE, NOTE : MULTILINE_TEXT_TYPE}
+
     @staticmethod
-    def elem_list():
+    def get_elem_list():
         return Elem.ELEM_LIST
     
+    @staticmethod
+    def get_optional_elem_list():
+        return Elem.ELEM_LIST[2:]
+
+    @staticmethod
+    def elem_init(elem, val):
+        # Get the type of the element being created, from mapping of elems to types
+        # Call that type's __init__() with value for the element, return it
+        type = Elem.get_elem_type(elem)
+        
+        if type == Elem.ROOT_TYPE:
+            return RootElement(elem, val)
+        elif type == Elem.TEXT_TYPE:
+            return ChildTextElement(elem, val)
+        elif type == Elem.LIST_TYPE:
+            return ChildListElement(elem, val)
+        elif type == Elem.MULTILINE_TEXT_TYPE:
+            return ChildMultilineTextElement(elem, val)
+        else:
+             raise OrganizemIllegalDataFormatException("Element %s with value %s is invalid type to conver to str" % (elem, val))
+
+    @staticmethod
+    def get_elem_type(elem):
+        return Elem.ELEM_TYPE_MAP[elem]
+                  
+#    @staticmethod
+#    def elem_list():
+#        return Elem.ELEM_LIST
+
+#    @staticmethod
+#    def elem_val_to_str(elem, val):
+#        if val is None:
+#            return None
+#        val = str(val)
+#        type = Elem.ELEM_TYPES[elem]
+#        if type == 'ChildTextElement':
+#            return "'" + val.replace("'", "\\'") + "'"
+#        elif type == 'ChildListElement':
+#            return val
+#        elif type == 'ChildMultilineTextElement':
+#            return """%s""" % re.sub(re.compile("'", re.MULTILINE), Elem._repl, val)
+#        else:
+#            raise OrganizemIllegalDataFormatException("Element %s with value %s is invalid type to conver to str" % (elem, val))
+
+#    @staticmethod
+#    def _repl(matchobject):
+#        val = matchobject.group(0)
+#        if val == "'":
+#            return "\\'"
+#        else:
+#            return val 
+
+
+class RootElement(object):
+    # Root has a label but no value
+    def __init__(self, key=None, val=None):
+        if not key: key = Elem.ROOT
+        self.key = key
+        self.val = None
+    
+    def __str__(self):
+        # Leading line break to always init a new Element block
+        #  validly at the start of a new line
+        return "\n\n- %s:" % self.key
+
+class ChildTextElement(object):
+    # Note the default value of literal empty string to be printed
+    # This is a convenience if you later want to fill in a value
+    def __init__(self, key, val):
+        if not val: val = "''"
+        self.key = key
+        self.val = val
+    
+    def __str__(self):
+        return "  - %s: %s" % (self.key, self.val)
+
+    def escaped_str(self):
+        return "'" + str(self.val).replace("'", "\\'") + "'"
+
+class ChildListElement(object):
+    # Note the default value of a literal empty list
+    # This is a convenience that indicates in the file to the user that 
+    #  this is a list, so hand edits more likely to be valid
+    def __init__(self, key, val):
+        if not val: val = []
+        if not isinstance(val, list):
+            raise OrganizemIllegalDataTypeException("Illegal value %s for a list element" % val)          
+        self.key = key
+        self.val = val
+    
+    def __str__(self):
+        return "  - %s: %s" % (self.key, self.val)
+
+    def escaped_str(self):
+        return self.val
+    
+class ChildMultilineTextElement(object):
+    def __init__(self, key, val):
+        if not val: val = ""
+        self.key = key
+        self.val = val
+
+    def __str__(self):
+        ret = []
+        ret.append('  - %s: |' % self.key)
+        for line in self.val.split('\n'):
+            ret.append('      %s' % line)          
+        return "\n".join(ret)
+    
+    def escaped_str(self):
+        return """%s""" % \
+            re.sub(re.compile("'", re.MULTILINE), ChildMultilineTextElement._repl, self.val)
+
     @staticmethod
     def _repl(matchobject):
         val = matchobject.group(0)
         if val == "'":
             return "\\'"
         else:
-            return val 
-        
-    @staticmethod
-    def elem_val_to_str(elem, val):
-        if val is None:
-            return None
-        val = str(val)
-        type = Elem.ELEM_TYPES[elem]
-        if type == 'ChildTextElement':
-            return "'" + val.replace("'", "\\'") + "'"
-        elif type == 'ChildListElement':
-            return val
-        elif type == 'ChildMultilineTextElement':
-            return """%s""" % re.sub(re.compile("'", re.MULTILINE), Elem._repl, val)
-        else:
-            raise OrganizemIllegalDataFormatException("Element %s with value %s is invalid type to conver to str" % (elem, val))
+            return val       
 
-    # Child lists of parent list come back as individual ordered dicts 
-    #  in a list, one dict for each child name/value pair (child list).
-    # This lets Item client code not care. ITEM_LIST defines order/data format.             
-    @staticmethod
-    def _elem_index(elem):
-        return Elem.ELEM_LIST.index(elem)       
-
-    @staticmethod
-    def _elem_type(elem):
-        return Elem.ELEM_TYPES[elem]
-
-            
-# A single Item in the TODO file, with a root 'item:' element and child
-#  elements for each of the TODO fields, title, project, area, tags, actions
-#  due_date and notes
+# A single Item in the data file, with a root 'item:' element and child
+#  elements for each of the fields (Elements) in an Item
 # Only title is required and all other args are optional and any or none can
 #  be passed as named args (kwargs)
 # Values for all elements are available directly as properties
 # str() returns the YAML string serialization of the Item
-# repr() TODO returns the Item as a dict/list that is what YAML deserializes to
-#  so can be converted back to str() by PyYaml  
+# repr() returns the Item as a dict/list that is what YAML deserializes to
 class Item(object):
 
-    # TODO MAKE THIS DYNAMIC WITH SETATTR
-    def __init__(self, title, **kwelements):      
-        self._root = RootElement(Elem.ROOT)
-        # TODO validate title is a non-zero-length string, throw otherwise
-        self._title = ChildTextElement(Elem.TITLE, title)        
-        # Now handle all the optional args, using kwargs because we want the 
-        #  flexibility to pass any of these, skipping any we don't care about
-        #  so it's not the right use for just default args
-        area, project, tags, actions, priority, due_date, note = \
-            self.__load_elems(kwelements)          
-        # Now load element properties, with vals or None returned from __load_elems()
-        self._area = ChildTextElement(Elem.AREA, area)
-        self._project = ChildTextElement(Elem.PROJECT, project)        
-        self._tags = ChildListElement(Elem.TAGS, tags)
-        self._actions = ChildListElement(Elem.ACTIONS, actions)
-        self._priority = ChildTextElement(Elem.PRIORITY, priority)
-        # TODO real date type and validation - create a new Element type
-        self._due_date = ChildTextElement(Elem.DUE_DATE, due_date)
-        self._note = ChildMultilineTextElement(Elem.NOTE, note)
-    
+    def __init__(self, title, **kwelements): 
+        # Store list of all elements in Item
+        self._elemlist = Elem.get_elem_list()
+        
+        # Required elements are 'ROOT' and 'TITLE'
+        # Set 'root' Item Element
+        self.__setattr__('_' + Elem.ROOT, Elem.elem_init(Elem.ROOT, None))           
+        # 'title' Element is required, set it first
+        if not title:
+            raise OrganizemIllegalDataFormatException("Cannot construct Item with null or empty title")
+        title_obj = Elem.elem_init(Elem.TITLE, title)
+        self.__setattr__('_' + Elem.TITLE, title_obj)
+        self.__setattr__(Elem.TITLE, title_obj.val)
+                
+        # A little dirty, but not bad. Elem exposes method to get list of optional
+        #  elements, with the assumption being client can call get_elem_list() to
+        #  get all elements and this to get only optional, so it can take care of
+        #  required ones (statically, as here) and process optional ones dynamically
+        opt_elems = Elem.get_optional_elem_list()        
+        for elem in opt_elems:
+            kwval = None
+            if elem in kwelements:
+                kwval = kwelements[elem]
+            elem_obj = Elem.elem_init(elem, kwval)
+            # Private object str(), repr() used by Item str() and repr()
+            self.__setattr__('_' + elem, elem_obj)
+            # Public getter just returns obj.val, value for the element
+            self.__setattr__(elem, elem_obj.val)
+
+    def __getattr__(self, attr):
+        return self.__dict__[attr]
+            
     @staticmethod
     def init_from_py_item(py_item):
         """Converts Item serialized to Python object form, dicts and lists, to YAML"""
         
         # The list of names of elements an Item must have for this version
-        elem_names = Elem.elem_list()
+        elem_names = Elem.get_optional_elem_list()
         # List of names of elements in the py_item
         py_elem_names = Item._get_py_item_elem_list(py_item)
 
         # Item must have title element, so check for that first
         title = Item._get_py_item_title(py_item, py_elem_names)
-        # Now reset elem_names to skip TITLE
-        elem_names = elem_names[1:]
         
         # Handling dynamic list of kwargs to __init__(), so build string
         #  dynamically and make __init__() call an eval()
@@ -190,11 +240,11 @@ class Item(object):
                 idx = py_elem_names.index(elem_name)
                 py_elems = py_item[Elem.ROOT]
                 py_elem_val = py_elems[idx][elem_name]
-                py_elem_val = Elem.elem_val_to_str(elem_name, py_elem_val)                
+                py_elem_val = Elem.elem_init(elem_name, py_elem_val).escaped_str()                
                 if py_elem_val:
                     # Handle special case of multiline string value for Note elem
                     # See comment above where note_vals[] is declared
-                    if elem_name == Elem.NOTE:
+                    if Elem.get_elem_type(elem_name) == Elem.MULTILINE_TEXT_TYPE:
                         note_vals.append(py_elem_val)
                         val_idx = len(note_vals) - 1
                         init_call.append(', %s=note_vals[%i]' % (elem_name, val_idx))
@@ -212,12 +262,12 @@ class Item(object):
     
     @staticmethod
     def _get_py_item_elem_list(py_item):
-        elems = py_item[Elem.ROOT]
-        num_elems = len(elems)
-        return [elems[j].keys()[0] for j in range(0, num_elems)]
+        py_elems = py_item[Elem.ROOT]
+        num_elems = len(py_elems)
+        return [py_elems[j].keys()[0] for j in range(0, num_elems)]
 
     @staticmethod
-    def _get_py_item_title(py_item, py_elem_names):
+    def _get_py_item_title(py_item, py_elem_names):      
         # Elements in the py_item
         py_elems = py_item[Elem.ROOT]                
         if Elem.TITLE not in py_elem_names:
@@ -228,100 +278,17 @@ class Item(object):
             raise OrganizemIllegalDataFormatException("Attempted to load Item from data file without value for required 'title' element")
         return title
                 
-    def get_elem_val(self, element):
-        if element == Elem.TITLE:
-            return self.title
-        elif element == Elem.AREA:
-            return self.area
-        elif element == Elem.PROJECT:
-            return self.project
-        elif element == Elem.TAGS:
-            return self.tags
-        elif element == Elem.ACTIONS:
-            return self.actions
-        elif element == Elem.PRIORITY:
-            return self.priority
-        elif element == Elem.DUE_DATE:
-            return self.due_date
-        elif element == Elem.NOTE:
-            return self.note
+    def get_elem_val(self, elem):
+        return self.__getattr__(elem)
     
-    # Props so string values for each Element in the Item are directly available
-    @property
-    def title(self):
-        return self._title.val    
-    
-    @property
-    def area(self):
-        return self._area.val
-
-    @property
-    def project(self):
-        return self._project.val
-    
-    @property
-    def tags(self):
-        return self._tags.val
-    
-    @property
-    def actions(self):
-        return self._actions.val
-    
-    @property
-    def priority(self):
-        return self._priority.val
-
-    @property
-    def due_date(self):
-        return self._due_date.val
-    
-    @property
-    def note(self):
-        return self._note.val
-
     # For now str() representation is YAML.  Make separate method to make client
     #  code more explicit and allow future change to str() without client code change
     def __str__(self):
         return self._to_yaml()
     
     def _to_yaml(self):
-        ret = []
-        ret.append(str(self._root))
-        ret.append(str(self._title))
-        ret.append(str(self._area))
-        ret.append(str(self._project))
-        ret.append(str(self._tags))
-        ret.append(str(self._actions))
-        ret.append(str(self._priority))        
-        ret.append(str(self._due_date))
-        ret.append(str(self._note))
-        return '\n'.join(ret)
+        return '\n'.join([str(self.__getattr__('_' + elem)) for elem in self._elemlist])
         
-    def __load_elems(self, kwelements):
-      area = None
-      project = None
-      tags = None
-      actions = None
-      priority = None
-      due_date = None
-      note = None        
-      elems = kwelements.keys()        
-      if Elem.AREA in elems:
-          area = kwelements[Elem.AREA]
-      if Elem.PROJECT in elems:
-          project = kwelements[Elem.PROJECT]
-      if Elem.TAGS in elems: 
-          tags = kwelements[Elem.TAGS]
-      if Elem.ACTIONS in elems: 
-          actions = kwelements[Elem.ACTIONS]
-      if Elem.PRIORITY in elems: 
-          priority = kwelements[Elem.PRIORITY]
-      if Elem.DUE_DATE in elems: 
-          due_date = kwelements[Elem.DUE_DATE]
-      if Elem.NOTE in elems: 
-          note = kwelements[Elem.NOTE]
-      return area, project, tags, actions, priority, due_date, note
-
     # NOTE: Used by organizem_test.py unit tests
     def __repr__(self):
         """
@@ -329,15 +296,8 @@ class Item(object):
         the YAML item from the data file. So then PyYaml.#dump(Item.#repr()) produces
         valid YAML string
         """
-        item_repr = {}
-        elems = []
-        elems.append({Elem.TITLE : self.title})
-        elems.append({Elem.AREA : self.area})
-        elems.append({Elem.PROJECT : self.project})
-        elems.append({Elem.TAGS : self.tags})
-        elems.append({Elem.ACTIONS : self.actions})
-        elems.append({Elem.PRIORITY : self.priority})
-        elems.append({Elem.DUE_DATE : self.due_date})
-        elems.append({Elem.NOTE : self.note})
-        item_repr[Elem.ROOT] = elems
+        # Use list of elements skipping ROOT
+        # Iterate list of elems to create list of dicts, one for each attr
+        elems = [{elem : self.__getattr__(elem)} for elem in self._elemlist[1:]]
+        item_repr = {Elem.ROOT : elems}
         return repr(item_repr)
