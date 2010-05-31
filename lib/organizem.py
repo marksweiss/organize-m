@@ -3,10 +3,13 @@ import re
 import yaml
 from odict import OrderedDict
 
-from item import Elem, Item
+from element import Elem
+from item import Item
+from item_converter import YamlItemConverter
 
 
 class OrganizemIllegalUsageException(Exception): pass
+
 
 class Conf(object):
     DATA_FILE = 'data_file'
@@ -409,7 +412,7 @@ class Organizem(object):
             if py_items and len(py_items):
                 for py_item in py_items:
                     # Convert each item retrieved from the file to a class Item object
-                    items.append(Item.init_from_py_item(py_item))             
+                    items.append(YamlItemConverter.convert_to_item(py_item))             
         return items
 
     # Useful for debugging, though doesn't support any current feature
