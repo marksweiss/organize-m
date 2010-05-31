@@ -15,18 +15,6 @@ class Conf(object):
     BAK_FILE_DFLT_PATH = '../orgm_bak.dat'
     CONF_PATH = 'conf/orgm.conf'
     CONF_TEST_PATH = '../conf/orgm.conf'
-    
-    
-    # TODO GET RID OF THIS
-    # Config stores version of current installation of Organizem
-    # VERSION_PATH = 'conf/VERSION'
-    # Config stores version of previous installation of Organizem
-    # If these don't match when checked, then all items must be checked to see
-    #  if fields have been added by new version.  If they have, Organizem rewrites
-    #  the data file with all values for existing items and empty new Elements
-    #  in each Item for new Elements
-    # TODO GET RID OF THIS
-    # USER_DATA_VERSION_PATH = 'conf/USER_DATA_VERSION'
 
 class Action(object):
     ADD = 'add'
@@ -37,8 +25,6 @@ class Action(object):
     SHOW_ELEMENTS = 'show_elements'
     REBUILD_GROUPED = 'rebuild_grouped'
     BACKUP = 'backup'
-    # TODO GET RID OF THIS
-    # RELOAD = 'reload'
     SETCONF_DATA_FILE = 'setconf_data_file'
     SETCONF_BAK_FILE = 'setconf_bak_file'
 
@@ -87,13 +73,6 @@ class Organizem(object):
             self.bak_file = self._conf[Conf.BAK_FILE]
         else:
             self.bak_file = Conf.DATA_FILE_DFLT_PATH
-           
-        # TODO GET RID OF THIS
-        # Test to see if a new version of Organizem was installed since last use
-        # If yes, new Element may have been added to Item format, so reload all
-        #  Items with Element values they had before plus empty new Element
-        #  for newly added Elements
-        # self.reload()
     
     # Just appends item to end of file using Item.__str__()
     # Maybe there is a way to leverage the library to yaml-ize transparently?
@@ -194,14 +173,6 @@ class Organizem(object):
             bak_file = self.bak_file
         self._backup(bak_file)
   
-    # TODO GET RID OF THIS
-    #def reload(self):
-    #    version = self._get_version()
-    #    user_data_version = self._get_user_data_version()
-    #    if version != user_data_version:
-    #        self._set_user_data_version(version)
-    #        self._reload()
-
     def setconf(self, conf, value):
         self._set_conf(conf, value)
 
@@ -270,10 +241,6 @@ class Organizem(object):
             
         elif action == Action.BACKUP:
             self.backup(filename)
-
-        # TODO GET RID OF THIS
-        #elif action == Action.RELOAD:
-        #    self.reload()
 
         elif action == Action.SETCONF_DATA_FILE:
             self.setconf(Conf.DATA_FILE, filename)
@@ -460,20 +427,6 @@ class Organizem(object):
         with open(self.data_file, 'w') as f:     
             for item in items:
                 f.write(str(item))
-    
-    # TODO GET RID OF THIS
-    #def _reload(self):
-    #    items = self._load()
-    #    if not items or len(items) == 0:
-    #        return
-    #    # This is the current list of elements in an item, in order
-    #    elem_list = Elem.elem_list()
-    #    # Get the first Item from data -- if it's elements don't match, then
-    #    #  user data version doesn't match current version.  So rewrite all elements
-    #    #  to have the correct updated Elements per item, and then update user_data_
-    #    #  versions so we only have to do this once per version chnage per new element
-    #    item = items[0]
-    #    # TODO WRITE THIS COMPARISON OF ELEMENTS IN CURRENT ITEM AND ITEMS IN LIST FOR THIS VERSION
                             
     def _set_conf(self, conf, value):
         self._conf[conf] = value
@@ -499,29 +452,3 @@ class Organizem(object):
             if stored_conf:
                 self._conf = eval(stored_conf)
         return self._conf
-
-    # TODO GET RID OF THIS and FILS IN Conf
-    #def _get_version(self):
-    #    if self._version:
-    #        return self._version
-    #    with open(Conf.VERSION_PATH) as f:
-    #        self._version = f.readline()
-    #    return self._version
-
-    # TODO GET RID OF THIS
-    #def _get_user_data_version(self):
-    #    if self._user_version:
-    #        return self._user_version
-    #    with open(Conf.USER_DATA_VERSION_PATH) as f:
-    #        self._user_version = f.readline()
-    #    return self._user_version
-
-    # TODO GET RID OF THIS
-    # Only set() for user version, because this can be updated if reload()
-    #  finds version of data file and current Organizem version don't match.
-    #  So, after reload, user version is updated.
-    # But software version is never programatically updated.  It can only be set
-    #  by the VERSION file included with each release of Organizem.
-    #def _set_user_data_version(self, version):
-    #    with open(Conf.USER_DATA_VERSION_PATH, "w") as f:
-    #        f.write(version)

@@ -70,34 +70,7 @@ class Elem(object):
     @staticmethod
     def get_elem_type(elem):
         return Elem.ELEM_TYPE_MAP[elem]
-                  
-#    @staticmethod
-#    def elem_list():
-#        return Elem.ELEM_LIST
-
-#    @staticmethod
-#    def elem_val_to_str(elem, val):
-#        if val is None:
-#            return None
-#        val = str(val)
-#        type = Elem.ELEM_TYPES[elem]
-#        if type == 'ChildTextElement':
-#            return "'" + val.replace("'", "\\'") + "'"
-#        elif type == 'ChildListElement':
-#            return val
-#        elif type == 'ChildMultilineTextElement':
-#            return """%s""" % re.sub(re.compile("'", re.MULTILINE), Elem._repl, val)
-#        else:
-#            raise OrganizemIllegalDataFormatException("Element %s with value %s is invalid type to conver to str" % (elem, val))
-
-#    @staticmethod
-#    def _repl(matchobject):
-#        val = matchobject.group(0)
-#        if val == "'":
-#            return "\\'"
-#        else:
-#            return val 
-
+        
 
 class RootElement(object):
     # Root has a label but no value

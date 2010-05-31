@@ -127,7 +127,6 @@ def main(argv):
 [-B | --setconf_backup_file] - Store a configuration for location of backup file. Persisted and will be reused across Organize-m sessions.
 --setconf_backup_file --file_name "/MyPath/MyBackupOrgmFile.dat"
   """
-# TODO GET RID OF THIS   [-l | --reload] - reload all item data. Required to add new Elements to existing Items if upgrade adds Element(s)
 
     parser = OptionParser(usage=usage)
     
@@ -158,10 +157,6 @@ def main(argv):
     parser.add_option("-b", "--backup", 
                       action="store_const", const=Action.BACKUP, dest="action",  
                       help="Backup data file. Takes mandatory additonal argument --filename [My_Filename.txt]")
-    # TODO GET RID OF THIS
-    #parser.add_option("-l", "--reload", 
-    #                  action="store_const", const=Action.RELOAD, dest="action",  
-    #                  help="Reload data file.  Required to add new Elements to existing Items if upgrade adds new Element(s)"
                       
     # Configuration
     # Users call these to set config options that persist across calls to Organizem 
