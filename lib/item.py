@@ -47,8 +47,9 @@ class Item(object):
 
     def __getattr__(self, attr):
         return self.__dict__[attr]
-                
-    def get_elem_val(self, elem):
+    
+    # Used for access to arbitrary element value: x = item[elem]
+    def __getitem__(self, elem):
         return self.__getattr__(elem)
     
     # For now str() representation is YAML.  Make separate method to make client

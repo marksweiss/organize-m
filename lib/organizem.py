@@ -273,7 +273,7 @@ class Organizem(object):
         
         for item in items:
             # Skip empty string and empty list, not interesting to return anyway
-            val = item.get_elem_val(element)
+            val = item[element]  # use Item.__getitem__() for syntactic sugar
             if val and len(val):
                 # Handle case of list and string
                 if isinstance(val, str):
@@ -298,7 +298,7 @@ class Organizem(object):
             return ret
 
         for item in items:
-            group_keys = item.get_elem_val(element) 
+            group_keys = item[element] # use Item.__getitem__() for syntactic sugar 
             if isinstance(group_keys, str):
                 group_keys = [group_keys]
             for group_key in group_keys:              
@@ -360,7 +360,7 @@ class Organizem(object):
         pattern = set(pattern)
         # Get the item data, and get the element values from each item
         items = self._load()
-        elem_vals = [item.get_elem_val(element) for item in items]
+        elem_vals = [item[element] for item in items] # use Item.__getitem__() for syntactic sugar
         # Set intersection tests each element value against the pattern to match on
         for i, val in enumerate(elem_vals):
             if isinstance(val, str): val = [val]
