@@ -52,16 +52,12 @@ class OrgmCliController(OrgmBaseController):
         self._orgm_api = Organizem(data_file, is_unit_testing)
 
     # Command line users use only this call, indirectly, by passing command lines
-    #  to orgm.py#__main__(). Arg 'a' is optparser.args. Short here for cleaner code   
+    #  to orgm.py#__main__().   
     # CLI API
-    # Command line users use only this call, indirectly, by passing command lines
-    #  to orgm.py#__main__()     
     def run_cmd(self, title, args):  
-        # Validate (TODO) and load args
+        # Validate and load args
         action, title, area, project, tags, actions, priority, due_date, note, \
-            use_regex_match, filename, \
-            by_title, by_area, by_project, by_tags, by_actions, by_priority =\
-            self._run_cli_load_args(args)        
+            use_regex_match, filename = self._run_cli_load_args(args)        
         # For actions matching on an element value, figure out which one
         # NOTE: Just uses first one. DOES NOT validate only one passed in 
         match_elem, match_val = \
@@ -69,8 +65,8 @@ class OrgmCliController(OrgmBaseController):
             
         # For actions modified by a group_by arg, figure out which one
         group_elem = \
-            self._run_cli_get_group_elem(action, by_title, by_area, by_project, \
-                by_tags, by_actions, by_priority)
+            self._run_cli_get_group_elem(action, args, \
+                title, area, project, tags, actions, priority)
     
         # Now turn cmd line action and arguments into Organizem API call
         if action == Action.ADD:
@@ -129,6 +125,8 @@ class OrgmCliController(OrgmBaseController):
         # Do this to avoid matching bugs depending on how elements were entered
         #  in data file or from CLI
         tags = args.tags.split(',')
+        # NOTE: _trim_quotes() keeps args not passed as None and empty strings as empty, 
+        #  which is *crucial* to logic of _run_cli_get_group_elem() below
         tags = [self._trim_quotes(t).strip() for t in tags]        
         actions = args.actions.split(',')
         actions = [self._trim_quotes(a).strip() for a in actions]
@@ -149,10 +147,7 @@ class OrgmCliController(OrgmBaseController):
             and not filename:
             raise OrganizemIllegalUsageException("'--setconf_*' actions must include '--filename' element and a value for filename.")
 
-        return (action, title, area, project, tags, actions, priority, due_date, note, \
-            args.regex, filename, \
-            args.by_title, args.by_area, args.by_project, args.by_tags, \
-            args.by_actions, args.by_priority) 
+        return (action, title, area, project, tags, actions, priority, due_date, note, args.regex, filename) 
  
     def _trim_quotes(self, arg):
         if arg is None or len(arg) < 2:
@@ -184,23 +179,26 @@ class OrgmCliController(OrgmBaseController):
                 match_val = note
         return (match_elem, match_val)
   
-    def _run_cli_get_group_elem(self, action, by_title, by_area, by_project, by_tags, by_actions, by_priority):
+    def _run_cli_get_group_elem(self, action, args, title, area, project, tags, actions, priority):
         group_elem = None
         if action == Action.SHOW_GROUPED or \
             action == Action.REBUILD_GROUPED or \
             action == Action.SHOW_ELEMENTS:
-            if by_title:
+            # First test for actual ACTION_ARG flag arguments, --by_title, --by_area etc.
+            # These are handled as boolean flag args by orgm.py cmd line arg OptParser
+            if args.by_title:
                 group_elem = Elem.TITLE
-            elif by_area:
+            elif args.by_area:
                 group_elem = Elem.AREA
-            elif by_project:
+            elif args.by_project:
                 group_elem = Elem.PROJECT
-            elif by_tags:
+            elif args.by_tags:
                 group_elem = Elem.TAGS
-            elif by_actions:
+            elif args.by_actions:
                 group_elem = Elem.ACTIONS
-            elif by_priority:
+            elif args.by_priority:
                 group_elem = Elem.PRIORITY
+                
         return group_elem
   
 
@@ -238,9 +236,7 @@ class Organizem(object):
         else:
             self.bak_file = Conf.DATA_FILE_DFLT_PATH
     
-    # Just appends item to end of file using Item.__str__()
-    # Maybe there is a way to leverage the library to yaml-ize transparently?
-    def add_item(self, item):
+    def add_item(self, item):        
         with open(self.data_file, 'a') as f:         
             f.write(str(item))
     

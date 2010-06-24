@@ -231,8 +231,9 @@ def main(argv):
     parser.add_option("-n", "--note", 
                       action="store", dest=Elem.NOTE, default="",
                       help="Additional note for the Item. Optional.")
-     
-    (options, args) = parser.parse_args()
+    
+    argv = preprocess_cmd_line_args(argv)             
+    (options, args) = parser.parse_args(argv)
 
     # Check for config from command line for data file
     data_file = None
@@ -242,6 +243,46 @@ def main(argv):
     orgm = OrgmCliController(data_file=data_file)
     orgm.run_cmd(options.title, options)
 
+def preprocess_cmd_line_args(argv):    
+    # The idea is that it's annoying to remember the --by_* flag args, just use the same syntax for all 
+    #  element-related modifiers to actions.
+
+    # Need to support both of these cases:
+    #   $> ./orgm.py --add --title "My title" --area "home improvement"
+    #   $> ./orgm.py --rebuild_grouped --area
+
+    # But OptionParser won't allow an arg that takes a value to have no value.  So intercept here detect the case
+    #  where we have one action, one element arg, the element arg is the last item in argv, and the action is one of the
+    #  grouping actions that support the element arg alone without a value.  If that is the case replace the second arg
+    #  with its matching --by* flag argument.
+    # Now all code upstream tha processes cmd line args and acts on them is unchanged.  Cleanest possible solution.    
     
-if __name__ == "__main__":  
-    sys.exit(main(sys.argv[1:]))
+    # Example:
+    # argv before translation ['-s', '--title']
+    # argv after translation ['-s', '--by_title']
+    
+    # Test that there two arguments
+    # Test that the first one is one of the grouping commands
+    if len(argv) == 2 and \
+        (argv[0] == '--show_grouped' or argv[0] == '-s' or \
+        argv[0] == '--show_elements' or argv[0] == '-S' or \
+        argv[0] == '--rebuild_grouped' or argv[0] == '-R'):
+        # Test that the second one is one of the Element command, and map that to its ActionArg --by* command
+        if argv[1] == '--title' or argv[1] == '-t':
+            argv[1] = '--by_title'
+        elif argv[1] == '--area' or argv[1] == '-A':
+            argv[1] = '--by_area'
+        elif argv[1] == '--project' or argv[1] == '-P':
+            argv[1] = '--by_project'
+        elif argv[1] == '--tags' or argv[1] == '-T':
+            argv[1] = '--by_tags' 
+        elif argv[1] == '--actions' or argv[1] == '-c':
+            argv[1] = '--by_actions' 
+        elif argv[1] == '--priority' or argv[1] == '-P':
+            argv[1] = '--by_priority'
+    return argv
+
+    
+if __name__ == "__main__":
+    argv = preprocess_cmd_line_args(sys.argv[1:]) 
+    sys.exit(main(argv))
