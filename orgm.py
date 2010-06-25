@@ -27,7 +27,7 @@ class CliElem:
     @staticmethod
     def get_action_arg_from_arg(arg):
         if arg in CliElem.LONG_ARGS:
-            return '--by_' + arg
+            return '--by_' + arg[2:]
         elif arg in CliElem.SHORT_ARGS_MAP:
             return '--by_' + CliElem.SHORT_ARGS_MAP[arg]
         else:
@@ -255,7 +255,8 @@ def main(argv):
                       action="store", dest=Elem.NOTE, default="",
                       help="Additional note for the Item. Optional.")
     
-    argv = preprocess_cmd_line_args(argv)             
+    # Preprocess cmd line args to remap element args like '--area' to group action args like '--by_area'
+    argv = preprocess_cmd_line_args(argv)  
     (options, args) = parser.parse_args(argv)
 
     # Check for config from command line for data file

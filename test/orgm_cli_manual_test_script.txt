@@ -30,17 +30,25 @@ python orgm.py --find --title "my title"
 
 # Test --show_elements
 python orgm.py --show_elements --by_title
+# This should match above results
+python orgm.py --show_elements --title
 python orgm.py --show_elements --by_priority
+python orgm.py --show_elements --priority
 python orgm.py --show_elements --by_actions
+python orgm.py --show_elements --actions
 
 # Test --show_grouped
 python orgm.py --show_grouped --by_project
+python orgm.py --show_grouped --project
 python orgm.py --show_grouped --by_priority
+python orgm.py --show_grouped --priority
 
 # Test --rebuild_grouped
 # Run this and check the file orgm.dat
 python orgm.py --rebuild_grouped --by_area
 python orgm.py --rebuild_grouped --by_priority
+python orgm.py --rebuild_grouped --area
+python orgm.py --rebuild_grouped --priority
 
 # Test --backup
 # Change orgm.py to use a test backup data file
