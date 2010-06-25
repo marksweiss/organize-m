@@ -18,6 +18,29 @@ data_file = 'orgm.dat'
 bak_file = data_file + '_bak'
 
 
+class CliElem:
+    LONG_ARGS = ['--' + elem for elem in Elem.get_elem_list()]
+    SHORT_ARGS_MAP = {'-t' : Elem.TITLE, '-A' : Elem.AREA, '-p' : Elem.PROJECT, 
+                      '-T' : Elem.TAGS, '-c' : Elem.ACTIONS, '-P' : Elem.PRIORITY, 
+                      '-d' : Elem.DUE_DATE, '-n' : Elem.NOTE}
+    
+    @staticmethod
+    def get_action_arg_from_arg(arg):
+        if arg in CliElem.LONG_ARGS:
+            return '--by_' + arg
+        elif arg in CliElem.SHORT_ARGS_MAP:
+            return '--by_' + CliElem.SHORT_ARGS_MAP[arg]
+        else:
+            return None
+
+class CliAction:
+    GROUP_ACTIONS = ['--show_grouped', '-s', '--show_elements', '-S','--rebuild_grouped', '-R'] 
+    
+    @staticmethod
+    def is_group_action(action):
+        return action in CliAction.GROUP_ACTIONS   
+
+
 def main(argv):
     """
     Collect the command line arguments and pass them to Organizem.py for processing.
@@ -255,31 +278,17 @@ def preprocess_cmd_line_args(argv):
     #  where we have one action, one element arg, the element arg is the last item in argv, and the action is one of the
     #  grouping actions that support the element arg alone without a value.  If that is the case replace the second arg
     #  with its matching --by* flag argument.
-    # Now all code upstream tha processes cmd line args and acts on them is unchanged.  Cleanest possible solution.    
+    # Now all code upstream that processes cmd line args and acts on them is unchanged.  Cleanest possible solution.    
     
     # Example:
     # argv before translation ['-s', '--title']
+    # argv before translation ['-s', '-t']
     # argv after translation ['-s', '--by_title']
-    
-    # Test that there two arguments
-    # Test that the first one is one of the grouping commands
-    if len(argv) == 2 and \
-        (argv[0] == '--show_grouped' or argv[0] == '-s' or \
-        argv[0] == '--show_elements' or argv[0] == '-S' or \
-        argv[0] == '--rebuild_grouped' or argv[0] == '-R'):
-        # Test that the second one is one of the Element command, and map that to its ActionArg --by* command
-        if argv[1] == '--title' or argv[1] == '-t':
-            argv[1] = '--by_title'
-        elif argv[1] == '--area' or argv[1] == '-A':
-            argv[1] = '--by_area'
-        elif argv[1] == '--project' or argv[1] == '-P':
-            argv[1] = '--by_project'
-        elif argv[1] == '--tags' or argv[1] == '-T':
-            argv[1] = '--by_tags' 
-        elif argv[1] == '--actions' or argv[1] == '-c':
-            argv[1] = '--by_actions' 
-        elif argv[1] == '--priority' or argv[1] == '-P':
-            argv[1] = '--by_priority'
+        
+    if len(argv) == 2 and CliAction.is_group_action(argv[0]):
+        arg = CliElem.get_action_arg_from_arg(argv[1])
+        if arg:
+            argv[1] = arg
     return argv
 
     
