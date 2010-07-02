@@ -16,9 +16,9 @@ class OrganizemIllegalDataTypeException(Exception): pass
 # repr() returns the Item as a dict/list that is what YAML deserializes to
 class Item(object):
 
-    def __init__(self, title, **kwelements): 
+    def __init__(self, title, dict_of_elems=None): 
         # Store list of all elements in Item
-        self._elemlist = Elem.get_elem_list()
+        self._elems = Elem.get_elems()
         
         # Required elements are 'ROOT' and 'TITLE'
         # Set 'root' Item Element
@@ -31,20 +31,25 @@ class Item(object):
         self.__setattr__(Elem.TITLE, title_obj.val)
                 
         # A little dirty, but not bad. Elem exposes method to get list of optional
-        #  elements, with the assumption being client can call get_elem_list() to
+        #  elements, with the assumption being client can call get_optional_data_elems() to
         #  get all elements and this to get only optional, so it can take care of
         #  required ones (statically, as here) and process optional ones dynamically
-        opt_elems = Elem.get_optional_elem_list()        
+        opt_elems = Elem.get_optional_data_elems()        
         for elem in opt_elems:
             kwval = None
-            if elem in kwelements:
-                kwval = kwelements[elem]
-            elem_obj = Elem.elem_init(elem, kwval)
-            # Private object str(), repr() used by Item str() and repr()
-            self.__setattr__('_' + elem, elem_obj)
-            # Public getter just returns obj.val, value for the element
-            self.__setattr__(elem, elem_obj.val)
-
+            elem_obj = None
+            if dict_of_elems:
+                if elem in dict_of_elems:
+                    kwval = dict_of_elems[elem]
+                elem_obj = Elem.elem_init(elem, kwval)
+                # Private object str(), repr() used by Item str() and repr()
+                self.__setattr__('_' + elem, elem_obj)
+                # Public getter just returns obj.val, value for the element
+                self.__setattr__(elem, elem_obj.val)
+            else:
+                self.__setattr__('_' + elem, Elem.elem_init(elem, None))
+                self.__setattr__(elem, None)
+                
     def __getattr__(self, attr):
         return self.__dict__[attr]
     
@@ -58,7 +63,7 @@ class Item(object):
         return self._to_yaml()
     
     def _to_yaml(self):
-        return '\n'.join([str(self.__getattr__('_' + elem)) for elem in self._elemlist])
+        return '\n'.join([str(self.__getattr__('_' + elem)) for elem in self._elems])
         
     # NOTE: Used by organizem_test.py unit tests
     def __repr__(self):
@@ -69,6 +74,6 @@ class Item(object):
         """
         # Use list of elements skipping ROOT
         # Iterate list of elems to create list of dicts, one for each attr
-        elems = [{elem : self.__getattr__(elem)} for elem in self._elemlist[1:]]
+        elems = [{elem : self.__getattr__(elem)} for elem in self._elems[1:]]
         item_repr = {Elem.ROOT : elems}
         return repr(item_repr)

@@ -25,6 +25,22 @@ class Elem(object):
     # ** NOTE: this defines format of Items in data file **
     ELEM_LIST = [ROOT, TITLE, AREA, PROJECT, TAGS, ACTIONS, PRIORITY, DUE_DATE, NOTE]
 
+    # Return all the elements used by class Item to construct an Item
+    @staticmethod
+    def get_elems():
+        return Elem.ELEM_LIST
+
+    # Return all data elemements in an Item, so we can treat them as an opaque collection in various places
+    #  and just iterate the list of them
+    @staticmethod
+    def get_data_elems():
+        return Elem.ELEM_LIST[1:]
+
+    # Return all optional data elemements in an Item, so Item can iterate and setattr dynamically 
+    @staticmethod
+    def get_optional_data_elems():
+        return Elem.ELEM_LIST[2:]
+
     # Element Class Types
     ROOT_TYPE = 'RootElement'
     TEXT_TYPE = 'ChildTextElement'
@@ -38,15 +54,8 @@ class Elem(object):
                      DUE_DATE : TEXT_TYPE, NOTE : MULTILINE_TEXT_TYPE}
 
     @staticmethod
-    def get_elem_list():
-        return Elem.ELEM_LIST
-    
-    @staticmethod
-    def get_optional_elem_list():
-        return Elem.ELEM_LIST[2:]
-
-    @staticmethod
     def elem_init(elem, val):
+        # Factory method to construct Elements of the right type
         # Get the type of the element being created, from mapping of elems to types
         # Call that type's __init__() with value for the element, return it
         type = Elem.get_elem_type(elem)

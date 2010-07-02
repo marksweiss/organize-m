@@ -17,9 +17,9 @@ class YamlItemConverter(BaseItemConverter):
         """Converts Item serialized to Python object form, dicts and lists, to YAML"""
     
         # The list of names of elements an Item must have for this version
-        elem_names = Elem.get_optional_elem_list()
+        elem_names = Elem.get_optional_data_elems()
         # List of names of elements in the py_item
-        py_elem_names = YamlItemConverter._get_py_item_elem_list(py_item)
+        py_elem_names = YamlItemConverter._get_py_item_elems(py_item)
 
         # Item must have title element, so check for that first
         title = YamlItemConverter._get_py_item_title(py_item, py_elem_names)
@@ -27,7 +27,7 @@ class YamlItemConverter(BaseItemConverter):
         # Handling dynamic list of kwargs to __init__(), so build string
         #  dynamically and make __init__() call an eval()
         init_call = []
-        init_call.append('Item(title')
+        init_call.append('Item(title, {')
         # eval(x) where x is a multiline string literal fails on
         #  exception from scanning literal and finding an EOL in it
         # So, store the multiline string in this local List.  Put the
@@ -51,21 +51,21 @@ class YamlItemConverter(BaseItemConverter):
                     if Elem.get_elem_type(elem_name) == Elem.MULTILINE_TEXT_TYPE:
                         note_vals.append(py_elem_val)
                         val_idx = len(note_vals) - 1
-                        init_call.append(', %s=note_vals[%i]' % (elem_name, val_idx))
+                        init_call.append("'%s' : note_vals[%i], " % (elem_name, val_idx))
                     else:
-                        init_call.append(', %s=%s' % (elem_name, py_elem_val))
+                        init_call.append("'%s' : %s, " % (elem_name, py_elem_val))
                 else:
-                    init_call.append(', %s=None' % elem_name)
+                    init_call.append("'%s' : None, " % elem_name)
             else:
-                init_call.append(', %s=None' % elem_name)
-        init_call.append(')')
+                init_call.append("'%s' : None, " % elem_name)
+        init_call.append('})')
         init_call = ''.join(init_call)
-    
+
         item = eval(init_call)
         return item
 
     @staticmethod
-    def _get_py_item_elem_list(py_item):
+    def _get_py_item_elems(py_item):
         py_elems = py_item[Elem.ROOT]
         num_elems = len(py_elems)
         return [py_elems[j].keys()[0] for j in range(0, num_elems)]

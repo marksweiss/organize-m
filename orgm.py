@@ -1,11 +1,5 @@
 #!/usr/bin/env python
 
-import sys
-from optparse import OptionParser
-
-from lib.item import Elem
-from lib.organizem import OrgmCliController, Action, ActionArg
-
 __author__ = ("Mark S. Weiss <markswess AT yahoo DOT com>")
 # __docformat__ = "en"
 # __revision__ = "$Id: odict.py 129 2005-09-12 18:15:28Z teknico $"
@@ -13,32 +7,44 @@ __version__ = "0.8.5"
 # __all__ = [""]
 
 
+import sys
+from optparse import OptionParser
+
+from lib.elem import Elem
+from lib.orgm_controller_cli import OrgmCliController
+from lib.orgm_controller_base import Action, ActionArg
+
+
 # TODO Move into real config? Make user-configurable?
 data_file = 'orgm.dat'
 bak_file = data_file + '_bak'
 
 
-class CliElem:
-    LONG_ARGS = ['--' + elem for elem in Elem.get_elem_list()]
+class CliArg:
+    LONG_ARGS = ['--' + elem for elem in Elem.get_elems()]
+    # TODO - this is the LAST place besides elem.py class Elem where these are hard-coded, can we expunge?
     SHORT_ARGS_MAP = {'-t' : Elem.TITLE, '-A' : Elem.AREA, '-p' : Elem.PROJECT, 
                       '-T' : Elem.TAGS, '-c' : Elem.ACTIONS, '-P' : Elem.PRIORITY, 
                       '-d' : Elem.DUE_DATE, '-n' : Elem.NOTE}
     
     @staticmethod
-    def get_action_arg_from_arg(arg):
-        if arg in CliElem.LONG_ARGS:
+    def get_action_arg_from_elem_arg(arg):
+        if arg in CliElemArg.LONG_ARGS:
             return '--by_' + arg[2:]
-        elif arg in CliElem.SHORT_ARGS_MAP:
+        elif arg in CliElemArg.SHORT_ARGS_MAP:
             return '--by_' + CliElem.SHORT_ARGS_MAP[arg]
         else:
             return None
-
-class CliAction:
-    GROUP_ACTIONS = ['--show_grouped', '-s', '--show_elements', '-S','--rebuild_grouped', '-R'] 
+    
+class CliActionArg:
+    GROUP_ACTION_ARGS = ['--' + action for action in Action.get_group_actions()]
+    SHORT_ARGS_MAP = {'-s' : Action.SHOW_GROUPED, '-S' : Action.SHOW_ELEMENTS, '-R' : Action.REBUILD_GROUPED}
     
     @staticmethod
-    def is_group_action(action):
-        return action in CliAction.GROUP_ACTIONS   
+    def is_group_action_arg(action):
+        if action in CliActionArg.GROUP_ACTION_ARGS or action in CliActionArg.SHORT_ARGS_MAP:
+            return True
+        return False
 
 
 def main(argv):
@@ -47,6 +53,7 @@ def main(argv):
     Coupled to Organizem.py#run_cli() in that these dest variable names must
     match what it expects.
     """
+    # TODO UPDATE AND SYNCH WITH DOCS
     usage = """
     [-a | --add] - adds an item to the data file
 
@@ -208,12 +215,11 @@ def main(argv):
     parser.add_option("-F", "--filename", 
                       action="store", dest=ActionArg.FILENAME,
                       help="The file to be used in the action passed in.  e.g. - backup --filename \"file of stuff.txt\"")
+    
     # Grouping Modifiers
+    # TODO ADD TO DOCS    
     parser.add_option("-1", "--by_title", 
                       action="store_true", dest=ActionArg.BY_TITLE, default=False,  
-                      help="Modifies --show_elements to show values for --title Element of all Items")
-    parser.add_option("-2", "--by_area", 
-                      action="store_true", dest=ActionArg.BY_AREA, default=False,  
                       help="Modifies --show_elements to show values for --area. Modifies --show_grouped and --rebuild_grouped to group by --area Element values")
     parser.add_option("-3", "--by_project", 
                       action="store_true", dest=ActionArg.BY_PROJECT, default=False,  
@@ -227,7 +233,10 @@ def main(argv):
     parser.add_option("-6", "--by_priority", 
                       action="store_true", dest=ActionArg.BY_PRIORITY, default=False,  
                       help="Modifies --show_elements to show values for --priority. Modifies --show_grouped and --rebuild_grouped to group by --priority Element values")
-    
+    parser.add_option("-7", "--by_due_date", 
+                      action="store_true", dest=ActionArg.BY_DUE_DATE, default=False,  
+                      help="Modifies --show_elements to show values for --due_date. Modifies --show_grouped and --rebuild_grouped to group by --due_date Element values")    
+
     # Elements
     # The data to be --add(ed), or the data to match on for --find and --remove
     parser.add_option("-t", "--title", 
@@ -265,7 +274,9 @@ def main(argv):
         data_file = eval('options.' + ActionArg.FILENAME)
     
     orgm = OrgmCliController(data_file=data_file)
-    orgm.run_cmd(options.title, options)
+    # NOTE pass the __dict__ so all code using the options can use Dict[Elem.ENUM] syntax and be
+    #  dynamic based on list of Elems and use standard syntax with the Elem enums everywhere    
+    orgm.run_cmd(options.title, options.__dict__)
 
 def preprocess_cmd_line_args(argv):    
     # The idea is that it's annoying to remember the --by_* flag args, just use the same syntax for all 
@@ -286,8 +297,8 @@ def preprocess_cmd_line_args(argv):
     # argv before translation ['-s', '-t']
     # argv after translation ['-s', '--by_title']
         
-    if len(argv) == 2 and CliAction.is_group_action(argv[0]):
-        arg = CliElem.get_action_arg_from_arg(argv[1])
+    if len(argv) == 2 and CliActionArg.is_group_action_arg(argv[0]):
+        arg = CliArg.get_action_arg_from_elem_arg(argv[1])
         if arg:
             argv[1] = arg
     return argv
