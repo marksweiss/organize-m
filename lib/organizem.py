@@ -8,9 +8,6 @@ from item import Item
 from item_converter import YamlItemConverter
 
 
-class OrganizemIllegalUsageException(Exception): pass
-
-
 class Conf(object):
     DATA_FILE = 'data_file'
     DATA_FILE_DFLT_PATH = '../orgm.dat'
@@ -192,9 +189,9 @@ class Organizem(object):
     
     def _is_rgx_intersect(self, pattern, elem_val, element):
         for p in pattern:
-           for v in elem_val:
-               if self._is_match(p, v, element, use_regex_match=True):
-                  return True
+            for v in elem_val:
+                if self._is_match(p, v, element, use_regex_match=True):
+                    return True
         return False
     
     def _is_match(self, pattern, match_val, element, use_regex_match):
@@ -204,7 +201,7 @@ class Organizem(object):
             # Note types can have line breaks and lots of crap.
             # Increase our chances of avoiding trouble by removing line breaks
             if element == Elem.NOTE:
-               match_val = match_val.replace('\n', ' ')                 
+                match_val = match_val.replace('\n', ' ')                 
             try:
                 rgx = re.compile(pattern, re.IGNORECASE)
             except:
@@ -233,8 +230,8 @@ class Organizem(object):
                 print line        
     
     def _backup(self, bak_data_file):
-  	    import shutil
-  	    shutil.copyfile(self.data_file, bak_data_file)
+        import shutil
+        shutil.copyfile(self.data_file, bak_data_file)
 
     def _rewrite(self, items):
         self._backup(self.bak_file)

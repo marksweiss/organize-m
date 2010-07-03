@@ -1,7 +1,10 @@
 from orgm_controller_base import OrgmBaseController, Action, ActionArg
-from organizem import Organizem
+from organizem import Organizem, Conf
 from element import Elem
 from item import Item
+
+
+class OrganizemIllegalUsageException(Exception): pass
 
 
 class OrgmCliController(OrgmBaseController):
@@ -24,16 +27,16 @@ class OrgmCliController(OrgmBaseController):
     
         # Now turn cmd line action and arguments into Organizem API call
         if action == Action.ADD:            
-            self._orgm_api.add_item(Item(title, args))
+            self._orgm_api.add_item(Item(args[Elem.TITLE], args))
         
         elif action == Action.ADD_EMPTY:
             self._orgm_api.add_empty()
     
         elif action == Action.REMOVE:
-            self._orgm_api.remove_items(match_elem, match_val, use_regex_match)            
+            self._orgm_api.remove_items(match_elem, match_val, args[ActionArg.REGEX])            
 
         elif action == Action.FIND:
-            items = self._orgm_api.find_items(match_elem, match_val, use_regex_match)            
+            items = self._orgm_api.find_items(match_elem, match_val, args[ActionArg.REGEX])            
             for item in items:              
                 print str(item)
     
@@ -48,7 +51,7 @@ class OrgmCliController(OrgmBaseController):
                     print str(item)
     
         elif action == Action.SHOW_ELEMENTS:
-            elems = self._orgm_api.get_elements(group_elem)
+            elems = self._orgm_api.get_elements(group_elem)            
             elems.sort()
             for elem in elems:              
                 print elem
@@ -57,7 +60,7 @@ class OrgmCliController(OrgmBaseController):
             self._orgm_api.regroup_data_file(group_elem)
         
         elif action == Action.BACKUP:
-            self._orgm_api.backup(filename)
+            self._orgm_api.backup(args[ActionArg.FILENAME])
 
         elif action == Action.SETCONF_DATA_FILE:
             self._orgm_api.setconf(Conf.DATA_FILE, args[ActionArg.FILENAME])
@@ -66,7 +69,7 @@ class OrgmCliController(OrgmBaseController):
             self._orgm_api.setconf(Conf.BAK_FILE, args[ActionArg.FILENAME])
 
     # Helpers
-    def _format_and_validate(self, action, args):    
+    def _format_and_validate(self, args):    
         # Unpack args, trim and clean, repack
         
         # Get action first for clarity of code here
@@ -81,7 +84,7 @@ class OrgmCliController(OrgmBaseController):
                 # NOTE: _trim_quotes() keeps args not passed as None and empty strings as empty, 
                 #  which is *crucial* to logic of _run_cli_get_group_elem() below        
                 args[elem] = [OrgmCliController._trim_quotes(t).strip() for t in args[elem].split(',')]        
-            elif elem_type == Elem.TEXT_TYPE
+            elif elem_type == Elem.TEXT_TYPE:
                 args[elem] = OrgmCliController._trim_quotes(args[elem])
         # Process filename
         args[ActionArg.FILENAME] = OrgmCliController._trim_quotes(args[ActionArg.FILENAME])
@@ -108,10 +111,10 @@ class OrgmCliController(OrgmBaseController):
                         break
         return (match_elem, match_val)
   
-    def _get_group(self, action, args):
+    def _get_group(self, action, args):        
         group_elem = None
         if action in Action.get_group_actions():
-            for action_arg_key in ActionArg.get_group_by_action_args():
+            for action_arg_key in ActionArg.get_group_by_action_args():                
                 if action_arg_key in args and args[action_arg_key]:
                     group_elem = ActionArg.elem_from_action_arg(action_arg_key)                
         return group_elem

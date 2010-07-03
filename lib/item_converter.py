@@ -1,5 +1,5 @@
 from element import Elem
-from item import Item
+from item import Item  #@UnusedImport, suppress Eclipse warning, used dynamically in convert_to_item() eval 
 
 
 class OrganizemItemDataConversionException(Exception): pass
@@ -27,7 +27,7 @@ class YamlItemConverter(BaseItemConverter):
         # Handling dynamic list of kwargs to __init__(), so build string
         #  dynamically and make __init__() call an eval()
         init_call = []
-        init_call.append('Item(title, {')
+        init_call.append("Item('%s', {" % title)
         # eval(x) where x is a multiline string literal fails on
         #  exception from scanning literal and finding an EOL in it
         # So, store the multiline string in this local List.  Put the

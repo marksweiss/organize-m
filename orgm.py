@@ -10,7 +10,7 @@ __version__ = "0.8.5"
 import sys
 from optparse import OptionParser
 
-from lib.elem import Elem
+from lib.element import Elem
 from lib.orgm_controller_cli import OrgmCliController
 from lib.orgm_controller_base import Action, ActionArg
 
@@ -29,10 +29,10 @@ class CliArg:
     
     @staticmethod
     def get_action_arg_from_elem_arg(arg):
-        if arg in CliElemArg.LONG_ARGS:
+        if arg in CliArg.LONG_ARGS:
             return '--by_' + arg[2:]
-        elif arg in CliElemArg.SHORT_ARGS_MAP:
-            return '--by_' + CliElem.SHORT_ARGS_MAP[arg]
+        elif arg in CliArg.SHORT_ARGS_MAP:
+            return '--by_' + CliArg.SHORT_ARGS_MAP[arg]
         else:
             return None
     
@@ -218,23 +218,28 @@ def main(argv):
     
     # Grouping Modifiers
     # TODO ADD TO DOCS    
+    # Note: #@UndefinedVariable here to suppress Eclipse warnings -- these *are* defined dynamically in 
+    #  orgm._controller_base.py class ActionArg_, but Eclipse parser only recognizes elements through static code analysis
     parser.add_option("-1", "--by_title", 
-                      action="store_true", dest=ActionArg.BY_TITLE, default=False,  
+                      action="store_true", dest=ActionArg.BY_TITLE, default=False,     #@UndefinedVariable
+                      help="Modifies --show_elements to show values for --title. Modifies --show_grouped and --rebuild_grouped to group by --title Element values")
+    parser.add_option("-2", "--by_area", 
+                      action="store_true", dest=ActionArg.BY_AREA, default=False,     #@UndefinedVariable
                       help="Modifies --show_elements to show values for --area. Modifies --show_grouped and --rebuild_grouped to group by --area Element values")
     parser.add_option("-3", "--by_project", 
-                      action="store_true", dest=ActionArg.BY_PROJECT, default=False,  
+                      action="store_true", dest=ActionArg.BY_PROJECT, default=False,   #@UndefinedVariable
                       help="Modifies --show_elements to show values for --project. Modifies --show_grouped and --rebuild_grouped to group by --project Element values")
     parser.add_option("-4", "--by_tags", 
-                      action="store_true", dest=ActionArg.BY_TAGS, default=False,  
+                      action="store_true", dest=ActionArg.BY_TAGS, default=False,      #@UndefinedVariable
                       help="Modifies --show_elements to show values for --tags. Modifies --show_grouped and --rebuild_grouped to group by --tags Element values")
     parser.add_option("-5", "--by_actions", 
-                      action="store_true", dest=ActionArg.BY_ACTIONS, default=False,  
+                      action="store_true", dest=ActionArg.BY_ACTIONS, default=False,   #@UndefinedVariable
                       help="Modifies --show_elements to show values for --actions. Modifies --show_grouped and --rebuild_grouped to group by --actions Element values")
     parser.add_option("-6", "--by_priority", 
-                      action="store_true", dest=ActionArg.BY_PRIORITY, default=False,  
+                      action="store_true", dest=ActionArg.BY_PRIORITY, default=False,  #@UndefinedVariable
                       help="Modifies --show_elements to show values for --priority. Modifies --show_grouped and --rebuild_grouped to group by --priority Element values")
     parser.add_option("-7", "--by_due_date", 
-                      action="store_true", dest=ActionArg.BY_DUE_DATE, default=False,  
+                      action="store_true", dest=ActionArg.BY_DUE_DATE, default=False,  #@UndefinedVariable
                       help="Modifies --show_elements to show values for --due_date. Modifies --show_grouped and --rebuild_grouped to group by --due_date Element values")    
 
     # Elements
@@ -266,7 +271,7 @@ def main(argv):
     
     # Preprocess cmd line args to remap element args like '--area' to group action args like '--by_area'
     argv = preprocess_cmd_line_args(argv)  
-    (options, args) = parser.parse_args(argv)
+    (options, args) = parser.parse_args(argv) #@UnusedVariable args
 
     # Check for config from command line for data file
     data_file = None

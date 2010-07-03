@@ -51,7 +51,10 @@ class Item(object):
                 self.__setattr__(elem, None)
                 
     def __getattr__(self, attr):
-        return self.__dict__[attr]
+        if attr in self.__dict__:
+            return self.__dict__[attr]
+        else:
+            return None
     
     # Used for access to arbitrary element value: x = item[elem]
     def __getitem__(self, elem):
