@@ -53,9 +53,9 @@ def main(argv):
     Coupled to Organizem.py#run_cli() in that these dest variable names must
     match what it expects.
     """
-    # TODO UPDATE AND SYNCH WITH DOCS
+
     usage = """
-    [-a | --add] - adds an item to the data file
+[-a | --add] - adds an item to the data file
 
 * Must include --title, and can optionally include any of the additional Element arguments below
 [-t | --title]  - item title 
@@ -88,7 +88,7 @@ def main(argv):
 [-x | --regex ]
 
 --remove --title "my item title"
---remove --title "my item t*"    
+--remove --regex --title "my item t*"    
 --remove --tags "tag1, tag2"
 --remove --tags "tag1"
 --remove --actions "do this now, do this later"
@@ -118,39 +118,82 @@ def main(argv):
 [-4 | --by_tags]
 [-5 | --by_actions]
 [-6 | --by_priority]
+[-7 | --by_due_date]
+* You can also just use the element forms of these flags, for convenience and consistency (so you have to remember less)
+[-t | --title]  - item title 
+[-A | --area]  - area of responsibility that includes the item
+[-p | --project]  - project the item is part of
+[-T | --tags]  - tags associated with the item
+[-c | --actions]  - item actions that need to be taken
+[-P | --priority]  - item priority
+[-d | --due_date] - date first action associated with item is due 
+[-n | --note] - additional freeform text associated with item
+* Can supply optional --[asc | desc] arg to sort the grouping elements in ascending or descending order
+* NOTE: Default sort order is ascending
+[-y | --asc]
+[-z | --desc]
+* For --by_due_date or --due_date grouping element only, you can use --next instead of --due_date to show Items in order they are due
+[-8 | --next]
 
---show_grouped --by_title
---show_grouped --by_area
---show_grouped --by_project
---show_grouped --by_tags
---show_grouped --by_actions
---show_grouped --by_priority
+--show_grouped [--by_title | -- title]
+--show_grouped --desc [--by_area | -- area]
+--show_grouped [--by_project | -- project]
+--show_grouped [--by_tags | --tags]
+--show_grouped [--by_actions | --actions]
+--show_grouped [--by_priority | --priority]
+--show_grouped --desc [--by_priority | --priority]
+--show_grouped [--by_due_date | --due_date]
+* Shows items due soonest
+* These two are equivalent
+--show_grouped [--by_due_date | --due_date]
+--show_grouped --next
+
 
 [-S | --show_elements] - show all values for Elements of a given type, sent to stdout
 * Must supply one Element type
+* You can also just use the element forms of these flags, for convenience and consistency (so you have to remember less)
+* Can supply optional --[asc | desc] arg to sort the grouping elements in ascending or descending order
+* NOTE: Default sort order is ascending
+* For --by_due_date or --due_date grouping element only, you can use --next instead of --due_date to show Items in order they are due
 
---show_elements --by_title
---show_elements --by_area
---show_elements --by_project
---show_elements --by_tags
---show_elements --by_actions
---show_elements --by_priority
+--show_elements [--by_title | -- title] 
+--show_elements [--by_area | -- area]
+--show_elements --desc [--by_project | -- project]
+--show_elements [--by_tags | --tags]
+--show_elements [--by_actions | --actions]
+--show_elements --desc [--by_priority | --priority]
+* Shows items due soonest
+* These two are equivalent
+--show_elements [--by_due_date | --due_date]
+--show_elements --next
 
 
 [-R | --rebuild_grouped] - rebuild the data file grouped by an Element type 
 * Must supply one Element type
+* You can also just use the element forms of these flags, for convenience and consistency (so you have to remember less)
+* Can supply optional --[asc | desc] arg to sort the grouping elements in ascending or descending order
+* NOTE: Default sort order is ascending
+* For --by_due_date or --due_date grouping element only, you can use --next instead of --due_date to show Items in order they are due
 
---rebuild_grouped --by_area
---rebuild_grouped --by_project
---rebuild_grouped --by_tags
---rebuild_grouped --by_actions
---rebuild_grouped --by_priority
+--rebuild_grouped --desc [--by_title | -- title]
+--rebuild_grouped [--by_area | -- area]
+--rebuild_grouped [--by_project | -- project]
+--rebuild_grouped [--by_tags | --tags]
+--rebuild_grouped [--by_actions | --actions]
+--rebuild_grouped [--by_priority | --priority]
+--rebuild_grouped [--by_due_date | --due_date]
+* Shows items due soonest
+* These two are equivalent
+--rebuild_grouped [--by_due_date | --due_date]
+--rebuild_grouped --next
+
 
 [-b | --backup] - backup all item data
 * Can optionally supply name of file to backup to. If none supplied default is used.
 [-F | --filename]
 
 --backup --filename "/MyPath/MyBackupOrgmFile.dat"
+
 
 [-D | --setconf_data_file] - Store a configuration for location of data file. Persisted and will be reused across Organize-m sessions.
 --setconf_data_file --filename "/MyPath/MyOrgmFile.dat"
@@ -215,6 +258,12 @@ def main(argv):
     parser.add_option("-F", "--filename", 
                       action="store", dest=ActionArg.FILENAME,
                       help="The file to be used in the action passed in.  e.g. - backup --filename \"file of stuff.txt\"")
+    parser.add_option("-y", "--asc", 
+                      action="store", dest=ActionArg.ASCENDING,
+                      help="For --show_* and --rebuild_* actions, sorts the grouping elements in ascending order")
+    parser.add_option("-z", "--desc", 
+                      action="store", dest=ActionArg.DESCENDING,
+                      help="For --show_* and --rebuild_* actions, sorts the grouping elements in descending order")
     
     # Grouping Modifiers
     # TODO ADD TO DOCS    
@@ -241,6 +290,9 @@ def main(argv):
     parser.add_option("-7", "--by_due_date", 
                       action="store_true", dest=ActionArg.BY_DUE_DATE, default=False,  #@UndefinedVariable
                       help="Modifies --show_elements to show values for --due_date. Modifies --show_grouped and --rebuild_grouped to group by --due_date Element values")    
+    parser.add_option("-8", "--next", 
+                      action="store", dest=ActionArg.DESCENDING,
+                      help="For --show_* and --rebuild_* actions, sorts the grouping elements in due date descending order. Synonym for --by_due_date | --due_date")
 
     # Elements
     # The data to be --add(ed), or the data to match on for --find and --remove

@@ -22,6 +22,9 @@ class Action(object):
 class ActionArg_(object):
     REGEX = 'regex'
     FILENAME = 'filename'
+    ASCENDING = 'ascending'
+    DESCENDING = 'descending'
+    NEXT = 'next'
 
     PFX = 'BY_'    
     
@@ -44,12 +47,12 @@ class ActionArg_(object):
             return arg
         return None
     
-    def _has_arg(self, arg):
-        return arg.upper() in self.__dict__
-    
     def get_group_by_action_args(self):
         # Return all attributes that start with 'BY_'
         return self.__dict__.values()
+    
+    def _has_arg(self, arg):
+        return arg.upper() in self.__dict__
 
 # Hack because we want to dynamically generate the actual 'BY_TITLE', 'BY_*' const attributes from
 #  elem list and we still want the same ActionArg.ENUM syntax to refer to these as used for Action.ENUM
