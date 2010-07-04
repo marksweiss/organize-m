@@ -1,7 +1,7 @@
 import re
 
-class OrganizemIllegalDataTypeException(Exception): pass
 class OrganizemIllegalDataFormatException(Exception): pass
+class OrganizemIllegalDataTypeException(Exception): pass
 
 class Elem(object):
     """

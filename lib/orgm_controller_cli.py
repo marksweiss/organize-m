@@ -24,14 +24,19 @@ class OrgmCliController(OrgmBaseController):
             
         # For actions modified by a group_by arg, figure out which one
         group_elem = self._get_group(action, args)
+        # For actions modified by a group by arg, figure out sorting of groups
+        sort_order = self._get_sort(action, args)
     
         # Now turn cmd line action and arguments into Organizem API call
+        
+        # Actions to create new Items
         if action == Action.ADD:            
             self._orgm_api.add_item(Item(args[Elem.TITLE], args))
         
         elif action == Action.ADD_EMPTY:
             self._orgm_api.add_empty()
-    
+        
+        # Matching actions
         elif action == Action.REMOVE:
             self._orgm_api.remove_items(match_elem, match_val, args[ActionArg.REGEX])            
 
@@ -40,10 +45,15 @@ class OrgmCliController(OrgmBaseController):
             for item in items:              
                 print str(item)
     
+        # Grouping actions
         elif action == Action.SHOW_GROUPED:
             grouped_items = self._orgm_api.get_grouped_items(group_elem)            
             group_keys = grouped_items.keys()
             group_keys.sort()
+            # If sort_order is DESCENDING, not the default ASCENDING (also the default for List#sort() )
+            #  then reverse the group_keys before building grouped display
+            if sort_order == ActionArg.DESCENDING:
+                group_keys.reverse()
             for group_key in group_keys:
                 label = self._orgm_api.format_group_label(group_elem, group_key)
                 print label
@@ -53,12 +63,16 @@ class OrgmCliController(OrgmBaseController):
         elif action == Action.SHOW_ELEMENTS:
             elems = self._orgm_api.get_elements(group_elem)            
             elems.sort()
+            # If sort_order is DESCENDING, not the default ASCENDING, reverse group_keys
+            if sort_order == ActionArg.DESCENDING:
+                elems.reverse()
             for elem in elems:              
                 print elem
                 
         elif action == Action.REBUILD_GROUPED:
-            self._orgm_api.regroup_data_file(group_elem)
+            self._orgm_api.regroup_data_file(group_elem, sort_order)
         
+        # Utility actions, backup and configuration
         elif action == Action.BACKUP:
             self._orgm_api.backup(args[ActionArg.FILENAME])
 
@@ -92,7 +106,7 @@ class OrgmCliController(OrgmBaseController):
         # Validation
         if action == Action.ADD and not args[Elem.TITLE]:
             raise OrganizemIllegalUsageException("'--add' action must include '--title' element and a value for title.")            
-        if (action == Action.SETCONF_DATA_FILE or action == Action.SETCONF_BAK_FILE) \
+        elif (action == Action.SETCONF_DATA_FILE or action == Action.SETCONF_BAK_FILE) \
             and not args[ActionArg.FILENAME]:
             raise OrganizemIllegalUsageException("'--setconf_*' actions must include '--filename' element and a value for filename.")
 
@@ -109,15 +123,28 @@ class OrgmCliController(OrgmBaseController):
                         match_elem = elemkey
                         match_val = argval
                         break
+            # Validate that we have match_elem and match_val if action requires them
+            if match_elem is None or match_val is None:
+                raise OrganizemIllegalUsageException("'--find and --remove must include an element (e.g. --title) and a value for that element.")                
         return (match_elem, match_val)
   
     def _get_group(self, action, args):        
         group_elem = None
-        if action in Action.get_group_actions():
+        if Action.is_group_action(action):
             for action_arg_key in ActionArg.get_group_by_action_args():                
                 if action_arg_key in args and args[action_arg_key]:
                     group_elem = ActionArg.elem_from_action_arg(action_arg_key)                
+            # Validate that we have group_elem if action requires it
+            if group_elem is None:
+                raise OrganizemIllegalUsageException("'--show_elements, --show_grouped and --rebuild_grouped must include a grouping element (e.g. --by_title).")
         return group_elem
+
+    def _get_sort(self, action, args):
+        # Sort defaults to asc but desc overrides if it is set
+        if args[ActionArg.DESCENDING]:
+            return ActionArg.DESCENDING
+        else:
+            return ActionArg.ASCENDING
   
     @staticmethod
     def _trim_quotes(arg):

@@ -3,6 +3,7 @@ import re
 import yaml
 from odict import OrderedDict
 
+from orgm_controller_base import ActionArg
 from element import Elem
 from item import Item
 from item_converter import YamlItemConverter
@@ -91,7 +92,7 @@ class Organizem(object):
                     val = [val]
                 for v in val:
                     ret.add(v)
-        # Now convert the set of uniqe values to list to sort it for return. 
+        # Now convert the set of unique values to list to sort it for return. 
         # Return contract is is sorted in descending order.
         ret = list(ret)
         ret.sort()
@@ -124,13 +125,17 @@ class Organizem(object):
     # NOTE: with_group_labels=True is used so default behavior is to
     #  include group labels as YAML comments.  But tests can pass False
     #  to bypass this and just test items written correctly.
-    def regroup_data_file(self, element, with_group_labels=True):
+    def regroup_data_file(self, element, sort_order, with_group_labels=True):
         grouped_items = self.get_grouped_items(element)               
         items = []
         if grouped_items is None:
             return ""
         group_keys = grouped_items.keys()
-        group_keys.sort()
+        group_keys.sort()        
+        # If sort_order is DESCENDING, not the default ASCENDING (also the default for List#sort() )
+        #  then reverse the group_keys before building grouped display
+        if sort_order == ActionArg.DESCENDING:
+            group_keys.reverse()        
         for group_key in group_keys:
             # Mark each group in the regrouped file with a group name label
             if with_group_labels:
@@ -140,7 +145,7 @@ class Organizem(object):
             items.extend(grouped_items[group_key])
         # Pass the Items, regrouped, to be written to data file
         self._rewrite(items)
-        # For conveninence, testing/debugging pass the same output back to stdout
+        # For convenience, testing/debugging pass the same output back to stdout
         return "\n".join([str(item) for item in items])
         
     def backup(self, bak_file=None):

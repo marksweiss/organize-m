@@ -20,7 +20,10 @@ python orgm.py --add --title "my title 3" --area "my area" --project "my project
 python orgm.py --add_empty
 
 # Test --find
+# Exact match on 'my title'
 python orgm.py --find --title "my title"
+# Wildcard match on all entries above, all of which are 'my title' or 'my title 2' or 'my title 3'
+python orgm.py --find --regex --title "my*"
 
 # Test --remove
 # Run this and check the file orgm.dat
@@ -32,16 +35,24 @@ python orgm.py --find --title "my title"
 python orgm.py --show_elements --by_title
 # This should match above results
 python orgm.py --show_elements --title
+python orgm.py --show_elements --desc --title
 python orgm.py --show_elements --by_priority
 python orgm.py --show_elements --priority
 python orgm.py --show_elements --by_actions
 python orgm.py --show_elements --actions
+python orgm.py --show_elements --by_due_date
+python orgm.py --show_elements --due_date
+python orgm.py --show_elements --next
 
 # Test --show_grouped
 python orgm.py --show_grouped --by_project
 python orgm.py --show_grouped --project
+python orgm.py --show_grouped --desc --by_project
 python orgm.py --show_grouped --by_priority
 python orgm.py --show_grouped --priority
+python orgm.py --show_grouped --by_due_date
+python orgm.py --show_grouped --due_date
+python orgm.py --show_grouped --next
 
 # Test --rebuild_grouped
 # Run this and check the file orgm.dat
@@ -49,6 +60,10 @@ python orgm.py --rebuild_grouped --by_area
 python orgm.py --rebuild_grouped --by_priority
 python orgm.py --rebuild_grouped --area
 python orgm.py --rebuild_grouped --priority
+python orgm.py --rebuild_grouped --desc --priority
+python orgm.py --rebuild_grouped --by_due_date
+python orgm.py --rebuild_grouped --due_date
+python orgm.py --rebuild_grouped --next
 
 # Test --backup
 # Change orgm.py to use a test backup data file

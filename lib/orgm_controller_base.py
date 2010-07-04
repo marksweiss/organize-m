@@ -19,6 +19,10 @@ class Action(object):
     def get_group_actions():
         return Action.GROUP_ACTIONS
 
+    @staticmethod
+    def is_group_action(action):
+        return action in Action.GROUP_ACTIONS
+
 class ActionArg_(object):
     REGEX = 'regex'
     FILENAME = 'filename'
@@ -33,12 +37,17 @@ class ActionArg_(object):
         #  enums dynamically from Elem fields, so that if we add new Elements to Item
         #  there is nothing to keep in synch here
         for elem in Elem.get_data_elems():
-            self.__setattr__(self.PFX + elem.upper(), self.PFX.lower() + elem.lower())  
+            self.__setattr__(self.PFX + elem.upper(), self.PFX.lower() + elem.lower())
+        # Special case for NEXT, which is syntactic sugar for BY_DUE_DATE, which kind of sucks but at least it's just here
+        self.__setattr__(self.PFX + self.NEXT.upper(), self.PFX.lower() + self.NEXT)
 
     def elem_from_action_arg(self, arg):
         if self._has_arg(arg):
-            # Trim the 'by_' off the front and return the Elem.* const
-            return arg[len(self.PFX) : ]
+            # Special case for NEXT, which is syntactic sugar for BY_DUE_DATE, which kind of sucks but at least it's just here
+            if arg != self.NEXT:
+                # Trim the 'by_' off the front and return the Elem.* const
+                arg = arg[len(self.PFX) : ]
+            return arg
         return None
 
     def action_arg_from_elem(self, elem):
