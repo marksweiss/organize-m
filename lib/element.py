@@ -1,5 +1,9 @@
 import re
 
+class OrganizemIllegalDataFormatException(Exception): pass
+class OrganizemIllegalDataTypeException(Exception): pass
+
+
 class Elem(object):
     """
         Defines the types of Elements an Item can have.  Also defines their position
@@ -69,7 +73,7 @@ class Elem(object):
         elif type == Elem.MULTILINE_TEXT_TYPE:
             return ChildMultilineTextElement(elem, val)
         else:
-             raise OrganizemIllegalDataFormatException("Element %s with value %s is invalid type to conver to str" % (elem, val))
+            raise OrganizemIllegalDataFormatException("Element %s with value %s is invalid type to conver to str" % (elem, val))
 
     @staticmethod
     def get_elem_type(elem):

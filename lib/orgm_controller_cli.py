@@ -92,7 +92,7 @@ class OrgmCliController(OrgmBaseController):
         # Validation
         if action == Action.ADD and not args[Elem.TITLE]:
             raise OrganizemIllegalUsageException("'--add' action must include '--title' element and a value for title.")            
-        if (action == Action.SETCONF_DATA_FILE or action == Action.SETCONF_BAK_FILE) \
+        elif (action == Action.SETCONF_DATA_FILE or action == Action.SETCONF_BAK_FILE) \
             and not args[ActionArg.FILENAME]:
             raise OrganizemIllegalUsageException("'--setconf_*' actions must include '--filename' element and a value for filename.")
 
@@ -109,14 +109,20 @@ class OrgmCliController(OrgmBaseController):
                         match_elem = elemkey
                         match_val = argval
                         break
+            # Validate that we have match_elem and match_val if action requires them
+            if match_elem is None or match_val is None:
+                raise OrganizemIllegalUsageException("'--find and --remove must include an element (e.g. --title) and a value for that element.")                
         return (match_elem, match_val)
   
     def _get_group(self, action, args):        
         group_elem = None
-        if action in Action.get_group_actions():
+        if Action.is_group_action(action):
             for action_arg_key in ActionArg.get_group_by_action_args():                
                 if action_arg_key in args and args[action_arg_key]:
                     group_elem = ActionArg.elem_from_action_arg(action_arg_key)                
+            # Validate that we have group_elem if action requires it
+            if group_elem is None:
+                raise OrganizemIllegalUsageException("'--show_elements, --show_grouped and --rebuild_grouped must include a grouping element (e.g. --by_title).")
         return group_elem
   
     @staticmethod

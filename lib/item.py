@@ -1,5 +1,3 @@
-import re
-
 from element import Elem
 
 
