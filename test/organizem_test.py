@@ -4,6 +4,7 @@ import sys
 sys.path.insert(0, '..')
 from lib.item import Item, Elem
 from lib.organizem import Organizem, Conf
+from lib.orgm_controller_base import ActionArg
 
 
 TEST_DATA_FILE = "orgm_test.dat"
@@ -531,7 +532,7 @@ class OrganizemTestCase(unittest.TestCase):
         orgm.add_item(item4)
 
         grouped_items = orgm.get_grouped_items(Elem.PROJECT)
-        new_data_file_str = orgm.regroup_data_file(Elem.PROJECT, with_group_labels=False)
+        new_data_file_str = orgm.regroup_data_file(Elem.PROJECT, ActionArg.ASCENDING, with_group_labels=False)
         grouped_items_str = []
         for group_key in grouped_items.keys():          
             for item in grouped_items[group_key]:
@@ -558,9 +559,38 @@ class OrganizemTestCase(unittest.TestCase):
         orgm.add_item(item4)
 
         grouped_items = orgm.get_grouped_items(Elem.AREA)
-        new_data_file_str = orgm.regroup_data_file(Elem.AREA, with_group_labels=False)
+        new_data_file_str = orgm.regroup_data_file(Elem.AREA, ActionArg.ASCENDING, with_group_labels=False)
         grouped_items_str = []
         for group_key in grouped_items.keys():          
+            for item in grouped_items[group_key]:
+                grouped_items_str.append(str(item))
+        grouped_items_str = "\n".join(grouped_items_str)
+        self.assertTrue(grouped_items_str == new_data_file_str)
+
+    def test_regroup_data_file_area_sort_desc(self):
+        self._init_test_data_file()
+        title1 = 'title 1'
+        title2 = 'title 2'
+        title3 = 'title 3'
+        title4 = 'title 4'
+        area1 = 'area 1'
+        area2 = 'area 2'
+        item1 = Item(title1, {Elem.AREA : area1})
+        item2 = Item(title2, {Elem.AREA : area2})
+        item3 = Item(title3, {Elem.AREA : area1})
+        item4 = Item(title4, {Elem.AREA : area2})
+        orgm = Organizem(TEST_DATA_FILE, IS_UNIT_TESTING)
+        orgm.add_item(item1)
+        orgm.add_item(item2)
+        orgm.add_item(item3)
+        orgm.add_item(item4)
+
+        grouped_items = orgm.get_grouped_items(Elem.AREA)
+        new_data_file_str = orgm.regroup_data_file(Elem.AREA, ActionArg.DESCENDING, with_group_labels=False)
+        grouped_items_str = []
+        group_keys = grouped_items.keys()
+        group_keys.reverse()
+        for group_key in group_keys:          
             for item in grouped_items[group_key]:
                 grouped_items_str.append(str(item))
         grouped_items_str = "\n".join(grouped_items_str)
@@ -589,7 +619,7 @@ class OrganizemTestCase(unittest.TestCase):
         orgm.add_item(item4)
 
         grouped_items = orgm.get_grouped_items(Elem.TAGS)
-        new_data_file_str = orgm.regroup_data_file(Elem.TAGS, with_group_labels=False)
+        new_data_file_str = orgm.regroup_data_file(Elem.TAGS, ActionArg.ASCENDING, with_group_labels=False)
         grouped_items_str = []
         for group_key in grouped_items.keys():          
             for item in grouped_items[group_key]:
@@ -597,6 +627,39 @@ class OrganizemTestCase(unittest.TestCase):
         grouped_items_str = "\n".join(grouped_items_str)
         self.assertTrue(grouped_items_str == new_data_file_str)
 
+    def test_regroup_data_file_tags_sort_desc(self):
+        self._init_test_data_file()
+        title1 = 'title 1'
+        title2 = 'title 2'
+        title3 = 'title 3'
+        title4 = 'title 4'
+        tag1 = 'tag 1'
+        tag2 = 'tag 2'
+        tag3 = 'tag 3'
+        tag4 = 'tag 4'
+        tags1 = [tag1, tag2]
+        tags2 = [tag3, tag4]
+        item1 = Item(title1, {Elem.TAGS : tags1})
+        item2 = Item(title2, {Elem.TAGS : tags2})
+        item3 = Item(title3, {Elem.TAGS : tags1})
+        item4 = Item(title4, {Elem.TAGS : tags2})
+        orgm = Organizem(TEST_DATA_FILE, IS_UNIT_TESTING)
+        orgm.add_item(item1)
+        orgm.add_item(item2)
+        orgm.add_item(item3)
+        orgm.add_item(item4)
+
+        grouped_items = orgm.get_grouped_items(Elem.TAGS)
+        new_data_file_str = orgm.regroup_data_file(Elem.TAGS, ActionArg.DESCENDING, with_group_labels=False)
+        grouped_items_str = []
+        group_keys = grouped_items.keys()
+        group_keys.reverse()
+        for group_key in group_keys:          
+            for item in grouped_items[group_key]:
+                grouped_items_str.append(str(item))
+        grouped_items_str = "\n".join(grouped_items_str)
+        self.assertTrue(grouped_items_str == new_data_file_str)
+    
     def test_backup(self):
         self._init_test_data_file()
         title1 = 'title 1'

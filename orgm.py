@@ -35,10 +35,14 @@ class CliArg:
             return '--by_' + CliArg.SHORT_ARGS_MAP[arg]
         else:
             return None
+
+    @staticmethod
+    def is_elem_arg(arg):
+        return arg in CliArg.LONG_ARGS or arg in CliArg.SHORT_ARGS_MAP
     
 class CliActionArg:
     GROUP_ACTION_ARGS = ['--' + action for action in Action.get_group_actions()]
-    SHORT_ARGS_MAP = {'-s' : Action.SHOW_GROUPED, '-S' : Action.SHOW_ELEMENTS, '-R' : Action.REBUILD_GROUPED}
+    SHORT_ARGS_MAP = {'-s' : Action.SHOW_GROUPED, '-S' : Action.SHOW_ELEMENTS, '-R' : Action.REBUILD_GROUPED}    
     
     @staticmethod
     def is_group_action_arg(action):
@@ -258,11 +262,13 @@ def main(argv):
     parser.add_option("-F", "--filename", 
                       action="store", dest=ActionArg.FILENAME,
                       help="The file to be used in the action passed in.  e.g. - backup --filename \"file of stuff.txt\"")
+    # Ascending ordering for --show_* and --rebuild_* is the default, but of course can be passed explicitly
     parser.add_option("-y", "--asc", 
-                      action="store", dest=ActionArg.ASCENDING,
+                      action="store_true", dest=ActionArg.ASCENDING, default=True,
                       help="For --show_* and --rebuild_* actions, sorts the grouping elements in ascending order")
+    # Must set Descending ordering for --show_* and --rebuild_*
     parser.add_option("-z", "--desc", 
-                      action="store", dest=ActionArg.DESCENDING,
+                      action="store_true", dest=ActionArg.DESCENDING, default=False,
                       help="For --show_* and --rebuild_* actions, sorts the grouping elements in descending order")
     
     # Grouping Modifiers
@@ -323,7 +329,7 @@ def main(argv):
                       help="Additional note for the Item. Optional.")
     
     # Preprocess cmd line args to remap element args like '--area' to group action args like '--by_area'
-    argv = preprocess_cmd_line_args(argv)  
+    argv = preprocess_cmd_line_args(argv)    
     (options, args) = parser.parse_args(argv) #@UnusedVariable args
 
     # Check for config from command line for data file
@@ -355,10 +361,15 @@ def preprocess_cmd_line_args(argv):
     # argv before translation ['-s', '-t']
     # argv after translation ['-s', '--by_title']
         
-    if len(argv) == 2 and CliActionArg.is_group_action_arg(argv[0]):
-        arg = CliArg.get_action_arg_from_elem_arg(argv[1])
-        if arg:
-            argv[1] = arg
+    if CliActionArg.is_group_action_arg(argv[0]):
+        if CliArg.is_elem_arg(argv[1]):
+            argv[1] = CliArg.get_action_arg_from_elem_arg(argv[1])
+        # May be an ActionArg (--desc or --asc) between group action (--show_*, --rebuild_*) 
+        #  and grouping element arg (--by_* or just elem, e.g. --by_title or --title)
+        # e.g. - 
+        #  --show_grouped --desc --by_title
+        elif len(argv) > 2 and CliArg.is_elem_arg(argv[2]):
+            argv[2] = CliArg.get_action_arg_from_elem_arg(argv[2])
     return argv
 
     
