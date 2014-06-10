@@ -24,6 +24,6 @@ Download and Install
 Learn More
 ----------
 * [Features](http://wiki.github.com/marksweiss/organize-m/features)
-* [Command-line Interface (CLI) Cookbook](http://wiki.github.com/marksweiss/organize-m/command-line-interface-cookbook)
-* Complete [CLI Reference](http://wiki.github.com/marksweiss/organize-m/command-line-interface-reference)
+* [Command-line Interface (CLI) Cookbook](http://github.com/marksweiss/organize-m/wiki/Command-Line-Interface:-Cookbook)
+* Complete [CLI Reference](https://github.com/marksweiss/organize-m/wiki/Command-Line-Interface:-Reference)
 * [Manually Editing Items](http://wiki.github.com/marksweiss/organize-m/manual-editing)
